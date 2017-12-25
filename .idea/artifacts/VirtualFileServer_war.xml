@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="VirtualFileServer:war">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <root id="archive" name="VirtualFileServer.war">
+      <element id="artifact" artifact-name="VirtualFileServer:war exploded" />
+    </root>
+  </artifact>
+</component>
