@@ -1,38 +1,91 @@
 package dao;
 
-import interfaces.UserServiceInterface;
+import interfaces.UserDaoInterface;
 import models.User;
 
-public class UserDao implements UserServiceInterface{
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import static constants.UserDaoConstants.*;
+
+public class UserDao implements UserDaoInterface {
+
+    private DatabaseConnection gob_databaseConnection = DatabaseConnection.getInstance();
+
     /**
-     * create a new User in the database
+     * get a user from the database with a specific email
      *
-     * @param iob_user this user must be saved in the database
-     * @return true if the user was saved in the database, otherwise false
+     * @param iva_email get the user with this email
+     * @return the found user
      */
-    public boolean createNewUserInDatabase(User iob_user) {
-        DatabaseConnection connection = DatabaseConnection.getInstance();
+    @Override
+    public User getUser(String iva_email) {
+        //------------Variables------------
+        ResultSet lob_resultSet;
+        PreparedStatement lob_preparedStatement;
+        User rob_user = null;
+        //---------------------------------
+        try (Connection lob_connection = this.gob_databaseConnection.getConnection()){
+            lob_preparedStatement = lob_connection.prepareStatement(GC_GET_USER);
+            lob_preparedStatement.setString(0, iva_email);
+            lob_resultSet = lob_preparedStatement.executeQuery();
+
+            while (lob_resultSet.next()) {
+                rob_user = new User(
+                        lob_resultSet.getString("email"),
+                        lob_resultSet.getString("password"),
+                        convertIntToBoolean(lob_resultSet.getInt("isAdmin")),
+                        lob_resultSet.getInt("userId"),
+                        lob_resultSet.getInt("adminId")
+                );
+            }
+
+        } catch (SQLException e) {
+            //TODO logger
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * delete a user from the database
+     *
+     * @param user delete that specific user
+     * @return false if an error occurred, otherwise true
+     */
+    @Override
+    public boolean deleteUser(User user) {
         return false;
     }
 
     /**
-     * look if the user exists in the database
+     * create a new user in the database
      *
-     * @param iob_user the user to log in
-     * @return true if the user exists in the database
+     * @param user create this user
+     * @return false if an error occurred, otherwise true
      */
-    public boolean login(User iob_user) {
+    @Override
+    public boolean createUser(User user) {
         return false;
     }
 
     /**
-     * change the password of a user
+     * update an user in the database
      *
-     * @param iob_user        change the password of this user
-     * @param iva_newPassword the new password
-     * @return true if the password was changed
+     * @param user update this user
+     * @return false if an error occurred, otherwise true
      */
-    public boolean changePassword(User iob_user, String iva_newPassword) {
+    @Override
+    public boolean updateUser(User user) {
         return false;
+    }
+
+    private static boolean convertIntToBoolean(int iva_integerBoolean) {
+        switch (iva_integerBoolean) {
+            case 1: return true;
+            default: return false;
+        }
     }
 }
