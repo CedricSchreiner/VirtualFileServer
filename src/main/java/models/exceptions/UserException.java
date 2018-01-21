@@ -1,4 +1,4 @@
-package exceptions;
+package models.exceptions;
 
 public class UserException extends RuntimeException {
 

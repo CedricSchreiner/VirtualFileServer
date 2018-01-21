@@ -1,4 +1,4 @@
-package models;
+package models.classes;
 
 import fileTree.interfaces.TreeInterface;
 
@@ -21,7 +21,7 @@ public class FileTreeCollection {
         this.gco_treeCollection.add(iob_userTree);
     }
 
-    public TreeInterface getTreeFromUser(User iob_user) {
+    public TreeInterface getTreeFromUser(UserImpl iob_user) {
         //--------------------Variables--------------------
         String lob_userEmail = iob_user.getEmail();
         String lob_userTreeEmail;

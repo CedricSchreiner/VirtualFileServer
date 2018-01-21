@@ -1,4 +1,4 @@
-package constants;
+package models.constants;
 
 public abstract class UserConstants {
 

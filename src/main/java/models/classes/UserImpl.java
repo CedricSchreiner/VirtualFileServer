@@ -1,17 +1,22 @@
-package models;
+package models.classes;
 
-import exceptions.UserException;
+import models.exceptions.UserException;
+import models.interfaces.User;
 
-import static constants.UserConstants.*;
+import static models.constants.UserConstants.*;
 
-public class User {
+public class UserImpl implements User{
     private String gva_email;
     private String gva_password;
+    private String gva_name;
     private boolean gva_isAdmin;
     private int gva_userId;
     private int gva_adminId;
 
-    public User(String iva_email, String iva_password, boolean iva_isAdmin, int iva_userId, int iva_adminId) {
+    public UserImpl() {
+    }
+
+    public UserImpl(String iva_email, String iva_password, String iva_name, boolean iva_isAdmin, int iva_userId, int iva_adminId) {
         if (iva_email.equals("")) {
             throw new UserException(GC_INVALID_EMAIL);
         }
@@ -33,6 +38,8 @@ public class User {
 
         this.gva_email = iva_email;
         this.gva_password = iva_password;
+        this.gva_name = iva_name;
+
         this.gva_userId = iva_userId;
         this.gva_adminId = iva_adminId;
     }
@@ -93,4 +100,13 @@ public class User {
     public int getAdminId() {
         return this.gva_adminId;
     }
+
+    public String getName() {
+        return gva_name;
+    }
+
+    public void setName(String gva_name) {
+        this.gva_name = gva_name;
+    }
+
 }

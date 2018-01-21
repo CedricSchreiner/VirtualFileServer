@@ -1,6 +1,6 @@
-package interfaces;
+package dao.interfaces;
 
-import models.User;
+import models.interfaces.User;
 
 public interface UserDaoInterface {
 
@@ -30,5 +30,7 @@ public interface UserDaoInterface {
      * @param user update this user
      * @return false if an error occurred, otherwise true
      */
-    boolean updateUser(User user);
+    boolean updateEmail(User user);
+    boolean updatePassword(User user);
+    boolean updateName(User user);
 }

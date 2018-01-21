@@ -1,12 +1,12 @@
-package models;
+package models.classes;
 
 import fileTree.interfaces.TreeInterface;
 
 public class UserTree {
     private TreeInterface gob_tree;
-    private User gob_user;
+    private UserImpl gob_user;
 
-    public UserTree(User iob_user, TreeInterface iob_tree) {
+    public UserTree(UserImpl iob_user, TreeInterface iob_tree) {
         this.gob_tree = iob_tree;
         this.gob_user = iob_user;
     }
@@ -19,11 +19,11 @@ public class UserTree {
         this.gob_tree = iob_tree;
     }
 
-    public User getUser() {
+    public UserImpl getUser() {
         return gob_user;
     }
 
-    public void setUser(User iob_user) {
+    public void setUser(UserImpl iob_user) {
         this.gob_user = iob_user;
     }
 }

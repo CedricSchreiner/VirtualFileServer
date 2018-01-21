@@ -12,4 +12,5 @@ import javax.ws.rs.core.Application;
 
 @ApplicationPath("/api")
 public class ApplicationHandler extends Application {
+    private static final String APPLICATION_PATH = "/api";
 }
