@@ -47,6 +47,9 @@ public class UserDaoImpl implements UserDao {
      */
     private static final String GC_UPDATE_USER = "UPDATE " + TABLE_USER + " SET $ = ? WHERE " + COL_USER_ID + " = ?";
 
+    /**
+     * SELECT * FROM User LEFT OUTER JOIN Admin
+     */
     private static final String GC_GET_ALL_USERS = "SELECT * FROM " + TABLE_USER + " LEFT OUTER JOIN " + TABLE_ADMIN;
 
 //----------------------------------------------------------------------------------------------------------------------
