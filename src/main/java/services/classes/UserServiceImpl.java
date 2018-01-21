@@ -4,12 +4,11 @@ import builder.DaoObjectBuilder;
 import dao.interfaces.UserDao;
 import models.interfaces.User;
 import services.interfaces.UserService;
-import models.classes.UserImpl;
 
 import java.util.List;
 
 public class UserServiceImpl implements UserService {
-    UserDao lob_userDao = DaoObjectBuilder.getUserDaoObject();
+    private UserDao lob_userDao = DaoObjectBuilder.getUserDaoObject();
 
     /**
      * create a new User in the database
@@ -22,7 +21,7 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * look if the user exists in the database
+     * Checks if the user exists in the database
      *
      * @param iob_user the user to log in
      * @return true if the user exists in the database
