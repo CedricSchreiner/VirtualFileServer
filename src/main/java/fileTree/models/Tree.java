@@ -357,7 +357,7 @@ public class Tree implements TreeInterface {
         return iob_parent;
     }
 
-    private String removeBasePath(String iva_path) {
+    public String removeBasePath(String iva_path) {
         return iva_path.replaceFirst(BASE_DIRECTORY, "");
     }
 

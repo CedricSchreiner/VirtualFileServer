@@ -1,30 +1,23 @@
 package rest;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
+import models.FileTreeCollection;
 
-@Path("/get")
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.io.File;
+
+@Path("/files")
 public class FileResource {
 
     @GET
-    public String getFile() {
-        System.out.println("test");
-        return "";
-    }
-
-    @PUT
-    public void addFile() {
-
-    }
-
-    @GET
-    public String getFiles() {
-        return "";
-    }
-
-    @PUT
-    public void addFiles() {
-
+    @Path("{path}")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public Response getFile(@PathParam("path") String test) {
+        FileTreeCollection lob_tree_collection = FileTreeCollection.getInstance();
+        File file = new File(lob_tree_collection.getTreeFromUser(null).getNode(test).getPath());
+        Response.ResponseBuilder response = Response.ok((Object) file);
+        response.header("Content-Disposition", "attachment;filename=" + file.getName());
+        return response.build();
     }
 }
