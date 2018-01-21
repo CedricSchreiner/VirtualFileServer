@@ -1,9 +1,10 @@
 package dao.classes;
 
+import builder.DaoObjectBuilder;
 import builder.ModelObjectBuilder;
 import dao.DatabaseConnection;
 import dao.enums.ColNameUser;
-import dao.interfaces.UserDaoInterface;
+import dao.interfaces.UserDao;
 import models.interfaces.User;
 
 import java.sql.Connection;
@@ -11,11 +12,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import static dao.constants.AdminDaoConstants.COL_ADMIN_ID;
 import static dao.constants.AdminDaoConstants.TABLE_ADMIN;
 import static dao.constants.DaoConstants.*;
 import static dao.constants.UserDaoConstants.*;
 
-public class UserDaoImpl implements UserDaoInterface {
+public class UserDaoImpl implements UserDao {
 //----------------------------------------------------------------------------------------------------------------------
 // Prepared Statements
 //----------------------------------------------------------------------------------------------------------------------
@@ -23,7 +25,7 @@ public class UserDaoImpl implements UserDaoInterface {
     /**
      * SELECT * FROM users NATURAL JOIN admin WHERE email = ?
      */
-    private static final String GC_GET_USER = "SELECT * FROM " + TABLE_USER + " NATURAL JOIN " + TABLE_ADMIN +
+    private static final String GC_GET_USER = "SELECT * FROM " + TABLE_USER + " LEFT OUTER JOIN " + TABLE_ADMIN +
             " WHERE " + COL_USER_EMAIL + " = ?";
 
     /**
@@ -40,7 +42,7 @@ public class UserDaoImpl implements UserDaoInterface {
     /**
      * UPDATE usersSET $ = ? WHERE userId = ?
      */
-    private static final String GC_UPDATE_USER = "UPDATE " + TABLE_USER + "SET $ = ? WHERE " + COL_USER_ID + " = ?";
+    private static final String GC_UPDATE_USER = "UPDATE " + TABLE_USER + " SET $ = ? WHERE " + COL_USER_ID + " = ?";
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -55,6 +57,7 @@ public class UserDaoImpl implements UserDaoInterface {
     @Override
     public User getUser(String iva_email) {
         ResultSet rs;
+        User aUser = ModelObjectBuilder.getUserModel();
 
         try (Connection lob_connection = this.gob_databaseConnection.getConnection();
              PreparedStatement lob_preparedStatement = lob_connection.prepareStatement(GC_GET_USER)) {
@@ -62,19 +65,25 @@ public class UserDaoImpl implements UserDaoInterface {
             lob_preparedStatement.setString(PARAMETER_1, iva_email);
             rs = lob_preparedStatement.executeQuery();
 
-            while(rs.next()) {
-                User aUser = ModelObjectBuilder.getUserModel();
+            while (rs.next()) {
+                aUser.setEmail(rs.getString(COL_USER_EMAIL));
+                aUser.setPassword(rs.getString(COL_USER_PASSWORD));
+                aUser.setName(rs.getString(COL_USER_NAME));
 
-                aUser.setEmail(COL_USER_EMAIL);
-                aUser.setPassword(COL_USER_PASSWORD);
-                aUser.setName(COL_USER_NAME);
-                //aUser.setIsAdmin(COL_ADMIN_);
+                if (rs.getInt(COL_ADMIN_ID) > 0) {
+                    aUser.setIsAdmin(true);
+                } else {
+                    aUser.setIsAdmin(false);
+                }
+
+                aUser.setUserId(rs.getInt(COL_USER_ID));
+                aUser.setAdminId(rs.getInt(COL_ADMIN_ID));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        return null;
+        return aUser;
     }
 
     /**
@@ -85,19 +94,18 @@ public class UserDaoImpl implements UserDaoInterface {
      */
     @Override
     public boolean deleteUser(User user) {
+        int iva_rowCount = 0;
+
         try (Connection lob_connection = this.gob_databaseConnection.getConnection();
-             PreparedStatement lob_preparedStatement = lob_connection.prepareStatement(GC_DELETE_USER)){
+             PreparedStatement lob_preparedStatement = lob_connection.prepareStatement(GC_DELETE_USER)) {
 
             lob_preparedStatement.setInt(PARAMETER_1, user.getUserId());
-            lob_preparedStatement.executeUpdate();
-
-            return true;
-
+            iva_rowCount = lob_preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        return false;
+        return convertIntToBoolean(iva_rowCount);
     }
 
     /**
@@ -108,6 +116,8 @@ public class UserDaoImpl implements UserDaoInterface {
      */
     @Override
     public boolean createUser(User user) {
+        int iva_rowCount = 0;
+
         try (Connection lob_connection = this.gob_databaseConnection.getConnection();
              PreparedStatement lob_preparedStatement = lob_connection.prepareStatement(GC_ADD_USER)) {
 
@@ -115,36 +125,54 @@ public class UserDaoImpl implements UserDaoInterface {
             lob_preparedStatement.setString(PARAMETER_2, user.getPassword());
             lob_preparedStatement.setString(PARAMETER_3, user.getName());
 
-            lob_preparedStatement.executeUpdate();
-
-            return true;
+            iva_rowCount = lob_preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        return false;
+        return convertIntToBoolean(iva_rowCount);
     }
 
+    /**
+     * Update the e-mail of an user
+     *
+     * @param user update this user
+     * @return false if an error occurred, otherwise true
+     */
     public boolean updateEmail(User user) {
         return updateUser(user, ColNameUser.Email, user.getEmail());
     }
 
+    /**
+     * Update the password of an user
+     *
+     * @param user update this user
+     * @return false if an error occurred, otherwise true
+     */
     public boolean updatePassword(User user) {
         return updateUser(user, ColNameUser.Password, user.getPassword());
     }
 
+    /**
+     * Update the name of an user
+     *
+     * @param user update this user
+     * @return false if an error occurred, otherwise true
+     */
     public boolean updateName(User user) {
         return updateUser(user, ColNameUser.Name, user.getName());
     }
 
     /**
-     * update an user in the database
-     *
-     * @param user update this user
+     * Update an attribute of an user
+     * @param user the user to update
+     * @param colNameUser attribute name
+     * @param value the new value
      * @return false if an error occurred, otherwise true
      */
     private boolean updateUser(User user, ColNameUser colNameUser, String value) {
         String lob_preparedStatementString = GC_UPDATE_USER.replace("$", colNameUser.getColName());
+        int iva_rowCount = 0;
 
         try (Connection lob_connection = this.gob_databaseConnection.getConnection();
              PreparedStatement lob_preparedStatement = lob_connection.prepareStatement(lob_preparedStatementString)) {
@@ -152,31 +180,35 @@ public class UserDaoImpl implements UserDaoInterface {
             lob_preparedStatement.setString(PARAMETER_1, value);
             lob_preparedStatement.setInt(PARAMETER_2, user.getUserId());
 
-            lob_preparedStatement.executeUpdate();
-
-            return true;
+            iva_rowCount = lob_preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        return false;
+        return convertIntToBoolean(iva_rowCount);
     }
 
+    /**
+     * Converts an integer to boolean
+     * @param iva_integerBoolean the integer
+     * @return true if int = 1 otherwise false
+     */
     private static boolean convertIntToBoolean(int iva_integerBoolean) {
-        switch (iva_integerBoolean) {
-            case 1:
-                return true;
-            default:
-                return false;
-        }
+        return iva_integerBoolean == 1;
     }
-
 
     public static void main(String[] args) {
-        System.out.println(GC_ADD_USER);
-        System.out.println(GC_GET_USER);
-        System.out.println(GC_DELETE_USER);
-        System.out.println(GC_UPDATE_USER);
-    }
+        UserDao userDao = DaoObjectBuilder.getUserDaoObject();
+        User user = ModelObjectBuilder.getUserModel();
+        user.setEmail("Bla");
+        user.setPassword("Password");
+        user.setName("Florian");
 
+        boolean a = userDao.createUser(user);
+
+
+        //boolean a = userDao.updatePassword(user);
+        //boolean a = userDao.deleteUser(user);
+        System.out.println(a);
+    }
 }

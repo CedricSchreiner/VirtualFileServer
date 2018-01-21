@@ -2,7 +2,7 @@ package dao.interfaces;
 
 import models.interfaces.User;
 
-public interface UserDaoInterface {
+public interface UserDao {
 
     /**
      * get a user from the database with a specific email

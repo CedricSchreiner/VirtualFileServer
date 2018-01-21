@@ -109,4 +109,15 @@ public class UserImpl implements User{
         this.gva_name = gva_name;
     }
 
+    @Override
+    public String toString() {
+        return "UserImpl{" +
+                "gva_email='" + gva_email + '\'' +
+                ", gva_password='" + gva_password + '\'' +
+                ", gva_name='" + gva_name + '\'' +
+                ", gva_isAdmin=" + gva_isAdmin +
+                ", gva_userId=" + gva_userId +
+                ", gva_adminId=" + gva_adminId +
+                '}';
+    }
 }

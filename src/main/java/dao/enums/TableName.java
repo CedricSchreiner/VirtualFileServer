@@ -1,7 +1,7 @@
 package dao.enums;
 
 public enum TableName {
-    Users("users"), Admin("admin");
+    User("User"), Admin("Admin");
 
     private String tableName;
 
