@@ -1,6 +1,6 @@
 package rest;
 
-import dao.DatabaseConnection;
+import dao.classes.DatabaseConnection;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

@@ -1,8 +1,6 @@
 package dao.classes;
 
-import builder.DaoObjectBuilder;
 import builder.ModelObjectBuilder;
-import dao.DatabaseConnection;
 import dao.enums.ColNameUser;
 import dao.interfaces.UserDao;
 import models.interfaces.User;
