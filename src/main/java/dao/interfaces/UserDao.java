@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface UserDao {
     /**
-     * get a user from the database with a specific email
+     * Get an user from the database with a specific email
      * @param iva_email get the user with this email
      * @return the found user
      */
@@ -19,14 +19,14 @@ public interface UserDao {
     List<User> getAllUsers();
 
     /**
-     * delete a user from the database
+     * Delete an user from the database
      * @param user delete that specific user
      * @return false if an error occurred, otherwise true
      */
     boolean deleteUser(User user);
 
     /**
-     * create a new user in the database
+     * Create a new user in the database
      * @param user create this user
      * @return false if an error occurred, otherwise true
      */
