@@ -235,23 +235,4 @@ public class UserDaoImpl implements UserDao {
 
         return convertIntToBoolean(iva_rowCount);
     }
-
-    public static void main(String[] args) {
-        UserDao userDao = DaoObjectBuilder.getUserDaoObject();
-        User user = ModelObjectBuilder.getUserModel();
-        user.setEmail("Bla1");
-        user.setPassword("Password");
-        user.setName("Florian");
-
-        //boolean a = userDao.createUser(user);
-
-
-        //boolean a = userDao.updatePassword(user);
-        //boolean a = userDao.deleteUser(user);
-        //System.out.println(a);
-
-        for (User aUser : userDao.getAllUsers()) {
-            System.out.println(aUser.toString());
-        }
-    }
 }
