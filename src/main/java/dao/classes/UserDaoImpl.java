@@ -18,6 +18,7 @@ import static dao.constants.AdminDaoConstants.COL_ADMIN_ID;
 import static dao.constants.AdminDaoConstants.TABLE_ADMIN;
 import static dao.constants.DaoConstants.*;
 import static dao.constants.UserDaoConstants.*;
+import static utilities.Utils.convertIntToBoolean;
 
 public class UserDaoImpl implements UserDao {
 //----------------------------------------------------------------------------------------------------------------------
@@ -83,8 +84,8 @@ public class UserDaoImpl implements UserDao {
                 lob_aUser.setUserId(lob_rs.getInt(COL_USER_ID));
                 lob_aUser.setAdminId(lob_rs.getInt(COL_ADMIN_ID));
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
         }
 
         return lob_aUser;
@@ -123,8 +124,8 @@ public class UserDaoImpl implements UserDao {
 
                 lob_userList.add(lob_aUser);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
         }
 
         return lob_userList;
@@ -145,8 +146,8 @@ public class UserDaoImpl implements UserDao {
 
             lob_preparedStatement.setInt(PARAMETER_1, user.getUserId());
             iva_rowCount = lob_preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
         }
 
         return convertIntToBoolean(iva_rowCount);
@@ -170,8 +171,8 @@ public class UserDaoImpl implements UserDao {
             lob_preparedStatement.setString(PARAMETER_3, user.getName());
 
             iva_rowCount = lob_preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
         }
 
         return convertIntToBoolean(iva_rowCount);
@@ -228,20 +229,11 @@ public class UserDaoImpl implements UserDao {
             lob_preparedStatement.setInt(PARAMETER_2, user.getUserId());
 
             iva_rowCount = lob_preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
         }
 
         return convertIntToBoolean(iva_rowCount);
-    }
-
-    /**
-     * Converts an integer to boolean
-     * @param iva_integerBoolean the integer
-     * @return true if int = 1 otherwise false
-     */
-    private static boolean convertIntToBoolean(int iva_integerBoolean) {
-        return iva_integerBoolean == 1;
     }
 
     public static void main(String[] args) {
