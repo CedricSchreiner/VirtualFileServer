@@ -23,24 +23,24 @@ public class UserDaoImpl implements UserDao {
 //----------------------------------------------------------------------------------------------------------------------
 
     /**
-     * SELECT * FROM users NATURAL JOIN admin WHERE email = ?
+     * SELECT * FROM User LEFT OUTER JOIN admin WHERE email = ?
      */
     private static final String GC_GET_USER = "SELECT * FROM " + TABLE_USER + " LEFT OUTER JOIN " + TABLE_ADMIN +
             " WHERE " + COL_USER_EMAIL + " = ?";
 
     /**
-     * DELETE FROM users WHERE userId = ?
+     * DELETE FROM User WHERE userId = ?
      */
     private static final String GC_DELETE_USER = "DELETE FROM " + TABLE_USER + " WHERE " + COL_USER_ID + " = ?";
 
     /**
-     * INSERT INTO users (email, password, name) VALUES (?, ?, ?)
+     * INSERT INTO User (email, password, name) VALUES (?, ?, ?)
      */
     private static final String GC_ADD_USER = "INSERT INTO " + TABLE_USER + " (" + COL_USER_EMAIL + ", " +
             COL_USER_PASSWORD + ", " + COL_USER_NAME + ") VALUES (?, ?, ?)";
 
     /**
-     * UPDATE usersSET $ = ? WHERE userId = ?
+     * UPDATE User SET $ = ? WHERE userId = ?
      */
     private static final String GC_UPDATE_USER = "UPDATE " + TABLE_USER + " SET $ = ? WHERE " + COL_USER_ID + " = ?";
 
