@@ -1,7 +1,7 @@
 package models;
 
-import fileTree.interfaces.NodeInterface;
 import fileTree.interfaces.TreeInterface;
+import models.interfaces.User;
 import fileTree.models.Node;
 import fileTree.models.Tree;
 
