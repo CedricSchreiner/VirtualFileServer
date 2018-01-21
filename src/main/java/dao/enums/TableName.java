@@ -3,7 +3,7 @@ package dao.enums;
 public enum TableName {
     User("User"), Admin("Admin");
 
-    private String tableName;
+    private final String tableName;
 
     TableName(String tableName) {
         this.tableName = tableName;

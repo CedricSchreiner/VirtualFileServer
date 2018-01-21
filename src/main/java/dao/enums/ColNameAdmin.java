@@ -3,7 +3,7 @@ package dao.enums;
 public enum ColNameAdmin {
     Id("adminId"), UserId("userId");
 
-    private String colName;
+    private final String colName;
 
     ColNameAdmin(String colName) {
         this.colName = colName;

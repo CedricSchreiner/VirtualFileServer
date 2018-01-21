@@ -52,7 +52,7 @@ public class UserDaoImpl implements UserDao {
 
 //----------------------------------------------------------------------------------------------------------------------
 
-    private DatabaseConnection gob_databaseConnection = DatabaseConnection.getInstance();
+    private final DatabaseConnection gob_databaseConnection = DatabaseConnection.getInstance();
 
     /**
      * Get an user from the database with a specific email

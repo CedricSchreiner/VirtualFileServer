@@ -8,7 +8,7 @@ import services.interfaces.UserService;
 import java.util.List;
 
 public class UserServiceImpl implements UserService {
-    private UserDao lob_userDao = DaoObjectBuilder.getUserDaoObject();
+    private final UserDao lob_userDao = DaoObjectBuilder.getUserDaoObject();
 
     /**
      * create a new User in the database
