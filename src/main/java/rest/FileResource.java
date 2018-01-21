@@ -1,6 +1,6 @@
 package rest;
 
-import models.FileTreeCollection;
+import models.classes.FileTreeCollection;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;

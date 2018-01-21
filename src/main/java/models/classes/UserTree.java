@@ -1,8 +1,9 @@
-package models;
+package models.classes;
 
+import fileTree.interfaces.NodeInterface;
 import fileTree.interfaces.TreeInterface;
-import models.interfaces.User;
 import fileTree.models.Node;
+import models.interfaces.User;
 import fileTree.models.Tree;
 
 import java.io.File;
