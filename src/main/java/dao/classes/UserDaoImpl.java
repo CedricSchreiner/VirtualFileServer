@@ -11,6 +11,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static dao.constants.AdminDaoConstants.COL_ADMIN_ID;
 import static dao.constants.AdminDaoConstants.TABLE_ADMIN;
@@ -44,6 +46,8 @@ public class UserDaoImpl implements UserDao {
      */
     private static final String GC_UPDATE_USER = "UPDATE " + TABLE_USER + " SET $ = ? WHERE " + COL_USER_ID + " = ?";
 
+    private static final String GC_GET_ALL_USERS = "SELECT * FROM " + TABLE_USER + " LEFT OUTER JOIN " + TABLE_ADMIN;
+
 //----------------------------------------------------------------------------------------------------------------------
 
     private DatabaseConnection gob_databaseConnection = DatabaseConnection.getInstance();
@@ -56,34 +60,74 @@ public class UserDaoImpl implements UserDao {
      */
     @Override
     public User getUser(String iva_email) {
-        ResultSet rs;
-        User aUser = ModelObjectBuilder.getUserModel();
+        User lob_aUser = ModelObjectBuilder.getUserModel();
+        ResultSet lob_rs;
 
         try (Connection lob_connection = this.gob_databaseConnection.getConnection();
              PreparedStatement lob_preparedStatement = lob_connection.prepareStatement(GC_GET_USER)) {
 
             lob_preparedStatement.setString(PARAMETER_1, iva_email);
-            rs = lob_preparedStatement.executeQuery();
+            lob_rs = lob_preparedStatement.executeQuery();
 
-            while (rs.next()) {
-                aUser.setEmail(rs.getString(COL_USER_EMAIL));
-                aUser.setPassword(rs.getString(COL_USER_PASSWORD));
-                aUser.setName(rs.getString(COL_USER_NAME));
+            while (lob_rs.next()) {
+                lob_aUser.setEmail(lob_rs.getString(COL_USER_EMAIL));
+                lob_aUser.setPassword(lob_rs.getString(COL_USER_PASSWORD));
+                lob_aUser.setName(lob_rs.getString(COL_USER_NAME));
 
-                if (rs.getInt(COL_ADMIN_ID) > 0) {
-                    aUser.setIsAdmin(true);
+                if (lob_rs.getInt(COL_ADMIN_ID) > 0) {
+                    lob_aUser.setIsAdmin(true);
                 } else {
-                    aUser.setIsAdmin(false);
+                    lob_aUser.setIsAdmin(false);
                 }
 
-                aUser.setUserId(rs.getInt(COL_USER_ID));
-                aUser.setAdminId(rs.getInt(COL_ADMIN_ID));
+                lob_aUser.setUserId(lob_rs.getInt(COL_USER_ID));
+                lob_aUser.setAdminId(lob_rs.getInt(COL_ADMIN_ID));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        return aUser;
+        return lob_aUser;
+    }
+
+    /**
+     * Get all users from db
+     * @return all user
+     */
+    @Override
+    public List<User> getAllUsers() {
+        List<User> lob_userList = new ArrayList<>();
+        ResultSet lob_rs;
+        User lob_aUser;
+
+        try (Connection lob_connection = this.gob_databaseConnection.getConnection();
+             PreparedStatement lob_preparedStatement = lob_connection.prepareStatement(GC_GET_ALL_USERS)) {
+
+            lob_rs = lob_preparedStatement.executeQuery();
+
+            while (lob_rs.next()) {
+                lob_aUser = ModelObjectBuilder.getUserModel();
+
+                lob_aUser.setEmail(lob_rs.getString(COL_USER_EMAIL));
+                lob_aUser.setPassword(lob_rs.getString(COL_USER_PASSWORD));
+                lob_aUser.setName(lob_rs.getString(COL_USER_NAME));
+
+                if (lob_rs.getInt(COL_ADMIN_ID) > 0) {
+                    lob_aUser.setIsAdmin(true);
+                } else {
+                    lob_aUser.setIsAdmin(false);
+                }
+
+                lob_aUser.setUserId(lob_rs.getInt(COL_USER_ID));
+                lob_aUser.setAdminId(lob_rs.getInt(COL_ADMIN_ID));
+
+                lob_userList.add(lob_aUser);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return lob_userList;
     }
 
     /**
@@ -139,6 +183,7 @@ public class UserDaoImpl implements UserDao {
      * @param user update this user
      * @return false if an error occurred, otherwise true
      */
+    @Override
     public boolean updateEmail(User user) {
         return updateUser(user, ColNameUser.Email, user.getEmail());
     }
@@ -149,6 +194,7 @@ public class UserDaoImpl implements UserDao {
      * @param user update this user
      * @return false if an error occurred, otherwise true
      */
+    @Override
     public boolean updatePassword(User user) {
         return updateUser(user, ColNameUser.Password, user.getPassword());
     }
@@ -159,6 +205,7 @@ public class UserDaoImpl implements UserDao {
      * @param user update this user
      * @return false if an error occurred, otherwise true
      */
+    @Override
     public boolean updateName(User user) {
         return updateUser(user, ColNameUser.Name, user.getName());
     }
@@ -200,15 +247,19 @@ public class UserDaoImpl implements UserDao {
     public static void main(String[] args) {
         UserDao userDao = DaoObjectBuilder.getUserDaoObject();
         User user = ModelObjectBuilder.getUserModel();
-        user.setEmail("Bla");
+        user.setEmail("Bla1");
         user.setPassword("Password");
         user.setName("Florian");
 
-        boolean a = userDao.createUser(user);
+        //boolean a = userDao.createUser(user);
 
 
         //boolean a = userDao.updatePassword(user);
         //boolean a = userDao.deleteUser(user);
-        System.out.println(a);
+        //System.out.println(a);
+
+        for (User aUser : userDao.getAllUsers()) {
+            System.out.println(aUser.toString());
+        }
     }
 }

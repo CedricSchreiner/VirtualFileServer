@@ -2,6 +2,8 @@ package dao.interfaces;
 
 import models.interfaces.User;
 
+import java.util.List;
+
 public interface UserDao {
 
     /**
@@ -11,6 +13,7 @@ public interface UserDao {
      */
     User getUser(String iva_email);
 
+    List<User> getAllUsers();
     /**
      * delete a user from the database
      * @param user delete that specific user
