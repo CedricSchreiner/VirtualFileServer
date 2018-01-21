@@ -4,6 +4,7 @@ import models.exceptions.UserException;
 import models.interfaces.User;
 
 import static models.constants.UserConstants.*;
+import static utilities.Utils.isStringEmpty;
 
 public class UserImpl implements User{
     private String gva_email;
@@ -17,35 +18,19 @@ public class UserImpl implements User{
     }
 
     public UserImpl(String iva_email, String iva_password, String iva_name, boolean iva_isAdmin, int iva_userId, int iva_adminId) {
-        if (iva_email.equals("")) {
-            throw new UserException(GC_INVALID_EMAIL);
-        }
-
-        if (iva_password.equals("")) {
-            throw new UserException(GC_INVALID_PASSWORD);
-        }
-
-        if (iva_userId < 0) {
-            throw new UserException(GC_INVALID_ID);
-        }
+        setEmail(iva_email);
+        setPassword(iva_password);
+        setName(iva_name);
+        this.gva_isAdmin = iva_isAdmin;
+        setUserId(iva_userId);
 
         if (iva_isAdmin) {
-            if (iva_adminId < 0) {
-                throw new UserException(GC_INVALID_ID);
-            }
-            this.gva_adminId = iva_adminId;
+            setAdminId(iva_adminId);
         }
-
-        this.gva_email = iva_email;
-        this.gva_password = iva_password;
-        this.gva_name = iva_name;
-
-        this.gva_userId = iva_userId;
-        this.gva_adminId = iva_adminId;
     }
 
     public void setEmail(String iva_email) {
-        if (iva_email.equals("")) {
+        if (isStringEmpty(iva_email)) {
             throw new UserException(GC_INVALID_EMAIL);
         }
 
@@ -53,7 +38,7 @@ public class UserImpl implements User{
     }
 
     public void setPassword(String iva_password) {
-        if (iva_password.equals("")) {
+        if (isStringEmpty(iva_password)) {
             throw new UserException(GC_INVALID_PASSWORD);
         }
 
@@ -73,12 +58,19 @@ public class UserImpl implements User{
     }
 
     public void setAdminId(int iva_adminId) {
-        if (gva_isAdmin) {
-            if (iva_adminId < 0) {
-                throw new UserException(GC_INVALID_ID);
-            }
-            this.gva_adminId = iva_adminId;
+        if (iva_adminId < 0) {
+            throw new UserException(GC_INVALID_ID);
         }
+
+        this.gva_adminId = iva_adminId;
+    }
+
+    public void setName(String iva_name) {
+        if (isStringEmpty(iva_name)) {
+            throw new UserException(GC_INVALID_NAME);
+        }
+
+        this.gva_name = iva_name;
     }
 
     public String getEmail() {
@@ -103,10 +95,6 @@ public class UserImpl implements User{
 
     public String getName() {
         return gva_name;
-    }
-
-    public void setName(String gva_name) {
-        this.gva_name = gva_name;
     }
 
     @Override

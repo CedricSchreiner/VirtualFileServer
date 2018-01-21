@@ -15,4 +15,8 @@ public class Utils {
     public static boolean convertIntToBoolean(int iva_integerBoolean) {
         return iva_integerBoolean == 1;
     }
+
+    public static boolean isStringEmpty(String iob_string) {
+        return iob_string.trim().isEmpty();
+    }
 }
