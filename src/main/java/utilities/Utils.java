@@ -16,6 +16,11 @@ public class Utils {
         return iva_integerBoolean == 1;
     }
 
+    /**
+     * Checks if a string is empty
+     * @param iob_string the string to check
+     * @return true if empty otherwise false
+     */
     public static boolean isStringEmpty(String iob_string) {
         return iob_string.trim().isEmpty();
     }
