@@ -8,7 +8,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-@Path("/test")
+@Path("test")
 @Produces(MediaType.TEXT_PLAIN)
 public class UserResource {
 

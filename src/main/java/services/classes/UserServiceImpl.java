@@ -3,16 +3,18 @@ package services.classes;
 import builder.DaoObjectBuilder;
 import builder.ModelObjectBuilder;
 import dao.interfaces.UserDao;
-import models.exceptions.UserException;
+import models.exceptions.UserEmptyException;
+import models.exceptions.UsersNotEqualException;
 import models.interfaces.User;
 import services.interfaces.UserService;
 
 import java.util.List;
 
 import static models.constants.UserConstants.GC_EMPTY_USER;
+import static models.constants.UserConstants.GC_USERS_NOT_EQUAL;
 
 public class UserServiceImpl implements UserService {
-    private final UserDao lob_userDao = DaoObjectBuilder.getUserDaoObject();
+    private final UserDao gob_userDao = DaoObjectBuilder.getUserDaoObject();
 
     /**
      * create a new User in the database
@@ -21,14 +23,14 @@ public class UserServiceImpl implements UserService {
      * @return true if the user was saved in the database, otherwise false
      */
     public boolean createNewUserInDatabase(User iob_user) {
-        if (!lob_userDao.getUser(iob_user.getEmail()).isEmpty()) {
+        if (!gob_userDao.getUser(iob_user.getEmail()).isEmpty()) {
             return false;
         }
 
         String password = PasswordService.encryptPassword(iob_user.getPassword());
         iob_user.setPassword(password);
 
-        return lob_userDao.createUser(iob_user);
+        return gob_userDao.createUser(iob_user);
     }
 
     /**
@@ -37,37 +39,50 @@ public class UserServiceImpl implements UserService {
      * @param iob_user the user to log in
      * @return true if the user exists in the database
      */
-    public boolean login(User iob_user) {
+    public User login(User iob_user) {
         User lob_user;
-        lob_user = lob_userDao.getUser(iob_user.getEmail());
+        lob_user = gob_userDao.getUser(iob_user.getEmail());
 
         if (lob_user.isEmpty()) {
-            throw new UserException(GC_EMPTY_USER);
+            throw new UserEmptyException(GC_EMPTY_USER);
         }
 
-        return lob_user.equals(iob_user);
+        String encryptedPassword = PasswordService.encryptPassword(iob_user.getPassword());
+        iob_user.setPassword(encryptedPassword);
+
+        if (!iob_user.equals(lob_user)) {
+            throw new UsersNotEqualException(GC_USERS_NOT_EQUAL);
+        }
+
+        return lob_user;
     }
 
     /**
      * change the password of a user
      *
-     * @param iob_user        change the password of this user
+     * @param iob_user change the password of this user
      * @param iva_newPassword the new password
      * @return true if the password was changed
      */
     public boolean changePassword(User iob_user, String iva_newPassword) {
-        iob_user.setPassword(iva_newPassword);
-        return lob_userDao.updatePassword(iob_user);
+        User lob_user = gob_userDao.getUser(iob_user.getEmail());
+
+        if (lob_user.isEmpty()) {
+            throw new UserEmptyException(GC_EMPTY_USER);
+        }
+
+        lob_user.setPassword(PasswordService.encryptPassword(iva_newPassword));
+        return gob_userDao.updatePassword(lob_user);
     }
 
     @Override
     public User getUserByEmail(String iob_email) {
-        return lob_userDao.getUser(iob_email);
+        return gob_userDao.getUser(iob_email);
     }
 
     @Override
     public List<User> getAllUser() {
-        return lob_userDao.getAllUsers();
+        return gob_userDao.getAllUsers();
     }
 
     public static void main(String[] args) {

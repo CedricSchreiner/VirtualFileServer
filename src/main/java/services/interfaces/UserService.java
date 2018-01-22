@@ -18,7 +18,7 @@ public interface UserService {
      * @param iob_user the user to log in
      * @return true if the user exists in the database
      */
-    boolean login(User iob_user);
+    User login(User iob_user);
 
     /**
      * change the password of a user
