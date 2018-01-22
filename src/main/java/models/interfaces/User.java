@@ -14,4 +14,6 @@ public interface User {
     String getName();
     void setName(String gva_name);
     boolean isEmpty();
+    boolean equals(Object o);
+    int hashCode();
 }

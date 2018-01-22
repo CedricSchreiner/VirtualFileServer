@@ -14,7 +14,6 @@ public class UserResource {
 
     @GET
     public Response login() {
-        DatabaseConnection connection = DatabaseConnection.getInstance();
         return Response.accepted().entity("hi").build();
     }
 
