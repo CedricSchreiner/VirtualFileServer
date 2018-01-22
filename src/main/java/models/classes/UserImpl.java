@@ -3,6 +3,8 @@ package models.classes;
 import models.exceptions.UserException;
 import models.interfaces.User;
 
+import java.util.Objects;
+
 import static models.constants.UserConstants.*;
 import static utilities.Utils.isStringEmpty;
 
@@ -97,6 +99,9 @@ public class UserImpl implements User{
         return gva_name;
     }
 
+    public boolean isEmpty() {
+        return gva_email == null && gva_password == null && gva_name == null;
+    }
     @Override
     public String toString() {
         return "UserImpl{" +
@@ -107,5 +112,20 @@ public class UserImpl implements User{
                 ", gva_userId=" + gva_userId +
                 ", gva_adminId=" + gva_adminId +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserImpl user = (UserImpl) o;
+        return Objects.equals(gva_email, user.gva_email) &&
+                Objects.equals(gva_password, user.gva_password);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(gva_email, gva_password);
     }
 }

@@ -1,11 +1,15 @@
 package services.classes;
 
 import builder.DaoObjectBuilder;
+import builder.ModelObjectBuilder;
 import dao.interfaces.UserDao;
+import models.exceptions.UserException;
 import models.interfaces.User;
 import services.interfaces.UserService;
 
 import java.util.List;
+
+import static models.constants.UserConstants.GC_EMPTY_USER;
 
 public class UserServiceImpl implements UserService {
     private final UserDao lob_userDao = DaoObjectBuilder.getUserDaoObject();
@@ -17,6 +21,13 @@ public class UserServiceImpl implements UserService {
      * @return true if the user was saved in the database, otherwise false
      */
     public boolean createNewUserInDatabase(User iob_user) {
+        if (!lob_userDao.getUser(iob_user.getEmail()).isEmpty()) {
+            return false;
+        }
+
+        String password = PasswordService.encryptPassword(iob_user.getPassword());
+        iob_user.setPassword(password);
+
         return lob_userDao.createUser(iob_user);
     }
 
@@ -27,7 +38,14 @@ public class UserServiceImpl implements UserService {
      * @return true if the user exists in the database
      */
     public boolean login(User iob_user) {
-        return false;
+        User lob_user;
+        lob_user = lob_userDao.getUser(iob_user.getEmail());
+
+        if (lob_user.isEmpty()) {
+            throw new UserException(GC_EMPTY_USER);
+        }
+
+        return lob_user.equals(iob_user);
     }
 
     /**
@@ -51,4 +69,15 @@ public class UserServiceImpl implements UserService {
     public List<User> getAllUser() {
         return lob_userDao.getAllUsers();
     }
+
+    public static void main(String[] args) {
+        UserServiceImpl userService = new UserServiceImpl();
+        User user = ModelObjectBuilder.getUserModel();
+        user.setEmail("Bla2");
+        user.setPassword("password");
+        user.setName("name");
+        userService.createNewUserInDatabase(user);
+    }
 }
+
+

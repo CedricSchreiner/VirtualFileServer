@@ -13,4 +13,5 @@ public interface User {
     int getAdminId();
     String getName();
     void setName(String gva_name);
+    boolean isEmpty();
 }
