@@ -37,7 +37,7 @@ public class UserServiceImpl implements UserService {
      * Checks if the user exists in the database
      *
      * @param iob_user the user to log in
-     * @return true if the user exists in the database
+     * @return the user which logged in
      */
     public User login(User iob_user) {
         User lob_user;
