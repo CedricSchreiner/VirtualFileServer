@@ -3,6 +3,7 @@ package services.classes;
 import builder.DaoObjectBuilder;
 import builder.ModelObjectBuilder;
 import dao.interfaces.UserDao;
+import models.exceptions.UserAlreadyExistsException;
 import models.exceptions.UserEmptyException;
 import models.exceptions.UsersNotEqualException;
 import models.interfaces.User;
@@ -10,8 +11,7 @@ import services.interfaces.UserService;
 
 import java.util.List;
 
-import static models.constants.UserConstants.GC_EMPTY_USER;
-import static models.constants.UserConstants.GC_USERS_NOT_EQUAL;
+import static models.constants.UserConstants.*;
 
 public class UserServiceImpl implements UserService {
     private final UserDao gob_userDao = DaoObjectBuilder.getUserDaoObject();
@@ -24,7 +24,7 @@ public class UserServiceImpl implements UserService {
      */
     public boolean createNewUserInDatabase(User iob_user) {
         if (!gob_userDao.getUser(iob_user.getEmail()).isEmpty()) {
-            return false;
+            throw new UserAlreadyExistsException(GC_USER_ALREADY_EXISTS);
         }
 
         String password = PasswordService.encryptPassword(iob_user.getPassword());

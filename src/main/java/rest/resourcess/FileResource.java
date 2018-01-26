@@ -1,4 +1,4 @@
-package rest;
+package rest.resourcess;
 
 import models.classes.FileTreeCollection;
 

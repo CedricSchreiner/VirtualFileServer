@@ -1,4 +1,4 @@
-package rest;
+package rest.resourcess;
 
 public class AdminResource {
 }
