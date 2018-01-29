@@ -10,8 +10,14 @@ import org.json.simple.JSONObject;
 import services.interfaces.UserService;
 
 import javax.ws.rs.*;
+import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.xml.bind.DatatypeConverter;
+
+import java.io.UnsupportedEncodingException;
+import java.util.List;
+import java.util.StringTokenizer;
 
 import static rest.constants.UserResourceConstants.*;
 import static rest.resourcess.UserResource.USER_RESOURCE_PATH;
@@ -88,8 +94,6 @@ public class UserResource {
                     .entity(lob_returnMessage.toJSONString())
                     .build();
         }
-
-
     }
 
     @PUT

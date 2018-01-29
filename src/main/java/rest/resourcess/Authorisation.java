@@ -37,6 +37,7 @@ public class Authorisation implements ContainerRequestFilter{
                 lob_tokenizer = new StringTokenizer(lob_decodeString, ":");
                 lob_email = lob_tokenizer.nextToken();
                 lob_password = lob_tokenizer.nextToken();
+
                 lob_user = gob_userService.getUserByEmail(lob_email);
 
                 if(PasswordService.checkPasswordEquals(lob_password,lob_user.getPassword())) {
