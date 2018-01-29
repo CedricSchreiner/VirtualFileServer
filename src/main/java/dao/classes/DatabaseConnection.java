@@ -1,12 +1,12 @@
 package dao.classes;
 
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
 public class DatabaseConnection {
 
     private static DatabaseConnection gob_ourInstance = new DatabaseConnection();
-    private Connection gob_connection;
 
     public static DatabaseConnection getInstance() {
         if (gob_ourInstance == null) {
@@ -18,15 +18,16 @@ public class DatabaseConnection {
     private DatabaseConnection() {}
 
     public Connection getConnection() {
-        if (this.gob_connection == null) {
-            try {
-                Class.forName("org.sqlite.JDBC");
-                gob_connection = DriverManager.getConnection("jdbc:sqlite:" + this.getClass().getProtectionDomain().getCodeSource().getLocation() + "database.db");
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
+        Connection gob_connection;
+
+        try {
+            Class.forName("org.sqlite.JDBC");
+            gob_connection = DriverManager.getConnection("jdbc:sqlite:" + DatabaseConnection.class.getClassLoader().getResource("database.db"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
-        return this.gob_connection;
+
+        return gob_connection;
     }
 }

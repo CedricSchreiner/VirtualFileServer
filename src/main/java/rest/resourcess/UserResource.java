@@ -1,6 +1,7 @@
 package rest.resourcess;
 
 import builder.ServiceObjectBuilder;
+import models.classes.UserImpl;
 import models.exceptions.UserAlreadyExistsException;
 import models.exceptions.UserEmptyException;
 import models.interfaces.User;
@@ -17,14 +18,14 @@ import static rest.resourcess.UserResource.USER_RESOURCE_PATH;
 @Path(USER_RESOURCE_PATH)
 @Produces(MediaType.TEXT_PLAIN)
 public class UserResource {
-    static final String USER_RESOURCE_PATH= "user";
+    static final String USER_RESOURCE_PATH= "user/";
 
     private UserService gob_userService = ServiceObjectBuilder.getUserServiceObject();
 
     @GET
-    public Response login(User iob_user) {
+    public Response login(UserImpl user) {
 
-        gob_userService.getUserByEmail(iob_user.getEmail());
+        gob_userService.getUserByEmail(user.getEmail());
 
         return Response.accepted()
                 .entity("hi")
@@ -33,12 +34,12 @@ public class UserResource {
 
     @PUT
     @Path("/auth/changePassword")
-    public Response changePassword(User iob_user, String iob_newPassword) {
+    public Response changePassword(UserImpl iob_user) {
         JSONObject lob_returnMessage = new JSONObject();
         boolean lva_passwordChanged;
 
         try {
-            lva_passwordChanged = gob_userService.changePassword(iob_user, iob_newPassword);
+            lva_passwordChanged = gob_userService.changePassword(iob_user, "test");
 
             if (lva_passwordChanged) {
                 lob_returnMessage.put(PASSWORD_CHANGE_STATUS, PASSWORD_SUCCESSFULLY_CHANGED);
@@ -55,8 +56,8 @@ public class UserResource {
     }
 
     @PUT
-    @Path("addNewUser")
-    public Response registerNewUser(User iob_user) {
+    @Path("addNewUser/")
+    public Response registerNewUser(UserImpl iob_user) {
         JSONObject lob_returnMessage = new JSONObject();
         boolean lva_userAdded;
 
@@ -73,7 +74,7 @@ public class UserResource {
         }
 
         return Response.ok()
-                .entity(lob_returnMessage)
+                .entity(lob_returnMessage.toJSONString())
                 .build();
     }
 }

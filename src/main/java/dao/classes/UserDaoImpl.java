@@ -64,9 +64,12 @@ public class UserDaoImpl implements UserDao {
     public User getUser(String iva_email) {
         User lob_aUser = ModelObjectBuilder.getUserModel();
         ResultSet lob_rs = null;
+        Connection lob_connection = null;
+        PreparedStatement lob_preparedStatement = null;
 
-        try (Connection lob_connection = this.gob_databaseConnection.getConnection();
-             PreparedStatement lob_preparedStatement = lob_connection.prepareStatement(GC_GET_USER)) {
+        try {
+            lob_connection = this.gob_databaseConnection.getConnection();
+            lob_preparedStatement = lob_connection.prepareStatement(GC_GET_USER);
 
             lob_preparedStatement.setString(PARAMETER_1, iva_email);
             lob_rs = lob_preparedStatement.executeQuery();
@@ -91,6 +94,14 @@ public class UserDaoImpl implements UserDao {
             try {
                 if (lob_rs != null) {
                     lob_rs.close();
+                }
+
+                if (lob_preparedStatement != null) {
+                    lob_preparedStatement.close();
+                }
+
+                if (lob_connection != null) {
+                    lob_connection.close();
                 }
             } catch (SQLException e) {
                 e.printStackTrace();

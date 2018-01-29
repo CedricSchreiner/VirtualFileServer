@@ -3,15 +3,17 @@ package models.classes;
 import models.exceptions.UserException;
 import models.interfaces.User;
 
+import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Objects;
 
 import static models.constants.UserConstants.*;
 import static utilities.Utils.isStringEmpty;
 
+@XmlRootElement
 public class UserImpl implements User{
-    private String gva_email;
-    private String gva_password;
-    private String gva_name;
+    private String email;
+    private String password;
+    private String name;
     private boolean gva_isAdmin;
     private int gva_userId;
     private int gva_adminId;
@@ -19,6 +21,11 @@ public class UserImpl implements User{
     public UserImpl() {
     }
 
+    public UserImpl (String email, String password, String name) {
+        this.email = email;
+        this.password = password;
+        this.name = name;
+    }
     public UserImpl(String iva_email, String iva_password, String iva_name, boolean iva_isAdmin, int iva_userId, int iva_adminId) {
         setEmail(iva_email);
         setPassword(iva_password);
@@ -36,7 +43,7 @@ public class UserImpl implements User{
             throw new UserException(GC_INVALID_EMAIL);
         }
 
-        this.gva_email = iva_email;
+        this.email = iva_email;
     }
 
     public void setPassword(String iva_password) {
@@ -44,7 +51,7 @@ public class UserImpl implements User{
             throw new UserException(GC_INVALID_PASSWORD);
         }
 
-        this.gva_password = iva_password;
+        this.password = iva_password;
     }
 
     public void setIsAdmin(boolean iva_isAdmin) {
@@ -72,15 +79,15 @@ public class UserImpl implements User{
             throw new UserException(GC_INVALID_NAME);
         }
 
-        this.gva_name = iva_name;
+        this.name = iva_name;
     }
 
     public String getEmail() {
-        return this.gva_email;
+        return this.email;
     }
 
     public String getPassword() {
-        return this.gva_password;
+        return this.password;
     }
 
     public boolean getIsAdmin() {
@@ -96,18 +103,18 @@ public class UserImpl implements User{
     }
 
     public String getName() {
-        return gva_name;
+        return name;
     }
 
     public boolean isEmpty() {
-        return gva_email == null && gva_password == null && gva_name == null;
+        return email == null && password == null && name == null;
     }
     @Override
     public String toString() {
         return "UserImpl{" +
-                "gva_email='" + gva_email + '\'' +
-                ", gva_password='" + gva_password + '\'' +
-                ", gva_name='" + gva_name + '\'' +
+                "email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", name='" + name + '\'' +
                 ", gva_isAdmin=" + gva_isAdmin +
                 ", gva_userId=" + gva_userId +
                 ", gva_adminId=" + gva_adminId +
@@ -119,13 +126,13 @@ public class UserImpl implements User{
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UserImpl user = (UserImpl) o;
-        return Objects.equals(gva_email, user.gva_email) &&
-                Objects.equals(gva_password, user.gva_password);
+        return Objects.equals(email, user.email) &&
+                Objects.equals(password, user.password);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(gva_email, gva_password);
+        return Objects.hash(email, password);
     }
 }
