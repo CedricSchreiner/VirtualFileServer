@@ -34,24 +34,24 @@ public class UserResource {
         try{
             User aUser = gob_userService.getUserByEmail(user.getEmail());
 
-            lob_returnMessage.put(EMAIL, aUser.getEmail());
-            lob_returnMessage.put(PASSWORD, aUser.getPassword());
-            lob_returnMessage.put(NAME, aUser.getName());
-            lob_returnMessage.put(IS_ADMIN, aUser.getIsAdmin());
-            lob_returnMessage.put(ADMIN_ID, aUser.getAdminId());
-            lob_returnMessage.put(USER_ID, aUser.getUserId());
+            lob_returnMessage.put(GC_EMAIL, aUser.getEmail());
+            lob_returnMessage.put(GC_PASSWORD, aUser.getPassword());
+            lob_returnMessage.put(GC_NAME, aUser.getName());
+            lob_returnMessage.put(GC_IS_ADMIN, aUser.getIsAdmin());
+            lob_returnMessage.put(GC_ADMIN_ID, aUser.getAdminId());
+            lob_returnMessage.put(GC_USER_ID, aUser.getUserId());
 
             return Response.ok()
                     .entity(lob_returnMessage.toJSONString())
                     .build();
         } catch (UsersNotEqualException ex) {
-            lob_returnMessage.put(USER_LOGIN_STATUS, ex.getMessage());
+            lob_returnMessage.put(GC_USER_LOGIN_STATUS, ex.getMessage());
 
             return Response.status(Response.Status.CONFLICT)
                     .entity(lob_returnMessage.toJSONString())
                     .build();
         } catch (UserEmptyException ex) {
-            lob_returnMessage.put(USER_LOGIN_STATUS, ex.getMessage());
+            lob_returnMessage.put(GC_USER_LOGIN_STATUS, ex.getMessage());
 
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(lob_returnMessage.toJSONString())
@@ -69,27 +69,25 @@ public class UserResource {
             lva_passwordChanged = gob_userService.changePassword(iob_user, "test");
 
             if (lva_passwordChanged) {
-                lob_returnMessage.put(PASSWORD_CHANGE_STATUS, PASSWORD_SUCCESSFULLY_CHANGED);
+                lob_returnMessage.put(GC_PASSWORD_CHANGE_STATUS, GC_PASSWORD_SUCCESSFULLY_CHANGED);
 
                 return Response.ok()
                         .entity(lob_returnMessage.toJSONString())
                         .build();
             } else {
-                lob_returnMessage.put(PASSWORD_CHANGE_STATUS, PASSWORD_NOT_CHANGED);
+                lob_returnMessage.put(GC_PASSWORD_CHANGE_STATUS, GC_PASSWORD_NOT_CHANGED);
 
                 return Response.status(Response.Status.CONFLICT)
                         .entity(lob_returnMessage.toJSONString())
                         .build();
             }
         } catch (UserEmptyException ex) {
-            lob_returnMessage.put(PASSWORD_CHANGE_STATUS, ex.getMessage());
+            lob_returnMessage.put(GC_PASSWORD_CHANGE_STATUS, ex.getMessage());
 
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(lob_returnMessage.toJSONString())
                     .build();
         }
-
-
     }
 
     @PUT
@@ -102,20 +100,20 @@ public class UserResource {
             lva_userAdded = gob_userService.createNewUserInDatabase(iob_user);
 
             if (lva_userAdded) {
-                lob_returnMessage.put(USER_ADD_STATUS, USER_SUCCESSFULLY_ADDED);
+                lob_returnMessage.put(GC_USER_ADD_STATUS, GC_USER_SUCCESSFULLY_ADDED);
 
                 return Response.ok()
                         .entity(lob_returnMessage.toJSONString())
                         .build();
             } else {
-                lob_returnMessage.put(USER_ADD_STATUS, USER_NOT_ADDED);
+                lob_returnMessage.put(GC_USER_ADD_STATUS, GC_USER_NOT_ADDED);
 
                 return Response.status(Response.Status.CONFLICT)
                         .entity(lob_returnMessage.toJSONString())
                         .build();
             }
         } catch (UserAlreadyExistsException ex) {
-            lob_returnMessage.put(USER_ADD_STATUS, ex.getMessage());
+            lob_returnMessage.put(GC_USER_ADD_STATUS, ex.getMessage());
 
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(lob_returnMessage.toJSONString())

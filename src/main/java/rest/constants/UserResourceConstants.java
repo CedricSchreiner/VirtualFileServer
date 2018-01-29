@@ -1,19 +1,19 @@
 package rest.constants;
 
 public abstract class UserResourceConstants {
-    public static final String PASSWORD_CHANGE_STATUS = "passwordChangeStatus";
-    public static final String PASSWORD_SUCCESSFULLY_CHANGED = "Password wurde erfolgreich geaendert!\n";
-    public static final String PASSWORD_NOT_CHANGED = "Passwort konnte nicht geaendert werden!\n";
+    public static final String GC_PASSWORD_CHANGE_STATUS = "passwordChangeStatus";
+    public static final String GC_PASSWORD_SUCCESSFULLY_CHANGED = "Password successfully changed!\n";
+    public static final String GC_PASSWORD_NOT_CHANGED = "Password could not be changed!\n";
 
-    public static final String USER_ADD_STATUS = "userAddStatus";
-    public static final String USER_SUCCESSFULLY_ADDED = "User wurde erfolgreich hinzugefuegt!\n";
-    public static final String USER_NOT_ADDED = "Der User konnte nicht hinzugefuegt werden!\n";
+    public static final String GC_USER_ADD_STATUS = "userAddStatus";
+    public static final String GC_USER_SUCCESSFULLY_ADDED = "User succesfully added!\n";
+    public static final String GC_USER_NOT_ADDED = "The user could not be added!\n";
 
-    public static final String USER_LOGIN_STATUS = "userLoginStatus";
-    public static final String EMAIL = "email";
-    public static final String PASSWORD = "password";
-    public static final String NAME = "name";
-    public static final String IS_ADMIN = "isAdmin";
-    public static final String ADMIN_ID = "adminId";
-    public static final String USER_ID = "userId";
+    public static final String GC_USER_LOGIN_STATUS = "userLoginStatus";
+    public static final String GC_EMAIL = "email";
+    public static final String GC_PASSWORD = "password";
+    public static final String GC_NAME = "name";
+    public static final String GC_IS_ADMIN = "isAdmin";
+    public static final String GC_ADMIN_ID = "adminId";
+    public static final String GC_USER_ID = "userId";
 }
