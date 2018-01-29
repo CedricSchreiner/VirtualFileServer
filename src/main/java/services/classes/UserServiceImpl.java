@@ -84,15 +84,6 @@ public class UserServiceImpl implements UserService {
     public List<User> getAllUser() {
         return gob_userDao.getAllUsers();
     }
-
-    public static void main(String[] args) {
-        UserServiceImpl userService = new UserServiceImpl();
-        User user = ModelObjectBuilder.getUserModel();
-        user.setEmail("Bla2");
-        user.setPassword("password");
-        user.setName("name");
-        userService.createNewUserInDatabase(user);
-    }
 }
 
 

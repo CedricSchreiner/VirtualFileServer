@@ -255,13 +255,4 @@ public class UserDaoImpl implements UserDao {
 
         return convertIntToBoolean(iva_rowCount);
     }
-
-    public static void main(String[] args) {
-        UserDaoImpl userDao = new UserDaoImpl();
-        User user = ModelObjectBuilder.getUserModel();
-        user.setEmail("Bla");
-        user.setPassword("test");
-        user.setName("name");
-        userDao.getUser("Bla");
-    }
 }
