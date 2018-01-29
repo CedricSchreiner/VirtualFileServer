@@ -14,6 +14,10 @@ public class DaoObjectBuilder {
         return new UserDaoImpl();
     }
 
+    /**
+     * Generates an AdminDao object
+     * @return AdminDaoImpl
+     */
     public static AdminDao getAdminDaoObject() {
         return new AdminDaoImpl();
     }

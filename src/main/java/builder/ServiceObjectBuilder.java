@@ -14,6 +14,10 @@ public class ServiceObjectBuilder {
         return new UserServiceImpl();
     }
 
+    /**
+     * Generates an AdminService object
+     * @return AdminServiceImpl
+     */
     public static AdminService getAdminServiceObject() {
         return new AdminServiceImpl();
     }
