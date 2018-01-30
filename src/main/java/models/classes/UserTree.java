@@ -12,12 +12,18 @@ public class UserTree {
     private TreeInterface gob_tree;
     private User gob_user;
 
-    public UserTree(User iob_user) {
+    public UserTree(User iob_user, String iva_userDirectoryPath) {
         this.gob_user = iob_user;
         this.gob_tree = new Tree();
         try {
             //TODO open the directory for the specific user
-            addFilesToTree(null);
+            File lob_userDirectory = new File(iva_userDirectoryPath);
+
+            if (lob_userDirectory.exists() && lob_userDirectory.isDirectory()) {
+                addFilesToTree(lob_userDirectory);
+            } else {
+                lob_userDirectory.mkdir();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

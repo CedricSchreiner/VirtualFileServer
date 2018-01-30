@@ -27,20 +27,25 @@
       <version>2.26</version>
     </dependency>
 
-      <dependency>
-          <groupId>commons-io</groupId>
-          <artifactId>commons-io</artifactId>
-          <version>2.0.1</version>
-      </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>2.0.1</version>
+    </dependency>
 
       <!-- https://mvnrepository.com/artifact/org.jboss.resteasy/resteasy-multipart-provider -->
-      <dependency>
-          <groupId>org.jboss.resteasy</groupId>
-          <artifactId>resteasy-multipart-provider</artifactId>
-          <version>2.1-beta-1</version>
-      </dependency>
+    <dependency>
+      <groupId>org.jboss.resteasy</groupId>
+      <artifactId>resteasy-multipart-provider</artifactId>
+      <version>2.1-beta-1</version>
+    </dependency>
 
-
+  <!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+      <version>4.0.0</version>
+    </dependency>
 
       <!-- https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc -->
     <dependency>
