@@ -13,6 +13,9 @@ import java.util.List;
 
 public class Initializer extends HttpServlet{
 
+    /**
+     * Add all file paths, from the files that are saved by the user, in the associated tree
+     */
     public void init() {
         //---------------------------------Variables-------------------------------------------------
         FileTreeCollection lob_fileTree = FileTreeCollection.getInstance();
@@ -35,7 +38,7 @@ public class Initializer extends HttpServlet{
     }
 
     //TODO change the path at the end of the project
-    private static String getUserBasePath() {
+    public static String getUserBasePath() {
         return GC_FILE_BASE_PATH.replace("$", System.getProperty("user.name"));
     }
 }

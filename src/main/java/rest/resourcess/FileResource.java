@@ -1,6 +1,7 @@
 package rest.resourcess;
 
 import models.classes.FileTreeCollection;
+import models.interfaces.User;
 import org.apache.commons.io.IOUtils;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
@@ -20,16 +21,15 @@ public class FileResource {
     @GET
     @Path("{path}")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    public Response getFile(@PathParam("path") String test) {
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response getFile(@PathParam("path") String iva_filePath, User iob_user) {
         FileTreeCollection lob_tree_collection = FileTreeCollection.getInstance();
-        File file = new File(lob_tree_collection.getTreeFromUser(null).getNode(test).getPath());
+        File file = new File(lob_tree_collection.getTreeFromUser(null).getNode(iva_filePath).getPath());
         Response.ResponseBuilder response = Response.ok(file);
         response.header("Content-Disposition", "attachment;filename=" + file.getName());
         return response.build();
     }
 
-
-    //Todo Refactoring
     @POST
     @Path("/upload")
     @Consumes({MediaType.MULTIPART_FORM_DATA})
@@ -40,43 +40,7 @@ public class FileResource {
         Map<String, List<InputPart>> uploadForm = input.getFormDataMap();
         List<InputPart> inputParts = uploadForm.get("attachment");
         FileService.addNewFile(inputParts);
-//        for (InputPart inputPart : inputParts) {
-//
-//            try {
-//
-//                MultivaluedMap<String, String> header = inputPart.getHeaders();
-//                fileName = getFileName(header);
-//
-//                //convert the uploaded file to inputstream
-//                InputStream inputStream = inputPart.getBody(InputStream.class,null);
-//
-//                byte [] bytes = IOUtils.toByteArray(inputStream);
-//
-//                //constructs upload file path
-//                fileName = "C:\\Users\\Cedric\\Documents\\" + fileName;
-//
-//                writeFile(bytes,fileName);
-//
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//
-//        }
-
         return Response.status(200)
                 .entity("uploadFile is called, Uploaded file name : " + fileName).build();
     }
-
-    //save to somewhere
-//    private void writeFile(byte[] content, String filename) throws IOException {
-//
-//        File file = new File(filename);
-//
-//        FileOutputStream fop = new FileOutputStream(file);
-//
-//        fop.write(content);
-//        fop.flush();
-//        fop.close();
-//
-//    }
 }
