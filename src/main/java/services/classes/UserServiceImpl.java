@@ -4,6 +4,7 @@ import builder.DaoObjectBuilder;
 import builder.ModelObjectBuilder;
 import dao.interfaces.UserDao;
 import models.exceptions.UserAlreadyExistsException;
+import models.exceptions.UserDirectoryNotCreated;
 import models.exceptions.UserEmptyException;
 import models.exceptions.UsersNotEqualException;
 import models.interfaces.User;
@@ -25,21 +26,30 @@ public class UserServiceImpl implements UserService {
      * @return true if the user was saved in the database, otherwise false
      */
     public boolean createNewUserInDatabase(User iob_user) {
-        User user;
-        File dir;
+        User lob_user;
+        File lob_dir;
+        String lva_userName;
+        String lva_userDirectoryName;
+        String lva_password;
 
         if (!gob_userDao.getUser(iob_user.getEmail()).isEmpty()) {
             throw new UserAlreadyExistsException(GC_USER_ALREADY_EXISTS);
         }
 
-        String password = PasswordService.encryptPassword(iob_user.getPassword());
-        iob_user.setPassword(password);
+        lva_password = PasswordService.encryptPassword(iob_user.getPassword());
+        iob_user.setPassword(lva_password);
 
         if (gob_userDao.createUser(iob_user)) {
-            user = getUserByEmail(iob_user.getEmail());
+            lob_user = getUserByEmail(iob_user.getEmail());
+            lva_userName = lob_user.getName().toLowerCase();
+            lva_userDirectoryName = lva_userName + lob_user.getUserId();
 
-            dir = new File(Utils.getRootDirectory() + user.getName().toLowerCase() + user.getUserId());
-            dir.mkdir();
+            lob_dir = new File(Utils.getRootDirectory() +  lva_userDirectoryName);
+
+            if (!lob_dir.mkdir()) {
+                throw new UserDirectoryNotCreated(GC_USER_DIRECTORY_NOT_CREATED);
+            }
+
             return true;
         }
 
