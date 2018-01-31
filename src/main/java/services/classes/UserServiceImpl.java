@@ -8,7 +8,9 @@ import models.exceptions.UserEmptyException;
 import models.exceptions.UsersNotEqualException;
 import models.interfaces.User;
 import services.interfaces.UserService;
+import utilities.Utils;
 
+import java.io.File;
 import java.util.List;
 
 import static models.constants.UserConstants.*;
@@ -23,6 +25,9 @@ public class UserServiceImpl implements UserService {
      * @return true if the user was saved in the database, otherwise false
      */
     public boolean createNewUserInDatabase(User iob_user) {
+        User user;
+        File dir;
+
         if (!gob_userDao.getUser(iob_user.getEmail()).isEmpty()) {
             throw new UserAlreadyExistsException(GC_USER_ALREADY_EXISTS);
         }
@@ -30,7 +35,15 @@ public class UserServiceImpl implements UserService {
         String password = PasswordService.encryptPassword(iob_user.getPassword());
         iob_user.setPassword(password);
 
-        return gob_userDao.createUser(iob_user);
+        if (gob_userDao.createUser(iob_user)) {
+            user = getUserByEmail(iob_user.getEmail());
+
+            dir = new File(Utils.getRootDirectory() + user.getName().toLowerCase() + user.getUserId());
+            dir.mkdir();
+            return true;
+        }
+
+        return false;
     }
 
     /**
