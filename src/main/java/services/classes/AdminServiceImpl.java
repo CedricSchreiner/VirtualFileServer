@@ -20,7 +20,8 @@ public class AdminServiceImpl implements AdminService{
             throw new UserEmptyException(GC_EMPTY_USER);
         }
 
-        if (!gob_userDao.getUser(iob_user.getEmail()).isEmpty()) {
+        User lob_user = gob_userDao.getUser(iob_user.getEmail());
+        if (lob_user.getAdminId() > 0) {
             throw new AdminAlreadyExistsException(GC_ADMIN_ALREADY_EXISTS);
         }
 

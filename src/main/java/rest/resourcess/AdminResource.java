@@ -19,7 +19,7 @@ import static rest.resourcess.AdminResource.ADMIN_PATH;
 @Path(ADMIN_PATH)
 public class AdminResource {
     static final String ADMIN_PATH = "/admin";
-    private static final String ADD_NEW_ADMIN_PATH = "/addNewAdmin";
+    private static final String ADD_NEW_ADMIN_PATH = "/adminAuth/addNewAdmin";
 
     private AdminService adminService = ServiceObjectBuilder.getAdminServiceObject();
 
