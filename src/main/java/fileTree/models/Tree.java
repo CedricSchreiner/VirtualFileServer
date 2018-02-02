@@ -3,6 +3,7 @@ package fileTree.models;
 import fileTree.exceptions.NodeNotFoundException;
 import fileTree.interfaces.*;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -10,8 +11,8 @@ import java.util.List;
 
 public class Tree implements TreeInterface {
 
-    private static final String BASE_DIRECTORY = "C:\\\\Users\\\\Darth-Vader\\\\Documents\\\\Fileserver\\\\";
-    private static final String GC_ROOT_PATH = "C:\\Users\\Darth-Vader\\Documents\\Fileserver\\root";
+    private static final String BASE_DIRECTORY = "C:\\\\Users\\\\Cedric\\\\Documents\\\\FileSystem\\\\";
+    private static final String GC_ROOT_PATH = "C:\\Users\\Cedric\\Documents\\FileSystem\\cedric.schreiner@gmail.com";
     private static final String GC_ROOT_NAME = "<ROOT>";
     private static final String GC_NODE_NOT_FOUND = "Node not found: ";
 
@@ -347,6 +348,7 @@ public class Tree implements TreeInterface {
             lob_newDirectory.setParent(iob_parent);
             //add the new directory as child to the current node
             iob_parent.addChild(lob_newDirectory);
+            createDirectory(lob_newDirectory);
             return addNode(lob_newDirectory, iob_nodeToInsert, ++depth);
         }
 
@@ -371,7 +373,6 @@ public class Tree implements TreeInterface {
         String[] lva_directoryPath = convertPathToArray(iva_path);
         String lva_directoryName = lva_directoryPath[lva_directoryPath.length - 1];
         //-----------------------------------------------------
-
         return NodeFactory.createDirectoryNode(lva_directoryName, iva_path);
     }
 
@@ -439,5 +440,14 @@ public class Tree implements TreeInterface {
         }
 
         return ico_nodes;
+    }
+
+    private void createDirectory(NodeInterface iob_node) {
+        File file = new File(iob_node.getPath());
+        boolean test = true;
+        if (!file.exists()) {
+            test = file.mkdir();
+        }
+        System.out.println(test);
     }
 }

@@ -1,5 +1,8 @@
 package services.classes;
 
+import fileTree.interfaces.NodeInterface;
+import fileTree.models.NodeFactory;
+import fileTree.models.Tree;
 import org.apache.commons.io.IOUtils;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import rest.Initializer;
@@ -15,52 +18,36 @@ public class FileService {
     /**
      * add a new file to the user directory
      *
-     * @param iob_inputList
+     * @param ico_inputList contains file content and path
      */
-    public static void addNewFile(List<InputPart> iob_inputList) {
+    public static void addNewFile(List<InputPart> ico_inputList) {
         //-------------------------------------Variables------------------------------------------
-        InputStream lob_inputStream;
+        InputStream lob_fileContentInputStream;
+        InputStream lob_fileNameInputStream;
         String lva_filePath;
+        byte[] lar_fileContentBytes;
+        byte[] lar_fileNameBytes;
         //----------------------------------------------------------------------------------------
-        for (int i = 0; i < (iob_inputList.size() / 2); i += 2) {
+        for (int i = 0; i < (ico_inputList.size() / 2); i += 2) {
             try {
-//            MultivaluedMap<String, String> lob_contentHeader = iob_inputList.get(i).getHeaders();
-//            lva_fileName = getFileName(lob_contentHeader);
+            //convert the uploaded file to inputstream
+            lob_fileContentInputStream = ico_inputList.get(i).getBody(InputStream.class,null);
+            lar_fileContentBytes = IOUtils.toByteArray(lob_fileContentInputStream);
 
             //convert the uploaded file to inputstream
-            lob_inputStream = iob_inputList.get(i).getBody(InputStream.class,null);
-            byte[] lob_bytes = IOUtils.toByteArray(lob_inputStream);
-
-            //get the path of the file
-//            MultivaluedMap<String, String> lob_filePathHeader = iob_inputList.get(i + 1).getHeaders();
-
-            //convert the uploaded file to inputstream
-            InputStream inputStream = iob_inputList.get(i + 1).getBody(InputStream.class,null);
-            byte[] bytes = IOUtils.toByteArray(inputStream);
-            lva_filePath = new String(bytes);
+            lob_fileNameInputStream = ico_inputList.get(i + 1).getBody(InputStream.class,null);
+            lar_fileNameBytes = IOUtils.toByteArray(lob_fileNameInputStream);
+            lva_filePath = new String(lar_fileNameBytes);
 
             lva_filePath = Initializer.getUserBasePath() + "\\" + lva_filePath;
 
-            writeFile(lob_bytes, lva_filePath);
+            writeFile(lar_fileContentBytes, lva_filePath);
 
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
-
-//    private static String getFileName(MultivaluedMap<String, String> iob_header) {
-//        String[] lva_contentDisposition = iob_header.getFirst(GC_CONTENT_DISPOSITION).split(GC_SEMICOLON);
-//
-//        for (String lva_filename : lva_contentDisposition) {
-//            if ((lva_filename.trim().startsWith(GC_FILENAME))) {
-//
-//                String[] lva_name = lva_filename.split(GC_EQUALS);
-//                return  lva_name[1].trim().replaceAll(GC_QUOTATION_MARK, GC_SPACE);
-//            }
-//        }
-//        return GC_UNKNOWN;
-//    }
 
     /**
      * save the file on the server
@@ -69,9 +56,16 @@ public class FileService {
      * @throws IOException
      */
     private static void writeFile(byte[] iva_content, String iva_filename) throws IOException {
+        //----------------------------------------Vaiables--------------------------------------------
         File lob_file = new File(iva_filename);
+        FileOutputStream lob_fileOutputStream;
+        NodeInterface lob_newFileNode = NodeFactory.createFileNode(lob_file.getName(), lob_file.getAbsolutePath(), lob_file.length());
+        //--------------------------------------------------------------------------------------------
+        Tree tree = new Tree();
+        tree.addNode(lob_newFileNode);
 
-        FileOutputStream lob_fileOutputStream = new FileOutputStream(lob_file);
+
+        lob_fileOutputStream = new FileOutputStream(lob_file);
 
         lob_fileOutputStream.write(iva_content);
         lob_fileOutputStream.flush();
