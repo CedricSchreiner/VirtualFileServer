@@ -3,6 +3,8 @@ package services.classes;
 import fileTree.interfaces.NodeInterface;
 import fileTree.models.NodeFactory;
 import fileTree.models.Tree;
+import models.classes.UserImpl;
+import models.interfaces.User;
 import org.apache.commons.io.IOUtils;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import rest.Initializer;
@@ -23,21 +25,21 @@ public class FileService {
     public static void addNewFile(List<InputPart> ico_inputList) {
         //-------------------------------------Variables------------------------------------------
         InputStream lob_fileContentInputStream;
-        InputStream lob_fileNameInputStream;
         String lva_filePath;
+        String lva_userInformations;
         byte[] lar_fileContentBytes;
-        byte[] lar_fileNameBytes;
+        byte[] lar_userInformation;
         //----------------------------------------------------------------------------------------
         for (int i = 0; i < (ico_inputList.size() / 2); i += 2) {
             try {
-            //convert the uploaded file to inputstream
-            lob_fileContentInputStream = ico_inputList.get(i).getBody(InputStream.class,null);
-            lar_fileContentBytes = IOUtils.toByteArray(lob_fileContentInputStream);
+            //get the file content
+            lar_fileContentBytes = getFileContent(i, ico_inputList);
 
-            //convert the uploaded file to inputstream
-            lob_fileNameInputStream = ico_inputList.get(i + 1).getBody(InputStream.class,null);
-            lar_fileNameBytes = IOUtils.toByteArray(lob_fileNameInputStream);
-            lva_filePath = new String(lar_fileNameBytes);
+            //get the absolute path of the file
+            lva_filePath = getFilePath(i + 1, ico_inputList);
+
+            //get the user who owns the file
+            User user = getUser(i + 2, ico_inputList);
 
             lva_filePath = Initializer.getUserBasePath() + "\\" + lva_filePath;
 
@@ -47,6 +49,48 @@ public class FileService {
                 e.printStackTrace();
             }
         }
+    }
+
+    private static byte[] getFileContent(int iva_index, List<InputPart> ico_inputList) throws IOException{
+        return IOUtils.toByteArray(
+                ico_inputList.get(iva_index).getBody(InputStream.class,null)
+        );
+    }
+
+    private static String getFilePath(int iva_index, List<InputPart> ico_inputList) throws IOException{
+        return new String(
+                IOUtils.toByteArray(ico_inputList.get(iva_index).getBody(InputStream.class, null))
+        );
+    }
+
+    private static User getUser(int iva_index, List<InputPart> ico_inputList) throws IOException {
+        //----------------------------------------------Variables------------------------------------------
+        String lva_userString = new String(
+                IOUtils.toByteArray(ico_inputList.get(iva_index).getBody(InputStream.class, null))
+        );
+        //-------------------------------------------------------------------------------------------------
+        return createUserFromString(lva_userString);
+    }
+
+    private static User createUserFromString(String iva_userString) {
+        //-----------------------------Variables------------------------
+        User rob_user = null;
+        try {
+            String[] lar_userAttributes = iva_userString.split("\\|", 6);
+            String lva_email = lar_userAttributes[0];
+            String lva_password = lar_userAttributes[1];
+            String lva_name = lar_userAttributes[2];
+            boolean lva_isAdmin = Boolean.getBoolean(lar_userAttributes[3]);
+            int lva_userId = Integer.valueOf(lar_userAttributes[4]);
+            int lva_adminId = Integer.valueOf(lar_userAttributes[5]);
+            rob_user = new UserImpl(lva_email, lva_password, lva_name, lva_isAdmin, lva_userId, lva_adminId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        //--------------------------------------------------------------
+
+        return rob_user;
     }
 
     /**
@@ -63,7 +107,7 @@ public class FileService {
         //--------------------------------------------------------------------------------------------
         Tree tree = new Tree();
         tree.addNode(lob_newFileNode);
-
+        //TODO Dateigröße aktualisieren, momentan immer 0
 
         lob_fileOutputStream = new FileOutputStream(lob_file);
 
