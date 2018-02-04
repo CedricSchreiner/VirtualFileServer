@@ -24,11 +24,11 @@ public class FileService {
      */
     public static void addNewFile(List<InputPart> ico_inputList) {
         //-------------------------------------Variables------------------------------------------
-        InputStream lob_fileContentInputStream;
         String lva_filePath;
-        String lva_userInformations;
         byte[] lar_fileContentBytes;
-        byte[] lar_userInformation;
+        User lob_user ;
+        User lob_dbUser;
+        UserServiceImpl lob_userService = new UserServiceImpl();
         //----------------------------------------------------------------------------------------
         for (int i = 0; i < (ico_inputList.size() / 2); i += 2) {
             try {
@@ -39,11 +39,18 @@ public class FileService {
             lva_filePath = getFilePath(i + 1, ico_inputList);
 
             //get the user who owns the file
-            User user = getUser(i + 2, ico_inputList);
+            lob_user = getUser(i + 2, ico_inputList);
 
-            lva_filePath = Initializer.getUserBasePath() + "\\" + lva_filePath;
+            if (lob_user != null) {
+                lob_dbUser = lob_userService.getUserByEmail(lob_user.getEmail());
+                if (lob_dbUser.getEmail() != null) {
+                    if (PasswordService.checkPasswordEquals(lob_user.getPassword(), lob_dbUser.getPassword())) {
+                        lva_filePath = Initializer.getUserBasePath() + "\\" + lva_filePath;
 
-            writeFile(lar_fileContentBytes, lva_filePath);
+                        writeFile(lar_fileContentBytes, lva_filePath);
+                    }
+                }
+            }
 
             } catch (IOException e) {
                 e.printStackTrace();
