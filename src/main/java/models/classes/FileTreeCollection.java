@@ -1,7 +1,9 @@
 package models.classes;
 
 import fileTree.interfaces.TreeInterface;
+import fileTree.models.WatcherService;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 

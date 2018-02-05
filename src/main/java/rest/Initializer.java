@@ -1,5 +1,6 @@
 package rest;
 
+import fileTree.models.WatcherService;
 import models.classes.FileTreeCollection;
 import models.classes.UserTree;
 import models.interfaces.User;
