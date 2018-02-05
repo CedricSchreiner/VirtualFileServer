@@ -1,8 +1,7 @@
 package services.classes;
 
-import fileTree.interfaces.NodeInterface;
-import fileTree.models.NodeFactory;
-import fileTree.models.Tree;
+import fileTree.interfaces.Tree;
+import models.classes.FileTreeCollection;
 import models.classes.UserImpl;
 import models.interfaces.User;
 import org.apache.commons.io.IOUtils;
@@ -47,7 +46,7 @@ public class FileService {
                     if (PasswordService.checkPasswordEquals(lob_user.getPassword(), lob_dbUser.getPassword())) {
                         lva_filePath = Initializer.getUserBasePath() + "\\" + lva_filePath;
 
-                        writeFile(lar_fileContentBytes, lva_filePath);
+                        writeFile(lar_fileContentBytes, lva_filePath, lob_user);
                     }
                 }
             }
@@ -106,16 +105,15 @@ public class FileService {
      * @param iva_filename name of the file
      * @throws IOException
      */
-    private static void writeFile(byte[] iva_content, String iva_filename) throws IOException {
+    private static void writeFile(byte[] iva_content, String iva_filename, User iob_user) throws IOException {
         //----------------------------------------Vaiables--------------------------------------------
         File lob_file = new File(iva_filename);
         FileOutputStream lob_fileOutputStream;
-        NodeInterface lob_newFileNode = NodeFactory.createFileNode(lob_file.getName(), lob_file.getAbsolutePath(), lob_file.length());
+        FileTreeCollection lob_fileTrees = FileTreeCollection.getInstance();
+        Tree lob_tree = lob_fileTrees.getTreeFromUser(iob_user);
         //--------------------------------------------------------------------------------------------
-        Tree tree = new Tree();
-        tree.addNode(lob_newFileNode);
-        //TODO Dateigröße aktualisieren, momentan immer 0
 
+        lob_tree.addFile(lob_file, false);
         lob_fileOutputStream = new FileOutputStream(lob_file);
 
         lob_fileOutputStream.write(iva_content);

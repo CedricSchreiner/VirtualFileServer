@@ -1,20 +1,20 @@
 package models.classes;
 
-import fileTree.interfaces.NodeInterface;
-import fileTree.interfaces.TreeInterface;
-import fileTree.models.Node;
+import fileTree.interfaces.Tree;
+import fileTree.models.TreeImpl;
 import models.interfaces.User;
-import fileTree.models.Tree;
 
 import java.io.File;
+import java.io.IOException;
 
 public class UserTree {
-    private TreeInterface gob_tree;
+    private Tree gob_tree;
     private User gob_user;
 
-    public UserTree(User iob_user, String iva_userDirectoryPath) {
+    public UserTree(User iob_user, String iva_userDirectoryPath) throws IOException{
         this.gob_user = iob_user;
-        this.gob_tree = new Tree();
+        this.gob_tree = new TreeImpl(iva_userDirectoryPath);
+
         try {
             //TODO open the directory for the specific user
             File lob_userDirectory = new File(iva_userDirectoryPath);
@@ -29,11 +29,11 @@ public class UserTree {
         }
     }
 
-    public TreeInterface getTree() {
+    public Tree getTree() {
         return gob_tree;
     }
 
-    public void setTree(TreeInterface iob_tree) {
+    public void setTree(Tree iob_tree) {
         this.gob_tree = iob_tree;
     }
 
@@ -49,7 +49,7 @@ public class UserTree {
         //we have to add the child nodes of the file if the file is a direcotry
         if (io_file.isDirectory()) {
             //add the directory itself
-            addFile(io_file);
+            addFile(io_file, true);
             File[] lo_fileList = io_file.listFiles();
             if (lo_fileList != null) {
                 //add all files in the directory
@@ -59,18 +59,17 @@ public class UserTree {
                         addFilesToTree(lo_directoryChildFile);
                     } else {
                         //add normal file
-                        addFile(lo_directoryChildFile);
+                        addFile(lo_directoryChildFile, false);
                     }
                 }
             }
         } else {
-            addFile(io_file);
+            addFile(io_file, false);
         }
     }
 
 
-    private void addFile(File io_file) {
-        NodeInterface lob_node = new Node(io_file.getName(), io_file.getAbsolutePath(), io_file.isDirectory(), io_file.length());
-        this.gob_tree.addNode(lob_node);
+    private void addFile(File io_file, boolean iva_isDirectory) {
+        this.gob_tree.addFile(io_file, iva_isDirectory);
     }
 }

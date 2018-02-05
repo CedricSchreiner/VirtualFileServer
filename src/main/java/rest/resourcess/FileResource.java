@@ -24,10 +24,15 @@ public class FileResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response downloadFile(@PathParam(GC_PARAMETER_PATH_NAME) String iva_filePath, User iob_user) {
         FileTreeCollection lob_tree_collection = FileTreeCollection.getInstance();
-        File file = new File(lob_tree_collection.getTreeFromUser(null).getNode(iva_filePath).getPath());
-        Response.ResponseBuilder response = Response.ok(file);
-        response.header(GC_CONTENT_DISPOSITION, "attachment;filename=" + file.getName());
-        return response.build();
+        try {
+            File file = new File(lob_tree_collection.getTreeFromUser(iob_user).getFile(iva_filePath).getCanonicalPath());
+            Response.ResponseBuilder response = Response.ok(file);
+            response.header(GC_CONTENT_DISPOSITION, "attachment;filename=" + file.getName());
+            return response.build();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
     }
 
     @POST

@@ -1,9 +1,8 @@
 package models.classes;
 
-import fileTree.interfaces.TreeInterface;
-import fileTree.models.WatcherService;
+import fileTree.interfaces.Tree;
+import models.interfaces.User;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -23,7 +22,7 @@ public class FileTreeCollection {
         this.gco_treeCollection.add(iob_userTree);
     }
 
-    public TreeInterface getTreeFromUser(UserImpl iob_user) {
+    public Tree getTreeFromUser(User iob_user) {
         //--------------------Variables--------------------
         String lob_userEmail = iob_user.getEmail();
         String lob_userTreeEmail;
