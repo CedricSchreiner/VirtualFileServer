@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 
 import static dao.constants.DaoConstants.PARAMETER_1;
 import static dao.constants.DaoConstants.PARAMETER_2;
@@ -103,6 +104,11 @@ public class SharedDirectoryDaoImpl implements SharedDirectoryDao {
         }
 
         return Utils.convertIntToBoolean(lva_rowCount);
+    }
+
+    @Override
+    public List<SharedDirectory> getAllSharedDirectories() {
+        return null;
     }
 
     public static void main(String[] args) {
