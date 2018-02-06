@@ -1,6 +1,5 @@
 package dao.classes;
 
-import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
 

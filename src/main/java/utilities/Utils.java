@@ -1,5 +1,6 @@
 package utilities;
 
+import models.interfaces.User;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
@@ -55,5 +56,17 @@ public class Utils {
         }
 
         return rootDirectoryPath;
+    }
+
+    /**
+     * Its quiet likely that the server and the client have different paths to the same file.
+     * To prevent errors we must create a relative path that contains just the start from the root directory to the file
+     * @param iva_path the canonical path to a file
+     * @param iob_user the user who owns the file
+     * @return a relative path to the file that can be send to the client
+     */
+    public static String createRelativePath(String iva_path, User iob_user) {
+        String rva_relativePath = getRootDirectory();
+        return rva_relativePath;
     }
 }
