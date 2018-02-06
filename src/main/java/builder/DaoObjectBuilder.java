@@ -1,8 +1,10 @@
 package builder;
 
 import dao.classes.AdminDaoImpl;
+import dao.classes.SharedDirectoryDaoImpl;
 import dao.classes.UserDaoImpl;
 import dao.interfaces.AdminDao;
+import dao.interfaces.SharedDirectoryDao;
 import dao.interfaces.UserDao;
 
 public class DaoObjectBuilder {
@@ -20,5 +22,9 @@ public class DaoObjectBuilder {
      */
     public static AdminDao getAdminDaoObject() {
         return new AdminDaoImpl();
+    }
+
+    public static SharedDirectoryDao getSharedDirectoryObject() {
+        return new SharedDirectoryDaoImpl();
     }
 }
