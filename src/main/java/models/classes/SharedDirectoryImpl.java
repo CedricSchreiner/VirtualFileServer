@@ -51,4 +51,14 @@ public class SharedDirectoryImpl implements SharedDirectory{
     public void setId(int id) {
         this.id = id;
     }
+
+    @Override
+    public String toString() {
+        return "SharedDirectoryImpl{" +
+                "owner=" + owner +
+                ", members=" + members +
+                ", directoryName='" + directoryName + '\'' +
+                ", id=" + id +
+                '}';
+    }
 }
