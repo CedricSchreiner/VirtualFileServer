@@ -1,7 +1,7 @@
 package dao.enums;
 
 public enum TableName {
-    User("User"), Admin("Admin");
+    User("User"), Admin("Admin"), SharedDirectory("SharedDirectory"), SharedDirectoryMember("SharedDirectoryMember");
 
     private final String tableName;
 
