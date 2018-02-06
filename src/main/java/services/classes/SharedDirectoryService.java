@@ -3,6 +3,7 @@ package services.classes;
 import builder.DaoObjectBuilder;
 import dao.interfaces.SharedDirectoryDao;
 import dao.interfaces.UserDao;
+import models.exceptions.UserEmptyException;
 import models.interfaces.SharedDirectory;
 import models.interfaces.User;
 import services.exceptions.SharedDirectoryIsEmptyException;
@@ -14,6 +15,7 @@ import java.util.List;
 public class SharedDirectoryService {
 
     private static final String err_msg_sharedDirectory_list_isEmpty = "Error: list is empty.";
+    private static final String err_msg_User_not_exist = "Error: User does not exist";
     private UserDao gob_userDao = DaoObjectBuilder.getUserDaoObject();
     private SharedDirectoryDao gob_sharedDirectory = DaoObjectBuilder.getSharedDirectoryObject();
 
@@ -21,16 +23,15 @@ public class SharedDirectoryService {
         List<SharedDirectory> ili_sharedDir = gob_sharedDirectory.getAllSharedDirectories();
         List<SharedDirectory> rli_associatedShareDir = new ArrayList<>();
 
+
         if(ili_sharedDir.isEmpty()){
             throw new SharedDirectoryIsEmptyException(err_msg_sharedDirectory_list_isEmpty);
+        }else if(gob_userDao.getUser(iob_user.getEmail()) == null) {
+            throw new UserEmptyException(err_msg_User_not_exist);
         }else{
-            int iva_sharedDirectoryIndex = ili_sharedDir.size();
-            while(iva_sharedDirectoryIndex != 0){
-                if(ili_sharedDir.get(iva_sharedDirectoryIndex).getMembers().contains(iob_user)){
-                    rli_associatedShareDir.add(ili_sharedDir.get(iva_sharedDirectoryIndex));
-                    iva_sharedDirectoryIndex--;
-                }else {
-                    iva_sharedDirectoryIndex--;
+            for (SharedDirectory lob_temp : ili_sharedDir){
+                if(lob_temp.getMembers().contains(iob_user)){
+                    rli_associatedShareDir.add(lob_temp);
                 }
             }
         }
