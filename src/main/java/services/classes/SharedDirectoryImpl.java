@@ -7,16 +7,18 @@ import models.exceptions.UserEmptyException;
 import models.interfaces.SharedDirectory;
 import models.interfaces.User;
 import services.exceptions.SharedDirectoryIsEmptyException;
+import services.interfaces.SharedDirectoryService;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import static services.constants.SharedDirectoryServiceConstants.*;
 
-public class SharedDirectoryService {
+public class SharedDirectoryImpl implements SharedDirectoryService {
     private UserDao gob_userDao = DaoObjectBuilder.getUserDaoObject();
     private SharedDirectoryDao gob_sharedDirectory = DaoObjectBuilder.getSharedDirectoryObject();
 
-    private List<SharedDirectory> getSharedDirectoryService(User iob_user){
+    public List<SharedDirectory> getSharedDirectoryService(User iob_user){
         List<SharedDirectory> ili_sharedDir = gob_sharedDirectory.getAllSharedDirectories();
         List<SharedDirectory> rli_associatedShareDir = new ArrayList<>();
 
