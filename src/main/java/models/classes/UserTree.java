@@ -13,10 +13,10 @@ public class UserTree {
 
     public UserTree(User iob_user, String iva_userDirectoryPath) throws IOException{
         this.gob_user = iob_user;
+        iva_userDirectoryPath += "\\" + iob_user.getUserId();
         this.gob_tree = new TreeImpl(iva_userDirectoryPath);
 
         try {
-            //TODO open the directory for the specific user
             File lob_userDirectory = new File(iva_userDirectoryPath);
 
             if (lob_userDirectory.exists() && lob_userDirectory.isDirectory()) {

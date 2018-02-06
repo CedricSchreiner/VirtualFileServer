@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 
 public class TreeImpl implements Tree {
@@ -409,56 +410,73 @@ public class TreeImpl implements Tree {
     }
 
     /**
-     * compare this tree
+     * compare two trees
      *
      * @param iob_tree tree to compare to
      * @return the difference between the two trees
      */
     @Override
     public TreeDifference compareTrees(Tree iob_tree) {
-        return null;
-    }
+        //------------------Variables----------------------------
+        TreeDifference lob_difference = new TreeDifferenceImpl();
+        Collection<File> lco_thisFiles = getAll();
+        Collection<File> lco_compareFiles = iob_tree.getAll();
+        String lva_thisRootPath;
+        String lva_treeRootPath;
+        String lva_thisFilePath;
+        String lva_treeFilePath;
+        Iterator<File> lob_treeFileIterator;
+        Iterator<File> lob_thisFileIterator;
+        File lob_treeFile;
+        File lob_thisFile;
+        //-------------------------------------------------------
 
-//    @Override
-//    public TreeDifference compareTrees(TreeInterface iob_tree) {
-//        //---------------------------Variables-----------------------------
-//        boolean lva_treeExceptionStatus = iob_tree.isExceptionActive();
-//        boolean lva_tmpExceptionStatus = this.gva_nodeNotFoundExceptionStatus;
-//        Collection<NodeInterface> lco_thisTreeCollection = this.getAll();
-//        Collection<NodeInterface> lco_treeCollection = iob_tree.getAll();
-//        Collection<NodeInterface> lco_nodesToUpdate = new ArrayList<>();
-//        Collection<NodeInterface> lco_nodesToDelete = new ArrayList<>();
-//        Collection<NodeInterface> lco_nodesToInsert = new ArrayList<>();
-//        NodeInterface lob_treeNode;
-//        TreeDifference rob_treeDifference = new TreeDifference();
-//        //-----------------------------------------------------------------
-//
-//        iob_tree.setNodeNotFoundExceptionStatus(false);
-//        this.gva_nodeNotFoundExceptionStatus = false;
-//
-//        for (NodeInterface lob_collectionNode : lco_thisTreeCollection) {
-//            lob_treeNode = iob_tree.getNode(lob_collectionNode.getPath());
-//
-//            if (lob_treeNode == null) {
-//                lco_nodesToDelete.add(lob_collectionNode);
-//            } else if (lob_treeNode.getSize() != lob_collectionNode.getSize()) {
-//                //the nodesize is different so it must be updated
-//                lco_nodesToUpdate.add(lob_treeNode);
-//            }
-//            lco_treeCollection.remove(lob_treeNode);
-//        }
-//
-//
-//
-//        rob_treeDifference.setNodesToUpdate(lco_nodesToUpdate);
-//        rob_treeDifference.setNodesToDelete(lco_nodesToDelete);
-//        rob_treeDifference.setNodesToInsert(lco_treeCollection);
-//
-//        iob_tree.setNodeNotFoundExceptionStatus(lva_treeExceptionStatus);
-//        this.gva_nodeNotFoundExceptionStatus = lva_tmpExceptionStatus;
-//
-//        return rob_treeDifference;
-//    }
+        try {
+            lva_thisRootPath = this.gva_rootDirectory;
+            lva_treeRootPath = iob_tree.getRoot().getCanonicalPath();
+
+            for (lob_thisFileIterator = lco_thisFiles.iterator(); lob_thisFileIterator.hasNext();) {
+                lob_thisFile = lob_thisFileIterator.next();
+                //remove everything including from the path including root to get a relative path
+                lva_thisFilePath = lob_thisFile.getCanonicalPath();
+                lva_thisFilePath = lva_thisFilePath.replace(lva_thisRootPath, "");
+                for(lob_treeFileIterator = lco_compareFiles.iterator(); lob_treeFileIterator.hasNext();) {
+                    lob_treeFile = lob_treeFileIterator.next();
+                    lva_treeFilePath = lob_treeFile.getCanonicalPath();
+                    lva_treeFilePath = lva_treeFilePath.replace(lva_treeRootPath, "");
+                    //check if the relative paths are the same
+                    if (lva_thisFilePath.equals(lva_treeFilePath)) {
+                        //check if the file on the server is newer
+                        if (lob_thisFile.lastModified() > lob_treeFile.lastModified()) {
+                            //add the file to the update list
+                            lob_difference.addFileToUpdate(lva_treeFilePath);
+                            lob_treeFileIterator.remove();
+                            lob_thisFileIterator.remove();
+                            break;
+                        }
+                    }
+                }
+            }
+
+            for (File lob_file : lco_thisFiles) {
+                lva_thisFilePath = lob_file.getCanonicalPath();
+                lva_thisFilePath = lva_thisFilePath.replace(lva_thisRootPath, "");
+                lob_difference.addFileToInsert(lva_thisFilePath);
+            }
+
+            for (File lob_file : lco_compareFiles) {
+                lva_treeFilePath = lob_file.getCanonicalPath();
+                lva_treeFilePath = lva_treeFilePath.replace(lva_treeRootPath, "");
+                lob_difference.addFileToInsert(lva_treeFilePath);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        return lob_difference;
+    }
 
     private FileNode addNode(FileNode iob_parent, FileNode iob_nodeToInsert, int depth) throws IOException{
         //------------------------------------Variables---------------------------------------------------------
@@ -620,4 +638,3 @@ public class TreeImpl implements Tree {
         return iob_node.getFile().mkdir();
     }
 }
-

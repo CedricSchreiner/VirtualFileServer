@@ -9,6 +9,7 @@ public abstract class FileResourceConstants {
     public static final String GC_FILE_DELETE_PATH = "/delete";
     public static final String GC_FILE_MOVE_PATH = "/move";
     public static final String GC_FILE_REMOVE_DIR_ONLY_PATH = "/removeDirectoryOnly";
+    public static final String GC_CREATE_DIRECTORY_PATH = "/createDirectory";
 
     public static final String GC_PATH_PARAMETER_FILE_PATH = "/{path}";
     public static final String GC_PATH_PARAMETER_NEW_FILE_NAME = "/{newName}";

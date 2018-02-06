@@ -16,6 +16,8 @@ import java.util.List;
 
 public class FileService {
 
+    private static FileTreeCollection gob_fileTreeCollection;
+
     /**
      * add a new file to the user directory
      *
@@ -55,6 +57,65 @@ public class FileService {
                 e.printStackTrace();
             }
         }
+    }
+
+    public static boolean renameFile(String iva_filePath, String iva_newFileName, User iob_user) {
+        //---------------------------------------Variables----------------------------------------
+        File lob_file;
+        //----------------------------------------------------------------------------------------
+
+        if (iob_user == null) {
+            return false;
+        }
+
+        iva_filePath = createUserFilePath(iva_filePath, iob_user);
+        gob_fileTreeCollection = FileTreeCollection.getInstance();
+        lob_file = gob_fileTreeCollection.getTreeFromUser(iob_user).getFile(iva_filePath);
+        return lob_file.renameTo(new File(lob_file.getParent() + iva_newFileName));
+    }
+
+    public static boolean deleteFile(String iva_filePath, User iob_user) {
+        if (iob_user == null) {
+            return false;
+        }
+
+        iva_filePath = createUserFilePath(iva_filePath, iob_user);
+        gob_fileTreeCollection = FileTreeCollection.getInstance();
+        return gob_fileTreeCollection.getTreeFromUser(iob_user).deleteFile(iva_filePath);
+    }
+
+    public static boolean moveFile(String iva_filePath, String iva_newFilePath, User iob_user) {
+        if (iob_user == null) {
+            return false;
+        }
+
+        //TODO check if is allow to move the file to the destination
+        iva_filePath = createUserFilePath(iva_filePath, iob_user);
+        gob_fileTreeCollection = FileTreeCollection.getInstance();
+        return gob_fileTreeCollection.getTreeFromUser(iob_user).moveFile(iva_filePath, iva_newFilePath);
+    }
+
+    public static boolean deleteDirectoryOnly(String iva_filePath, User iob_user) {
+        if (iob_user == null) {
+            return false;
+        }
+
+        //TODO check if is allow to move the file to the destination
+        iva_filePath = createUserFilePath(iva_filePath, iob_user);
+        gob_fileTreeCollection = FileTreeCollection.getInstance();
+        return gob_fileTreeCollection.getTreeFromUser(iob_user).deleteDirectoryOnly(iva_filePath);
+    }
+
+    public static boolean createDirectory(String iva_filePath, User iob_user) {
+        if (iob_user == null) {
+            return false;
+        }
+
+        //TODO check if is allow to move the file to the destination
+        iva_filePath = createUserFilePath(iva_filePath, iob_user);
+        gob_fileTreeCollection = FileTreeCollection.getInstance();
+        File lob_newDirectory = new File(iva_filePath);
+        return gob_fileTreeCollection.getTreeFromUser(iob_user).addFile(lob_newDirectory, true);
     }
 
     private static byte[] getFileContent(int iva_index, List<InputPart> ico_inputList) throws IOException{
@@ -119,5 +180,9 @@ public class FileService {
         lob_fileOutputStream.write(iva_content);
         lob_fileOutputStream.flush();
         lob_fileOutputStream.close();
+    }
+
+    private static String createUserFilePath(String iva_relativePath, User iob_user) {
+        return Initializer.getUserBasePath() + iob_user.getName() + iob_user.getUserId() + "\\" + iva_relativePath;
     }
 }
