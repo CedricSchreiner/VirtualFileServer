@@ -7,15 +7,12 @@ import models.exceptions.UserEmptyException;
 import models.interfaces.SharedDirectory;
 import models.interfaces.User;
 import services.exceptions.SharedDirectoryIsEmptyException;
-
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
-public class SharedDirectoryService {
+import static services.constants.SharedDirectoryServiceConstants.*;
 
-    private static final String err_msg_sharedDirectory_list_isEmpty = "Error: list is empty.";
-    private static final String err_msg_User_not_exist = "Error: User does not exist";
+public class SharedDirectoryService {
     private UserDao gob_userDao = DaoObjectBuilder.getUserDaoObject();
     private SharedDirectoryDao gob_sharedDirectory = DaoObjectBuilder.getSharedDirectoryObject();
 
@@ -25,9 +22,9 @@ public class SharedDirectoryService {
 
 
         if(ili_sharedDir.isEmpty()){
-            throw new SharedDirectoryIsEmptyException(err_msg_sharedDirectory_list_isEmpty);
+            throw new SharedDirectoryIsEmptyException(GC_ERR_MSG_SHARED_DIRECTORY_ISEMPTY);
         }else if(gob_userDao.getUser(iob_user.getEmail()) == null) {
-            throw new UserEmptyException(err_msg_User_not_exist);
+            throw new UserEmptyException(GC_ERR_MSG_USER_NOT_EXIST);
         }else{
             for (SharedDirectory lob_temp : ili_sharedDir){
                 if(lob_temp.getMembers().contains(iob_user)){
