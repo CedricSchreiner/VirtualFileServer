@@ -21,15 +21,15 @@ public class Authorisation implements ContainerRequestFilter {
     private UserService gob_userService = ServiceObjectBuilder.getUserServiceObject();
 
     @Override
-    public void filter(ContainerRequestContext containerRequest) {
-        if(containerRequest.getUriInfo().getPath().contains("auth")) {
-            String authCredentials = containerRequest.getHeaderString(HttpHeaders.AUTHORIZATION);
+    public void filter(ContainerRequestContext iob_containerRequest) {
+        if(iob_containerRequest.getUriInfo().getPath().contains("auth")) {
+            String iva_authCredentials = iob_containerRequest.getHeaderString(HttpHeaders.AUTHORIZATION);
 
-            AuthService authsvc = new AuthService();
+            AuthService lob_authService = new AuthService();
 
-            boolean authStatus = authsvc.authenticate(authCredentials);
+            boolean lva_authStatus = lob_authService.authenticate(iva_authCredentials);
 
-            if (!authStatus) {
+            if (!lva_authStatus) {
                 throw new WebApplicationException(Response.Status.UNAUTHORIZED);
             }
         }

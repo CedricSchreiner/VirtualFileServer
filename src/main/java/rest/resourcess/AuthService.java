@@ -11,32 +11,39 @@ import java.util.Base64;
 import java.util.StringTokenizer;
 
 public class AuthService {
-    private UserService userService = ServiceObjectBuilder.getUserServiceObject();
+    private UserService gob_userService = ServiceObjectBuilder.getUserServiceObject();
 
-    public boolean authenticate(String authCredentials) {
+    public boolean authenticate(String iva_authCredentials) {
+        final String lva_encodedUserPassword;
+        final StringTokenizer lob_tokenizer;
+        final String lva_username;
+        final String lva_password;
+
+        String lva_userNameAndPassword = null;
+        byte[] lar_decodedBytes;
+
         User lob_user = ModelObjectBuilder.getUserModel();
 
-        if (authCredentials == null) {
+        if (iva_authCredentials == null) {
             return false;
         }
 
-        final String encodedUserPassword = authCredentials.replaceFirst("Basic" + " ", "");
-        String userNameAndPassword = null;
+        lva_encodedUserPassword = iva_authCredentials.replaceFirst("Basic" + " ", "");
 
         try {
-            byte[] decodedBytes = Base64.getDecoder().decode(encodedUserPassword);
-            userNameAndPassword = new String(decodedBytes, "UTF-8");
+            lar_decodedBytes = Base64.getDecoder().decode(lva_encodedUserPassword);
+            lva_userNameAndPassword = new String(lar_decodedBytes, "UTF-8");
         } catch (IOException ex) {
             ex.printStackTrace();
         }
 
-        final StringTokenizer tokenizer = new StringTokenizer(userNameAndPassword, ":");
-        final String username = tokenizer.nextToken();
-        final String password = tokenizer.nextToken();
+        lob_tokenizer = new StringTokenizer(lva_userNameAndPassword, ":");
+        lva_username = lob_tokenizer.nextToken();
+        lva_password = lob_tokenizer.nextToken();
 
-        lob_user = userService.getUserByEmail(username);
+        lob_user = gob_userService.getUserByEmail(lva_username);
 
-        return lob_user.getEmail().equals(username) &&
-                PasswordService.checkPasswordEquals(password, lob_user.getPassword());
+        return lob_user.getEmail().equals(lva_username) &&
+                PasswordService.checkPasswordEquals(lva_password, lob_user.getPassword());
     }
 }
