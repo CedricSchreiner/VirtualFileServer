@@ -14,9 +14,9 @@ public class UserImpl implements User{
     private String email;
     private String password;
     private String name;
-    private boolean gva_isAdmin;
-    private int gva_userId;
-    private int gva_adminId;
+    private boolean isAdmin;
+    private int userId;
+    private int adminId;
 
     public UserImpl() {
     }
@@ -30,7 +30,7 @@ public class UserImpl implements User{
         setEmail(iva_email);
         setPassword(iva_password);
         setName(iva_name);
-        this.gva_isAdmin = iva_isAdmin;
+        this.isAdmin = iva_isAdmin;
         setUserId(iva_userId);
 
         if (iva_isAdmin) {
@@ -39,45 +39,31 @@ public class UserImpl implements User{
     }
 
     public void setEmail(String iva_email) {
-        if (isStringEmpty(iva_email)) {
-            throw new UserException(GC_INVALID_EMAIL);
-        }
 
         this.email = iva_email;
     }
 
     public void setPassword(String iva_password) {
-        if (isStringEmpty(iva_password)) {
-            throw new UserException(GC_INVALID_PASSWORD);
-        }
 
         this.password = iva_password;
     }
 
     public void setIsAdmin(boolean iva_isAdmin) {
-        this.gva_isAdmin = iva_isAdmin;
+        this.isAdmin = iva_isAdmin;
     }
 
     public void setUserId(int iva_userId) {
-        if (iva_userId < 0) {
-            throw new UserException(GC_INVALID_ID);
-        }
 
-        this.gva_userId = iva_userId;
+        this.userId = iva_userId;
     }
 
     public void setAdminId(int iva_adminId) {
-        if (iva_adminId < 0) {
-            throw new UserException(GC_INVALID_ID);
-        }
 
-        this.gva_adminId = iva_adminId;
+
+        this.adminId = iva_adminId;
     }
 
     public void setName(String iva_name) {
-        if (isStringEmpty(iva_name)) {
-            throw new UserException(GC_INVALID_NAME);
-        }
 
         this.name = iva_name;
     }
@@ -91,33 +77,34 @@ public class UserImpl implements User{
     }
 
     public boolean getIsAdmin() {
-        return this.gva_isAdmin;
+        return this.isAdmin;
     }
 
     public int getUserId() {
-        return this.gva_userId;
+        return this.userId;
     }
 
     public int getAdminId() {
-        return this.gva_adminId;
+        return this.adminId;
     }
 
     public String getName() {
         return name;
     }
 
-    public boolean isEmpty() {
+    public boolean testisEmpty() {
         return email == null && password == null && name == null;
     }
+
     @Override
     public String toString() {
         return "UserImpl{" +
                 "email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", name='" + name + '\'' +
-                ", gva_isAdmin=" + gva_isAdmin +
-                ", gva_userId=" + gva_userId +
-                ", gva_adminId=" + gva_adminId +
+                ", isAdmin=" + isAdmin +
+                ", userId=" + userId +
+                ", adminId=" + adminId +
                 '}';
     }
 

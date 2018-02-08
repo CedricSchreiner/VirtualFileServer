@@ -87,6 +87,7 @@ public class UserDaoImpl implements UserDao {
 
                 lob_aUser.setUserId(lob_rs.getInt(COL_USER_ID));
                 lob_aUser.setAdminId(lob_rs.getInt(COL_ADMIN_ID));
+
             }
         } catch (SQLException ex) {
             ex.printStackTrace();

@@ -1,6 +1,7 @@
 package rest.resourcess;
 
 import builder.ServiceObjectBuilder;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import models.classes.UserImpl;
 import models.exceptions.UserAlreadyExistsException;
 import models.exceptions.UserEmptyException;
@@ -9,15 +10,19 @@ import models.interfaces.User;
 import org.json.simple.JSONObject;
 import services.interfaces.UserService;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 
 import static rest.constants.UserResourceConstants.*;
 import static rest.resourcess.UserResource.USER_RESOURCE_PATH;
 
 @Path(USER_RESOURCE_PATH)
-@Produces(MediaType.TEXT_PLAIN)
+@Produces(MediaType.APPLICATION_JSON)
 public class UserResource {
     static final String USER_RESOURCE_PATH = "user/";
     private static final String USER_LOGIN_PATH = "/auth/login/";
@@ -28,22 +33,25 @@ public class UserResource {
 
     @PUT
     @Path(USER_LOGIN_PATH)
+    @Consumes(MediaType.APPLICATION_JSON)
     public Response login(UserImpl user) {
         JSONObject lob_returnMessage = new JSONObject();
 
         try{
             User aUser = gob_userService.getUserByEmail(user.getEmail());
+            String lva_jsonString = "";
+            ObjectMapper lob_mapper = new ObjectMapper();
 
-            lob_returnMessage.put(GC_EMAIL, aUser.getEmail());
-            lob_returnMessage.put(GC_PASSWORD, aUser.getPassword());
-            lob_returnMessage.put(GC_NAME, aUser.getName());
-            lob_returnMessage.put(GC_IS_ADMIN, aUser.getIsAdmin());
-            lob_returnMessage.put(GC_ADMIN_ID, aUser.getAdminId());
-            lob_returnMessage.put(GC_USER_ID, aUser.getUserId());
+            try {
+                lva_jsonString = lob_mapper.writeValueAsString(aUser);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
             return Response.ok()
-                    .entity(lob_returnMessage.toJSONString())
+                    .entity(lva_jsonString)
                     .build();
+
         } catch (UsersNotEqualException ex) {
             lob_returnMessage.put(GC_USER_LOGIN_STATUS, ex.getMessage());
 
@@ -61,12 +69,13 @@ public class UserResource {
 
     @PUT
     @Path(USER_CHANGE_PASSWORD_PATH)
+    @Consumes(MediaType.APPLICATION_JSON)
     public Response changePassword(UserImpl iob_user) {
         JSONObject lob_returnMessage = new JSONObject();
         boolean lva_passwordChanged;
 
         try {
-            lva_passwordChanged = gob_userService.changePassword(iob_user, "test");
+            lva_passwordChanged = gob_userService.changePassword(iob_user, iob_user.getPassword());
 
             if (lva_passwordChanged) {
                 lob_returnMessage.put(GC_PASSWORD_CHANGE_STATUS, GC_PASSWORD_SUCCESSFULLY_CHANGED);

@@ -1,7 +1,6 @@
 package services.classes;
 
 import builder.DaoObjectBuilder;
-import builder.ModelObjectBuilder;
 import dao.interfaces.UserDao;
 import models.exceptions.UserAlreadyExistsException;
 import models.exceptions.UserDirectoryNotCreated;
@@ -32,7 +31,7 @@ public class UserServiceImpl implements UserService {
         String lva_userDirectoryName;
         String lva_password;
 
-        if (!gob_userDao.getUser(iob_user.getEmail()).isEmpty()) {
+        if (!gob_userDao.getUser(iob_user.getEmail()).testisEmpty()) {
             throw new UserAlreadyExistsException(GC_USER_ALREADY_EXISTS);
         }
 
@@ -66,7 +65,7 @@ public class UserServiceImpl implements UserService {
         User lob_user;
         lob_user = gob_userDao.getUser(iob_user.getEmail());
 
-        if (lob_user.isEmpty()) {
+        if (lob_user.testisEmpty()) {
             throw new UserEmptyException(GC_EMPTY_USER);
         }
 
@@ -90,7 +89,7 @@ public class UserServiceImpl implements UserService {
     public boolean changePassword(User iob_user, String iva_newPassword) {
         User lob_user = gob_userDao.getUser(iob_user.getEmail());
 
-        if (lob_user.isEmpty()) {
+        if (lob_user.testisEmpty()) {
             throw new UserEmptyException(GC_EMPTY_USER);
         }
 

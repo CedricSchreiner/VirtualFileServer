@@ -16,7 +16,7 @@ public class AdminServiceImpl implements AdminService{
     private UserDao gob_userDao = DaoObjectBuilder.getUserDaoObject();
 
     public boolean addNewAdmin(User iob_user) {
-        if (iob_user.isEmpty()) {
+        if (iob_user.testisEmpty()) {
             throw new UserEmptyException(GC_EMPTY_USER);
         }
 
