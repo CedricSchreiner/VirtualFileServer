@@ -31,11 +31,10 @@ public class Initializer extends HttpServlet{
             lob_rootDirectory.mkdir();
         }
 
-
             for (User lob_user : lco_userList) {
                 try {
                     //get the directory of the user, build the tree and add it to the collection
-                    lob_userTree = new UserTree(lob_user, getUserBasePath() + "\\" + lob_user.getEmail());
+                    lob_userTree = new UserTree(lob_user, getUserBasePath() + "\\");
                     lob_fileTree.addTreeToCollection(lob_userTree);
                 } catch (IOException e) {
                     e.printStackTrace();

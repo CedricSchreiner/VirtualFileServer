@@ -13,10 +13,10 @@ public class UserTree {
 
     public UserTree(User iob_user, String iva_userDirectoryPath) throws IOException{
         this.gob_user = iob_user;
+        iva_userDirectoryPath += "\\" + iob_user.getUserId();
         this.gob_tree = new TreeImpl(iva_userDirectoryPath);
 
         try {
-            //TODO open the directory for the specific user
             File lob_userDirectory = new File(iva_userDirectoryPath);
 
             if (lob_userDirectory.exists() && lob_userDirectory.isDirectory()) {
@@ -45,31 +45,31 @@ public class UserTree {
         this.gob_user = iob_user;
     }
 
-    private void addFilesToTree(File io_file) {
+    private void addFilesToTree(File iob_file) {
         //we have to add the child nodes of the file if the file is a direcotry
-        if (io_file.isDirectory()) {
+        if (iob_file.isDirectory()) {
             //add the directory itself
-            addFile(io_file, true);
-            File[] lo_fileList = io_file.listFiles();
-            if (lo_fileList != null) {
+            addFile(iob_file, true);
+            File[] lob_fileList = iob_file.listFiles();
+            if (lob_fileList != null) {
                 //add all files in the directory
-                for (File lo_directoryChildFile : lo_fileList) {
+                for (File lob_directoryChildFile : lob_fileList) {
                     //if the directory contains another directory, do the same for it
-                    if (lo_directoryChildFile.isDirectory()) {
-                        addFilesToTree(lo_directoryChildFile);
+                    if (lob_directoryChildFile.isDirectory()) {
+                        addFilesToTree(lob_directoryChildFile);
                     } else {
                         //add normal file
-                        addFile(lo_directoryChildFile, false);
+                        addFile(lob_directoryChildFile, false);
                     }
                 }
             }
         } else {
-            addFile(io_file, false);
+            addFile(iob_file, false);
         }
     }
 
 
-    private void addFile(File io_file, boolean iva_isDirectory) {
-        this.gob_tree.addFile(io_file, iva_isDirectory);
+    private void addFile(File iob_file, boolean iva_isDirectory) {
+        this.gob_tree.addFile(iob_file, iva_isDirectory);
     }
 }
