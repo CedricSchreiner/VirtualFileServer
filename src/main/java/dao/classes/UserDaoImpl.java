@@ -25,7 +25,7 @@ public class UserDaoImpl implements UserDao {
 //----------------------------------------------------------------------------------------------------------------------
 
     /**
-     * SELECT * FROM User LEFT OUTER JOIN admin WHERE email = ?
+     * SELECT * FROM User LEFT OUTER JOIN Admin ON User.userId = Admin.userId WHERE email = ?
      */
     private static final String GC_GET_USER = "SELECT * FROM " + TABLE_USER + " LEFT OUTER JOIN " + TABLE_ADMIN +
             " ON " + TABLE_USER + "." + COL_USER_ID + " = " + TABLE_ADMIN + "." + COL_ADMIN_USER_ID +
@@ -48,7 +48,7 @@ public class UserDaoImpl implements UserDao {
     private static final String GC_UPDATE_USER = "UPDATE " + TABLE_USER + " SET $ = ? WHERE " + COL_USER_ID + " = ?";
 
     /**
-     * SELECT * FROM User LEFT OUTER JOIN Admin
+     * SELECT * FROM User LEFT OUTER JOIN Admin ON User.userId = Admin.userId
      */
     private static final String GC_GET_ALL_USERS = "SELECT * FROM " + TABLE_USER + " LEFT OUTER JOIN " + TABLE_ADMIN +
             " ON " + TABLE_USER + "." + COL_USER_ID + " = " + TABLE_ADMIN + "." +COL_ADMIN_USER_ID;
