@@ -44,8 +44,8 @@ public class UserResource {
 
             try {
                 lva_jsonString = lob_mapper.writeValueAsString(aUser);
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (IOException ex) {
+                ex.printStackTrace();
             }
 
             return Response.ok()

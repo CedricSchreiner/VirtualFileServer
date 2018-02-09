@@ -21,8 +21,7 @@ public class AuthService {
 
         String lva_userNameAndPassword = null;
         byte[] lar_decodedBytes;
-
-        User lob_user = ModelObjectBuilder.getUserModel();
+        User lob_user;
 
         if (iva_authCredentials == null) {
             return false;
