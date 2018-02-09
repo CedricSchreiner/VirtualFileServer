@@ -1,6 +1,7 @@
 package builder;
 
 import services.classes.AdminServiceImpl;
+import services.classes.FileServiceImpl;
 import services.classes.SharedDirectoryImpl;
 import services.classes.UserServiceImpl;
 import services.interfaces.AdminService;
@@ -29,5 +30,13 @@ public class ServiceObjectBuilder {
      */
     public static SharedDirectoryImpl getSharedDirectoryServiceObject(){
         return new SharedDirectoryImpl();
+    }
+
+    /**
+     * Generates an FileServiceImpl
+     * @return FileServiceImpl
+     */
+    public static FileServiceImpl getFileServiceObject() {
+        return new FileServiceImpl();
     }
 }

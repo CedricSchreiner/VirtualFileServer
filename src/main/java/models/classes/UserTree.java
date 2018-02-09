@@ -13,17 +13,18 @@ public class UserTree {
 
     public UserTree(User iob_user, String iva_userDirectoryPath) throws IOException{
         this.gob_user = iob_user;
-        iva_userDirectoryPath += "\\" + iob_user.getUserId();
-        this.gob_tree = new TreeImpl(iva_userDirectoryPath);
+        iva_userDirectoryPath += iob_user.getName() + iob_user.getUserId();
 
         try {
             File lob_userDirectory = new File(iva_userDirectoryPath);
 
-            if (lob_userDirectory.exists() && lob_userDirectory.isDirectory()) {
-                addFilesToTree(lob_userDirectory);
-            } else {
+            if (!lob_userDirectory.exists() || !lob_userDirectory.isDirectory()) {
                 lob_userDirectory.mkdir();
             }
+
+            this.gob_tree = new TreeImpl(iva_userDirectoryPath);
+            addFilesToTree(lob_userDirectory);
+
         } catch (Exception e) {
             e.printStackTrace();
         }

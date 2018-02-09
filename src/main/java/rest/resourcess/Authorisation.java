@@ -1,5 +1,7 @@
 package rest.resourcess;
 
+import services.classes.AuthService;
+
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.HttpHeaders;
@@ -10,15 +12,17 @@ import javax.ws.rs.ext.Provider;
 public class Authorisation implements ContainerRequestFilter {
     @Override
     public void filter(ContainerRequestContext iob_containerRequest) {
+        AuthService lob_authService;
+        String iva_authCredentials;
+        Response unauthorizedStatus;
+
         if(iob_containerRequest.getUriInfo().getPath().contains("auth")) {
-            String iva_authCredentials = iob_containerRequest.getHeaderString(HttpHeaders.AUTHORIZATION);
+            iva_authCredentials = iob_containerRequest.getHeaderString(HttpHeaders.AUTHORIZATION);
 
-            AuthService lob_authService = new AuthService();
+            lob_authService = new AuthService();
 
-            boolean lva_authStatus = lob_authService.authenticate(iva_authCredentials);
-
-            if (!lva_authStatus) {
-                Response unauthorizedStatus = Response
+            if(lob_authService.authenticate(iva_authCredentials) == null) {
+                unauthorizedStatus = Response
                         .status(Response.Status.UNAUTHORIZED)
                         .entity("User cant access the resource")
                         .build();

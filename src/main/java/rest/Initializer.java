@@ -1,9 +1,13 @@
 package rest;
 
+import builder.ServiceObjectBuilder;
 import models.classes.FileTreeCollection;
 import models.classes.UserTree;
 import models.interfaces.User;
 import services.classes.UserServiceImpl;
+import services.interfaces.UserService;
+import utilities.Utils;
+
 import static rest.constants.InitializerConstants.*;
 
 import javax.servlet.http.HttpServlet;
@@ -21,9 +25,9 @@ public class Initializer extends HttpServlet{
         //---------------------------------Variables-------------------------------------------------
         FileTreeCollection lob_fileTree = FileTreeCollection.getInstance();
         //get all users from the database and read for every single one the file tree
-        final UserServiceImpl lob_userService = new UserServiceImpl();
+        final UserService lob_userService = ServiceObjectBuilder.getUserServiceObject();
         List<User> lco_userList = lob_userService.getAllUser();
-        File lob_rootDirectory = new File(getUserBasePath());
+        File lob_rootDirectory = new File(Utils.getRootDirectory());
         UserTree lob_userTree;
         //-------------------------------------------------------------------------------------------
 
@@ -34,7 +38,7 @@ public class Initializer extends HttpServlet{
             for (User lob_user : lco_userList) {
                 try {
                     //get the directory of the user, build the tree and add it to the collection
-                    lob_userTree = new UserTree(lob_user, getUserBasePath() + "\\");
+                    lob_userTree = new UserTree(lob_user, Utils.getRootDirectory());
                     lob_fileTree.addTreeToCollection(lob_userTree);
                 } catch (IOException e) {
                     e.printStackTrace();

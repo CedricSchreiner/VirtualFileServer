@@ -1,5 +1,6 @@
 package fileTree.models;
 
+import com.sun.org.apache.xpath.internal.SourceTree;
 import fileTree.interfaces.*;
 import org.apache.commons.io.FileUtils;
 
@@ -78,7 +79,7 @@ public class TreeImpl implements Tree {
             lob_parent.addChild(lob_newNode);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
             return false;
         }
         return true;
