@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static dao.constants.AdminDaoConstants.COL_ADMIN_ID;
+import static dao.constants.AdminDaoConstants.COL_ADMIN_USER_ID;
 import static dao.constants.AdminDaoConstants.TABLE_ADMIN;
 import static dao.constants.DaoConstants.*;
 import static dao.constants.UserDaoConstants.*;
@@ -27,6 +28,7 @@ public class UserDaoImpl implements UserDao {
      * SELECT * FROM User LEFT OUTER JOIN admin WHERE email = ?
      */
     private static final String GC_GET_USER = "SELECT * FROM " + TABLE_USER + " LEFT OUTER JOIN " + TABLE_ADMIN +
+            " ON " + TABLE_USER + "." + COL_USER_ID + " = " + TABLE_ADMIN + "." + COL_ADMIN_USER_ID +
             " WHERE " + COL_USER_EMAIL + " = ?";
 
     /**
@@ -48,7 +50,8 @@ public class UserDaoImpl implements UserDao {
     /**
      * SELECT * FROM User LEFT OUTER JOIN Admin
      */
-    private static final String GC_GET_ALL_USERS = "SELECT * FROM " + TABLE_USER + " LEFT OUTER JOIN " + TABLE_ADMIN;
+    private static final String GC_GET_ALL_USERS = "SELECT * FROM " + TABLE_USER + " LEFT OUTER JOIN " + TABLE_ADMIN +
+            " ON " + TABLE_USER + "." + COL_USER_ID + " = " + TABLE_ADMIN + "." +COL_ADMIN_USER_ID;
 
 //----------------------------------------------------------------------------------------------------------------------
 

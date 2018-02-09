@@ -116,11 +116,11 @@ public class FileResource {
 
             lob_authService = new AuthService();
 
-            if(lob_authService.authenticate(iva_authCredentials) == null) {
+            if(lob_authService.authenticateUser(iva_authCredentials) == null) {
                 return null;
             }
 
-            return lob_authService.authenticate(iva_authCredentials);
+            return lob_authService.authenticateUser(iva_authCredentials);
         }
         return null;
     }

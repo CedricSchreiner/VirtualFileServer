@@ -10,13 +10,11 @@ import models.interfaces.User;
 import org.json.simple.JSONObject;
 import services.interfaces.UserService;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.util.List;
 
 import static rest.constants.UserResourceConstants.*;
 import static rest.resourcess.UserResource.USER_RESOURCE_PATH;
@@ -28,6 +26,7 @@ public class UserResource {
     private static final String USER_LOGIN_PATH = "/auth/login/";
     private static final String USER_CHANGE_PASSWORD_PATH = "/auth/changePassword/";
     private static final String USER_ADD_NEW_USER_PATH = "addNewUser/";
+    private static final String USER_GET_ALL_USER_PATH = "/adminAuth/getAllUser";
 
     private UserService gob_userService = ServiceObjectBuilder.getUserServiceObject();
 
@@ -37,7 +36,7 @@ public class UserResource {
     public Response login(UserImpl user) {
         JSONObject lob_returnMessage = new JSONObject();
 
-        try{
+        try {
             User aUser = gob_userService.getUserByEmail(user.getEmail());
             String lva_jsonString = "";
             ObjectMapper lob_mapper = new ObjectMapper();
@@ -128,5 +127,11 @@ public class UserResource {
                     .entity(lob_returnMessage.toJSONString())
                     .build();
         }
+    }
+
+    @GET
+    @Path(USER_GET_ALL_USER_PATH)
+    public List<User> getAllUser() {
+        return gob_userService.getAllUser();
     }
 }
