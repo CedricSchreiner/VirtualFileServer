@@ -133,10 +133,10 @@ public class FileResource {
         iva_authCredentials = iob_requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
         lob_authService = new AuthService();
 
-        if(lob_authService.authenticate(iva_authCredentials) == null) {
+        if(lob_authService.authenticateUser(iva_authCredentials) == null) {
             return null;
         }
 
-        return lob_authService.authenticate(iva_authCredentials);
+        return lob_authService.authenticateUser(iva_authCredentials);
     }
 }
