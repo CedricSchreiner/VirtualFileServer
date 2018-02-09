@@ -1,6 +1,5 @@
 package fileTree.models;
 
-import com.sun.org.apache.xpath.internal.SourceTree;
 import fileTree.interfaces.*;
 import org.apache.commons.io.FileUtils;
 
@@ -377,10 +376,18 @@ public class TreeImpl implements Tree {
     @Override
     public boolean moveFile(File iob_node, String iva_destinationNode) {
         try {
+            FileNode lob_node = searchNode(gob_rootNode, iva_destinationNode, 0);
+
+            if (lob_node == null){
+                return false;
+            }
+
+            File file = lob_node.getFile();
+
             if (iob_node.isDirectory()) {
-                FileUtils.moveDirectoryToDirectory(iob_node, iob_node.getParentFile().getParentFile(), false);
+                FileUtils.moveDirectoryToDirectory(iob_node, file, false);
             } else {
-                FileUtils.moveFileToDirectory(iob_node, iob_node.getParentFile().getParentFile(), false);
+                FileUtils.moveFileToDirectory(iob_node, file, false);
             }
             return true;
         } catch (Exception e) {
@@ -405,6 +412,50 @@ public class TreeImpl implements Tree {
             lob_node = searchNode(this.gob_rootNode, iva_path, 0);
             return lob_node != null && moveFile(lob_node.getFile(), iva_destinationPath);
         } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * rename a file
+     *
+     * @param iva_path    path of the file to renam
+     * @param iva_newName new file name
+     * @return true if the file was renamed, otherwise false
+     */
+    @Override
+    public boolean renameFile(String iva_path, String iva_newName) {
+        //--------------------------Variables-----------------------
+        FileNode lob_node;
+        //----------------------------------------------------------
+
+        try {
+            lob_node = searchNode(gob_rootNode, iva_path, 0);
+            if (lob_node == null) {
+                return false;
+            }
+
+            iva_newName = iva_path.replaceFirst("[^\\\\]*$", iva_newName);
+            return lob_node.getFile().renameTo(new File(iva_newName));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /**
+     * rename a file
+     *
+     * @param iob_file    file to rename
+     * @param iva_newName new file name
+     * @return true if the file was renamed, otherwise false
+     */
+    @Override
+    public boolean renameFile(File iob_file, String iva_newName) {
+        try {
+            return renameFile(iob_file.getCanonicalPath(), iva_newName);
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
