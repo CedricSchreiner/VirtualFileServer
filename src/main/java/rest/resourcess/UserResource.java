@@ -16,21 +16,21 @@ import java.io.IOException;
 import java.util.List;
 
 import static rest.constants.UserResourceConstants.*;
-import static rest.resourcess.UserResource.USER_RESOURCE_PATH;
+import static rest.resourcess.UserResource.GC_USER_RESOURCE_PATH;
 
-@Path(USER_RESOURCE_PATH)
+@Path(GC_USER_RESOURCE_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 public class UserResource {
-    static final String USER_RESOURCE_PATH = "user/";
-    private static final String USER_LOGIN_PATH = "/auth/login/";
-    private static final String USER_CHANGE_PASSWORD_PATH = "/auth/changePassword/";
-    private static final String USER_ADD_NEW_USER_PATH = "addNewUser/";
-    private static final String USER_GET_ALL_USER_PATH = "/adminAuth/getAllUser";
+    static final String GC_USER_RESOURCE_PATH = "user/";
+    private static final String GC_USER_LOGIN_PATH = "/auth/login/";
+    private static final String GC_USER_CHANGE_PASSWORD_PATH = "/auth/changePassword/";
+    private static final String GC_USER_ADD_NEW_USER_PATH = "addNewUser/";
+    private static final String GC_USER_GET_ALL_USER_PATH = "/adminAuth/getAllUser";
 
     private UserService gob_userService = ServiceObjectBuilder.getUserServiceObject();
 
     @PUT
-    @Path(USER_LOGIN_PATH)
+    @Path(GC_USER_LOGIN_PATH)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response login(UserImpl user) {
         try {
@@ -60,7 +60,7 @@ public class UserResource {
     }
 
     @PUT
-    @Path(USER_CHANGE_PASSWORD_PATH)
+    @Path(GC_USER_CHANGE_PASSWORD_PATH)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response changePassword(UserImpl iob_user) {
         boolean lva_passwordChanged;
@@ -85,7 +85,7 @@ public class UserResource {
     }
 
     @PUT
-    @Path(USER_ADD_NEW_USER_PATH)
+    @Path(GC_USER_ADD_NEW_USER_PATH)
     public Response registerNewUser(UserImpl iob_user) {
         boolean lva_userAdded;
 
@@ -109,7 +109,7 @@ public class UserResource {
     }
 
     @GET
-    @Path(USER_GET_ALL_USER_PATH)
+    @Path(GC_USER_GET_ALL_USER_PATH)
     public List<User> getAllUser() {
         return gob_userService.getAllUser();
     }
