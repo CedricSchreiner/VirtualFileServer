@@ -20,7 +20,6 @@ public class RestUtils {
     }
 
     public static boolean checkIfUsersNotEqual(User iob_userWhoDoesRequest, User iob_userWhoWantsDoAction) {
-        return (!iob_userWhoDoesRequest.getEmail().equals(iob_userWhoWantsDoAction.getEmail()) ||
-                !checkPasswordEquals(iob_userWhoWantsDoAction.getPassword(), iob_userWhoDoesRequest.getPassword()));
+        return (!iob_userWhoDoesRequest.getEmail().equals(iob_userWhoWantsDoAction.getEmail()));
     }
 }
