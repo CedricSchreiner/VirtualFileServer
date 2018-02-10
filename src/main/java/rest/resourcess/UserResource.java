@@ -7,7 +7,6 @@ import models.exceptions.UserAlreadyExistsException;
 import models.exceptions.UserEmptyException;
 import models.exceptions.UsersNotEqualException;
 import models.interfaces.User;
-import org.json.simple.JSONObject;
 import services.interfaces.UserService;
 
 import javax.ws.rs.*;
@@ -34,8 +33,6 @@ public class UserResource {
     @Path(USER_LOGIN_PATH)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response login(UserImpl user) {
-        JSONObject lob_returnMessage = new JSONObject();
-
         try {
             User aUser = gob_userService.getUserByEmail(user.getEmail());
             String lva_jsonString = "";
@@ -52,16 +49,12 @@ public class UserResource {
                     .build();
 
         } catch (UsersNotEqualException ex) {
-            lob_returnMessage.put(GC_USER_LOGIN_STATUS, ex.getMessage());
-
             return Response.status(Response.Status.CONFLICT)
-                    .entity(lob_returnMessage.toJSONString())
+                    .entity(ex.getMessage())
                     .build();
         } catch (UserEmptyException ex) {
-            lob_returnMessage.put(GC_USER_LOGIN_STATUS, ex.getMessage());
-
             return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(lob_returnMessage.toJSONString())
+                    .entity(ex.getMessage())
                     .build();
         }
     }
@@ -70,30 +63,23 @@ public class UserResource {
     @Path(USER_CHANGE_PASSWORD_PATH)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response changePassword(UserImpl iob_user) {
-        JSONObject lob_returnMessage = new JSONObject();
         boolean lva_passwordChanged;
 
         try {
             lva_passwordChanged = gob_userService.changePassword(iob_user, iob_user.getPassword());
 
             if (lva_passwordChanged) {
-                lob_returnMessage.put(GC_PASSWORD_CHANGE_STATUS, GC_PASSWORD_SUCCESSFULLY_CHANGED);
-
                 return Response.ok()
-                        .entity(lob_returnMessage.toJSONString())
+                        .entity(GC_PASSWORD_SUCCESSFULLY_CHANGED)
                         .build();
             } else {
-                lob_returnMessage.put(GC_PASSWORD_CHANGE_STATUS, GC_PASSWORD_NOT_CHANGED);
-
                 return Response.status(Response.Status.CONFLICT)
-                        .entity(lob_returnMessage.toJSONString())
+                        .entity(GC_PASSWORD_NOT_CHANGED)
                         .build();
             }
         } catch (UserEmptyException ex) {
-            lob_returnMessage.put(GC_PASSWORD_CHANGE_STATUS, ex.getMessage());
-
             return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(lob_returnMessage.toJSONString())
+                    .entity(ex.getMessage())
                     .build();
         }
     }
@@ -101,30 +87,23 @@ public class UserResource {
     @PUT
     @Path(USER_ADD_NEW_USER_PATH)
     public Response registerNewUser(UserImpl iob_user) {
-        JSONObject lob_returnMessage = new JSONObject();
         boolean lva_userAdded;
 
         try {
             lva_userAdded = gob_userService.createNewUserInDatabase(iob_user);
 
             if (lva_userAdded) {
-                lob_returnMessage.put(GC_USER_ADD_STATUS, GC_USER_SUCCESSFULLY_ADDED);
-
                 return Response.ok()
-                        .entity(lob_returnMessage.toJSONString())
+                        .entity(GC_USER_SUCCESSFULLY_ADDED)
                         .build();
             } else {
-                lob_returnMessage.put(GC_USER_ADD_STATUS, GC_USER_NOT_ADDED);
-
                 return Response.status(Response.Status.CONFLICT)
-                        .entity(lob_returnMessage.toJSONString())
+                        .entity(GC_USER_NOT_ADDED)
                         .build();
             }
         } catch (UserAlreadyExistsException ex) {
-            lob_returnMessage.put(GC_USER_ADD_STATUS, ex.getMessage());
-
             return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(lob_returnMessage.toJSONString())
+                    .entity(ex.getMessage())
                     .build();
         }
     }
