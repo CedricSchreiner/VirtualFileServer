@@ -10,6 +10,8 @@ import models.interfaces.User;
 import services.interfaces.UserService;
 
 import javax.ws.rs.*;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
@@ -32,7 +34,7 @@ public class UserResource {
     @PUT
     @Path(GC_USER_LOGIN_PATH)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response login(UserImpl user) {
+    public Response login(@Context ContainerRequestContext iob_requestContext, UserImpl user) {
         try {
             User aUser = gob_userService.getUserByEmail(user.getEmail());
             String lva_jsonString = "";
