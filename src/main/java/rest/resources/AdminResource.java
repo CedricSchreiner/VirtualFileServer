@@ -1,9 +1,8 @@
 package rest.resources;
 
 import builder.ServiceObjectBuilder;
-import models.classes.UserImpl;
+import models.classes.User;
 import models.exceptions.UserEmptyException;
-import models.interfaces.User;
 import services.exceptions.AdminAlreadyExistsException;
 import services.interfaces.AdminService;
 
@@ -28,7 +27,7 @@ public class AdminResource {
 
     @PUT
     @Path(GC_ADD_NEW_ADMIN_PATH)
-    public Response addNewAdmin(@Context ContainerRequestContext iob_requestContext, UserImpl iob_user) {
+    public Response addNewAdmin(@Context ContainerRequestContext iob_requestContext, User iob_user) {
         boolean lva_adminAdded;
         User lob_user;
 

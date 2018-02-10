@@ -1,7 +1,7 @@
 package dao.classes;
 
 import dao.interfaces.AdminDao;
-import models.interfaces.User;
+import models.classes.User;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import utilities.Utils;
 
@@ -27,6 +27,7 @@ public class AdminDaoImpl implements AdminDao {
 
     /**
      * Adds an user to the admin data table
+     *
      * @param iva_user the user
      * @return number of changed rows
      */
@@ -49,6 +50,7 @@ public class AdminDaoImpl implements AdminDao {
 
     /**
      * Not used
+     *
      * @param iva_user the user
      * @return null
      */

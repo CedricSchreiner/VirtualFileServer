@@ -1,6 +1,6 @@
 package utilities;
 
-import models.interfaces.User;
+import models.classes.User;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;

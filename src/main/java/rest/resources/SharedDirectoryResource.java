@@ -1,8 +1,8 @@
 package rest.resources;
 
 import builder.ServiceObjectBuilder;
-import models.interfaces.SharedDirectory;
-import models.interfaces.User;
+import models.classes.SharedDirectory;
+import models.classes.User;
 import services.interfaces.SharedDirectoryService;
 
 import javax.ws.rs.Consumes;

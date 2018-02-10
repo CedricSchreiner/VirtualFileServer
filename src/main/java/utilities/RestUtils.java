@@ -1,6 +1,6 @@
 package utilities;
 
-import models.interfaces.User;
+import models.classes.User;
 import services.classes.AuthService;
 
 import javax.ws.rs.container.ContainerRequestContext;

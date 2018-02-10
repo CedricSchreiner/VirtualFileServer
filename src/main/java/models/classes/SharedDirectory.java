@@ -1,20 +1,17 @@
 package models.classes;
 
-import models.interfaces.SharedDirectory;
-import models.interfaces.User;
-
 import java.util.List;
 
-public class SharedDirectoryImpl implements SharedDirectory{
+public class SharedDirectory {
     private User owner;
     private List<User> members;
     private String directoryName;
     private int id;
 
-    public SharedDirectoryImpl() {
+    public SharedDirectory() {
     }
 
-    public SharedDirectoryImpl(User owner, List<User> members, String directoryName) {
+    public SharedDirectory(User owner, List<User> members, String directoryName) {
         this.owner = owner;
         this.members = members;
         this.directoryName = directoryName;

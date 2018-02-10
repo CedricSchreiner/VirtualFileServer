@@ -2,7 +2,6 @@ package models.classes;
 
 import fileTree.interfaces.Tree;
 import fileTree.models.TreeImpl;
-import models.interfaces.User;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,7 +10,7 @@ public class UserTree {
     private Tree gob_tree;
     private User gob_user;
 
-    public UserTree(User iob_user, String iva_userDirectoryPath) throws IOException{
+    public UserTree(User iob_user, String iva_userDirectoryPath) throws IOException {
         this.gob_user = iob_user;
         iva_userDirectoryPath += iob_user.getName() + iob_user.getUserId();
 

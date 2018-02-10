@@ -1,7 +1,7 @@
 package services.interfaces;
 
-import models.interfaces.SharedDirectory;
-import models.interfaces.User;
+import models.classes.SharedDirectory;
+import models.classes.User;
 
 import java.util.List;
 

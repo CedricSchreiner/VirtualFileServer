@@ -2,7 +2,7 @@ package rest.resources;
 
 import builder.ServiceObjectBuilder;
 import models.classes.FileTreeCollection;
-import models.interfaces.User;
+import models.classes.User;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import rest.Initializer;
@@ -15,7 +15,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.*;
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -71,7 +71,7 @@ public class FileResource {
 
         User lob_user = getUserFromContext(iob_requestContext);
 
-        if(!gob_fileService.renameFile(iva_path, iva_newFileName, lob_user)) {
+        if (!gob_fileService.renameFile(iva_path, iva_newFileName, lob_user)) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
         return Response.ok().entity(FILE_RENAMED).build();
@@ -133,7 +133,7 @@ public class FileResource {
         iva_authCredentials = iob_requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
         lob_authService = new AuthService();
 
-        if(lob_authService.authenticateUser(iva_authCredentials) == null) {
+        if (lob_authService.authenticateUser(iva_authCredentials) == null) {
             return null;
         }
 

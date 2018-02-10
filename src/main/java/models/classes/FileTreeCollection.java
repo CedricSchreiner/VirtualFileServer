@@ -1,7 +1,6 @@
 package models.classes;
 
 import fileTree.interfaces.Tree;
-import models.interfaces.User;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,12 +9,12 @@ public class FileTreeCollection {
     private static FileTreeCollection ourInstance = new FileTreeCollection();
     private Collection<UserTree> gco_treeCollection;
 
-    public static FileTreeCollection getInstance() {
-        return ourInstance;
-    }
-
     private FileTreeCollection() {
         this.gco_treeCollection = new ArrayList<>();
+    }
+
+    public static FileTreeCollection getInstance() {
+        return ourInstance;
     }
 
     public void addTreeToCollection(UserTree iob_userTree) {
@@ -28,7 +27,7 @@ public class FileTreeCollection {
         String lob_userTreeEmail;
         //-------------------------------------------------
 
-        for(UserTree userTree : this.gco_treeCollection) {
+        for (UserTree userTree : this.gco_treeCollection) {
             lob_userTreeEmail = userTree.getUser().getEmail();
             if (lob_userEmail.equals(lob_userTreeEmail)) {
                 return userTree.getTree();

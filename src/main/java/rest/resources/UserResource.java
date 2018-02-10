@@ -2,11 +2,10 @@ package rest.resources;
 
 import builder.ServiceObjectBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import models.classes.UserImpl;
+import models.classes.User;
 import models.exceptions.UserAlreadyExistsException;
 import models.exceptions.UserEmptyException;
 import models.exceptions.UsersNotEqualException;
-import models.interfaces.User;
 import services.interfaces.UserService;
 
 import javax.ws.rs.*;
@@ -31,7 +30,7 @@ public class UserResource {
     @PUT
     @Path(GC_USER_LOGIN_PATH)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response login(@Context ContainerRequestContext iob_requestContext, UserImpl iob_user) {
+    public Response login(@Context ContainerRequestContext iob_requestContext, User iob_user) {
         User lob_user;
         String lva_jsonString;
         ObjectMapper lob_mapper;
@@ -72,7 +71,7 @@ public class UserResource {
     @PUT
     @Path(GC_USER_CHANGE_PASSWORD_PATH)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response changePassword(@Context ContainerRequestContext iob_requestContext, UserImpl iob_user) {
+    public Response changePassword(@Context ContainerRequestContext iob_requestContext, User iob_user) {
         boolean lva_passwordChanged;
         User lob_user;
 
@@ -106,7 +105,7 @@ public class UserResource {
 
     @PUT
     @Path(GC_USER_ADD_NEW_USER_PATH)
-    public Response registerNewUser(@Context ContainerRequestContext iob_requestContext, UserImpl iob_user) {
+    public Response registerNewUser(@Context ContainerRequestContext iob_requestContext, User iob_user) {
         boolean lva_userAdded;
         User lob_user;
 

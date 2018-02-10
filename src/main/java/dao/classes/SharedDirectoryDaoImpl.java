@@ -1,9 +1,8 @@
 package dao.classes;
 
-import builder.ModelObjectBuilder;
 import dao.interfaces.SharedDirectoryDao;
-import models.interfaces.SharedDirectory;
-import models.interfaces.User;
+import models.classes.SharedDirectory;
+import models.classes.User;
 import utilities.Utils;
 
 import java.sql.Connection;
@@ -148,9 +147,9 @@ public class SharedDirectoryDaoImpl implements SharedDirectoryDao {
 
 
             while (lob_rs.next()) {
-                lob_sharedDirectory = ModelObjectBuilder.getSharedDirectoryObject();
-                lob_member = ModelObjectBuilder.getUserModel();
-                lob_owner = ModelObjectBuilder.getUserModel();
+                lob_sharedDirectory = new SharedDirectory();
+                lob_member = new User();
+                lob_owner = new User();
                 lva_sharedDirectoryExists = false;
 
                 lva_sharedDirectoryID = lob_rs.getInt(COL_SHARED_D_ID);

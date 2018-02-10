@@ -1,9 +1,8 @@
 package dao.classes;
 
-import builder.ModelObjectBuilder;
 import dao.enums.ColNameUser;
 import dao.interfaces.UserDao;
-import models.interfaces.User;
+import models.classes.User;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,9 +11,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static dao.constants.AdminDaoConstants.COL_ADMIN_ID;
-import static dao.constants.AdminDaoConstants.COL_ADMIN_USER_ID;
-import static dao.constants.AdminDaoConstants.TABLE_ADMIN;
+import static dao.constants.AdminDaoConstants.*;
 import static dao.constants.DaoConstants.*;
 import static dao.constants.UserDaoConstants.*;
 import static utilities.Utils.convertIntToBoolean;
@@ -51,7 +48,7 @@ public class UserDaoImpl implements UserDao {
      * SELECT * FROM User LEFT OUTER JOIN Admin ON User.userId = Admin.userId
      */
     private static final String GC_GET_ALL_USERS = "SELECT * FROM " + TABLE_USER + " LEFT OUTER JOIN " + TABLE_ADMIN +
-            " ON " + TABLE_USER + "." + COL_USER_ID + " = " + TABLE_ADMIN + "." +COL_ADMIN_USER_ID;
+            " ON " + TABLE_USER + "." + COL_USER_ID + " = " + TABLE_ADMIN + "." + COL_ADMIN_USER_ID;
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -65,7 +62,7 @@ public class UserDaoImpl implements UserDao {
      */
     @Override
     public User getUser(String iva_email) {
-        User lob_aUser = ModelObjectBuilder.getUserModel();
+        User lob_aUser = new User();
         ResultSet lob_rs = null;
         Connection lob_connection = null;
         PreparedStatement lob_preparedStatement = null;
@@ -117,6 +114,7 @@ public class UserDaoImpl implements UserDao {
 
     /**
      * Get all users from db
+     *
      * @return all user
      */
     @Override
@@ -131,7 +129,7 @@ public class UserDaoImpl implements UserDao {
             lob_rs = lob_preparedStatement.executeQuery();
 
             while (lob_rs.next()) {
-                lob_aUser = ModelObjectBuilder.getUserModel();
+                lob_aUser = new User();
 
                 lob_aUser.setEmail(lob_rs.getString(COL_USER_EMAIL));
                 lob_aUser.setPassword(lob_rs.getString(COL_USER_PASSWORD));
@@ -237,9 +235,10 @@ public class UserDaoImpl implements UserDao {
 
     /**
      * Update an attribute of an user
-     * @param user the user to update
+     *
+     * @param user        the user to update
      * @param colNameUser attribute name
-     * @param value the new value
+     * @param value       the new value
      * @return false if an error occurred, otherwise true
      */
     private boolean updateUser(User user, ColNameUser colNameUser, String value) {
