@@ -1,4 +1,4 @@
-package rest.resourcess;
+package rest.resources;
 
 import builder.ServiceObjectBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,45 +17,53 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.List;
 
+import static rest.constants.RestConstants.GC_USERS;
 import static rest.constants.UserResourceConstants.*;
-import static rest.resourcess.UserResource.GC_USER_RESOURCE_PATH;
+import static utilities.RestUtils.checkIfUsersNotEqual;
+import static utilities.RestUtils.getUserFromContext;
 
 @Path(GC_USER_RESOURCE_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 public class UserResource {
-    static final String GC_USER_RESOURCE_PATH = "user/";
-    private static final String GC_USER_LOGIN_PATH = "/auth/login/";
-    private static final String GC_USER_CHANGE_PASSWORD_PATH = "/auth/changePassword/";
-    private static final String GC_USER_ADD_NEW_USER_PATH = "addNewUser/";
-    private static final String GC_USER_GET_ALL_USER_PATH = "/adminAuth/getAllUser";
 
     private UserService gob_userService = ServiceObjectBuilder.getUserServiceObject();
 
     @PUT
     @Path(GC_USER_LOGIN_PATH)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response login(@Context ContainerRequestContext iob_requestContext, UserImpl user) {
-        try {
-            User aUser = gob_userService.getUserByEmail(user.getEmail());
-            String lva_jsonString = "";
-            ObjectMapper lob_mapper = new ObjectMapper();
+    public Response login(@Context ContainerRequestContext iob_requestContext, UserImpl iob_user) {
+        User lob_user;
+        String lva_jsonString;
+        ObjectMapper lob_mapper;
 
-            try {
-                lva_jsonString = lob_mapper.writeValueAsString(aUser);
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
+        lob_user = getUserFromContext(iob_requestContext);
+
+        if (checkIfUsersNotEqual(lob_user, iob_user)) {
+            return Response
+                    .status(Response.Status.FORBIDDEN)
+                    .entity(GC_USERS)
+                    .build();
+        }
+
+        try {
+
+            lob_user = gob_userService.getUserByEmail(iob_user.getEmail());
+            lob_mapper = new ObjectMapper();
+            lva_jsonString = lob_mapper.writeValueAsString(lob_user);
 
             return Response.ok()
                     .entity(lva_jsonString)
                     .build();
 
-        } catch (UsersNotEqualException ex) {
-            return Response.status(Response.Status.CONFLICT)
+        } catch (IOException | UsersNotEqualException ex) {
+            return Response
+                    .status(Response.Status.CONFLICT)
                     .entity(ex.getMessage())
                     .build();
+
         } catch (UserEmptyException ex) {
-            return Response.status(Response.Status.BAD_REQUEST)
+            return Response
+                    .status(Response.Status.BAD_REQUEST)
                     .entity(ex.getMessage())
                     .build();
         }
@@ -64,8 +72,18 @@ public class UserResource {
     @PUT
     @Path(GC_USER_CHANGE_PASSWORD_PATH)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response changePassword(UserImpl iob_user) {
+    public Response changePassword(@Context ContainerRequestContext iob_requestContext, UserImpl iob_user) {
         boolean lva_passwordChanged;
+        User lob_user;
+
+        lob_user = getUserFromContext(iob_requestContext);
+
+        if (checkIfUsersNotEqual(lob_user, iob_user)) {
+            return Response
+                    .status(Response.Status.FORBIDDEN)
+                    .entity(GC_USERS)
+                    .build();
+        }
 
         try {
             lva_passwordChanged = gob_userService.changePassword(iob_user, iob_user.getPassword());
@@ -88,8 +106,18 @@ public class UserResource {
 
     @PUT
     @Path(GC_USER_ADD_NEW_USER_PATH)
-    public Response registerNewUser(UserImpl iob_user) {
+    public Response registerNewUser(@Context ContainerRequestContext iob_requestContext, UserImpl iob_user) {
         boolean lva_userAdded;
+        User lob_user;
+
+        lob_user = getUserFromContext(iob_requestContext);
+
+        if (checkIfUsersNotEqual(lob_user, iob_user)) {
+            return Response
+                    .status(Response.Status.FORBIDDEN)
+                    .entity(GC_USERS)
+                    .build();
+        }
 
         try {
             lva_userAdded = gob_userService.createNewUserInDatabase(iob_user);

@@ -1,4 +1,4 @@
-package rest.resourcess;
+package rest.resources;
 
 import builder.ServiceObjectBuilder;
 import models.classes.FileTreeCollection;

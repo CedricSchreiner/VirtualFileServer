@@ -1,4 +1,4 @@
-package rest.resourcess;
+package rest;
 
 import models.interfaces.User;
 import services.classes.AuthService;
@@ -13,7 +13,7 @@ import static rest.constants.AdminResourceConstants.GC_ADMIN_NOT_AUTHORISED;
 import static rest.constants.UserResourceConstants.GC_USER_NOT_AUTHORISED;
 
 @Provider
-public class Authorisation implements ContainerRequestFilter {
+public class UserAuthorisation implements ContainerRequestFilter {
     private static final String GC_USER_URI = "auth";
     private static final String GC_ADMIN_URI = "adminAuth";
 

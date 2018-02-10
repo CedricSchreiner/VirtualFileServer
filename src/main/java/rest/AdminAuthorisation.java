@@ -1,4 +1,4 @@
-package rest.resourcess;
+package rest;
 
 import builder.ServiceObjectBuilder;
 import models.interfaces.User;
