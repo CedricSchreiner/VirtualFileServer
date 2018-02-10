@@ -12,40 +12,40 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static dao.constants.DaoConstants.PARAMETER_1;
-import static dao.constants.DaoConstants.PARAMETER_2;
+import static dao.constants.DaoConstants.GC_PARAMETER_1;
+import static dao.constants.DaoConstants.GC_PARAMETER_2;
 import static dao.constants.SharedDirectoryConstants.*;
 
 public class SharedDirectoryDaoImpl implements SharedDirectoryDao {
 // Prepared Statements -------------------------------------------------------------------------------------------------
-    private static final String GC_ADD_SHARED_DIRECTORY = "INSERT INTO " + TABLE_SHARED_DIRECTORY + " (" +
-            COL_SHARED_D_OWNER + " , " + COL_SHARED_D_GROUP_NAME + ") VALUES (?,?)";
+    private static final String GC_ADD_SHARED_DIRECTORY = "INSERT INTO " + GC_TABLE_SHARED_DIRECTORY + " (" +
+        GC_COL_SHARED_D_OWNER + " , " + GC_COL_SHARED_D_GROUP_NAME + ") VALUES (?,?)";
 
     /**
      * INSERT INTO SharedDirectoryMember (groupName, member) VALUES (?,?)
      */
-    private static final String GC_ADD_NEW_MEMBER_TO_SHARED_DIRECTORY = "INSERT INTO " + TABLE_SHARED_DIRECTORY_MEMBER +
-            " (" + COL_SHARED_D_MEMBER_GROUP_ID + ", " + COL_SHARED_D_MEMBER_MEMBER + ") VALUES (?,?)";
+    private static final String GC_ADD_NEW_MEMBER_TO_SHARED_DIRECTORY = "INSERT INTO " + GC_TABLE_SHARED_DIRECTORY_MEMBER +
+            " (" + GC_COL_SHARED_D_MEMBER_GROUP_ID + ", " + GC_COL_SHARED_D_MEMBER_MEMBER_ID + ") VALUES (?,?)";
 
-    private static final String GC_DELETE_SHARED_DIRECTORY = "DELETE FROM " + TABLE_SHARED_DIRECTORY + " WHERE " +
-            COL_SHARED_D_ID + " = ?";
+    private static final String GC_DELETE_SHARED_DIRECTORY = "DELETE FROM " + GC_TABLE_SHARED_DIRECTORY + " WHERE " +
+            GC_COL_SHARED_D_ID + " = ?";
 
     private static final String GC_REMOVE_MEMBER_FROM_SHARED_DIRECTORY = "DELETE FROM " +
-            TABLE_SHARED_DIRECTORY_MEMBER + " WHERE " + COL_SHARED_D_MEMBER_MEMBER + " = ? AND " +
-            COL_SHARED_D_MEMBER_GROUP_ID + " = ?";
+            GC_TABLE_SHARED_DIRECTORY_MEMBER + " WHERE " + GC_COL_SHARED_D_MEMBER_MEMBER_ID + " = ? AND " +
+            GC_COL_SHARED_D_MEMBER_GROUP_ID + " = ?";
 
     /**
      * SELECT * FROM SharedDirectory LEFT OUTER JOIN SharedDirectoryMember ON SharedDirectory.id = SharedDirectoryMember.groupId
      */
-    private static final String GC_GET_ALL_SHARED_DIRECTORIES = "SELECT * FROM " + TABLE_SHARED_DIRECTORY +
-            " LEFT OUTER JOIN " + TABLE_SHARED_DIRECTORY_MEMBER + " ON " + TABLE_SHARED_DIRECTORY + "." +
-            COL_SHARED_D_ID + " = " + TABLE_SHARED_DIRECTORY_MEMBER + "." + COL_SHARED_D_MEMBER_GROUP_ID;
+    private static final String GC_GET_ALL_SHARED_DIRECTORIES = "SELECT * FROM " + GC_TABLE_SHARED_DIRECTORY +
+            " LEFT OUTER JOIN " + GC_TABLE_SHARED_DIRECTORY_MEMBER + " ON " + GC_TABLE_SHARED_DIRECTORY + "." +
+            GC_COL_SHARED_D_ID + " = " + GC_TABLE_SHARED_DIRECTORY_MEMBER + "." + GC_COL_SHARED_D_MEMBER_GROUP_ID;
 
     /**
      * DELETE FROM SharedDirectoryMember WHERE groupId = ?
      */
-    private static final String GC_REMOVE_MEMBER = "DELETE FROM " + TABLE_SHARED_DIRECTORY_MEMBER + " WHERE " +
-            COL_SHARED_D_MEMBER_GROUP_ID + " = ?";
+    private static final String GC_REMOVE_MEMBER = "DELETE FROM " + GC_TABLE_SHARED_DIRECTORY_MEMBER + " WHERE " +
+            GC_COL_SHARED_D_MEMBER_GROUP_ID + " = ?";
 // ---------------------------------------------------------------------------------------------------------------------
 
     private final DatabaseConnection gob_databaseConnection = DatabaseConnection.getInstance();
@@ -56,8 +56,8 @@ public class SharedDirectoryDaoImpl implements SharedDirectoryDao {
         try (Connection lob_connection = this.gob_databaseConnection.getConnection();
              PreparedStatement lob_preparedStatement = lob_connection.prepareStatement(GC_ADD_SHARED_DIRECTORY)) {
 
-            lob_preparedStatement.setInt(PARAMETER_1, iob_sharedDirectory.getOwner().getUserId());
-            lob_preparedStatement.setString(PARAMETER_2, iob_sharedDirectory.getDirectoryName());
+            lob_preparedStatement.setInt(GC_PARAMETER_1, iob_sharedDirectory.getOwner().getUserId());
+            lob_preparedStatement.setString(GC_PARAMETER_2, iob_sharedDirectory.getDirectoryName());
 
             lva_rowCount = lob_preparedStatement.executeUpdate();
         } catch (SQLException ex) {
@@ -73,8 +73,8 @@ public class SharedDirectoryDaoImpl implements SharedDirectoryDao {
         try (Connection lob_connection = this.gob_databaseConnection.getConnection();
              PreparedStatement lob_preparedStatement = lob_connection.prepareStatement(GC_ADD_NEW_MEMBER_TO_SHARED_DIRECTORY)) {
 
-            lob_preparedStatement.setInt(PARAMETER_1, iob_sharedDirectory.getId());
-            lob_preparedStatement.setInt(PARAMETER_2, iob_user.getUserId());
+            lob_preparedStatement.setInt(GC_PARAMETER_1, iob_sharedDirectory.getId());
+            lob_preparedStatement.setInt(GC_PARAMETER_2, iob_user.getUserId());
 
             lva_rowCount = lob_preparedStatement.executeUpdate();
         } catch (SQLException ex) {
@@ -90,7 +90,7 @@ public class SharedDirectoryDaoImpl implements SharedDirectoryDao {
         try (Connection lob_connection = this.gob_databaseConnection.getConnection();
              PreparedStatement lob_preparedStatement = lob_connection.prepareStatement(GC_REMOVE_MEMBER)) {
 
-            lob_preparedStatement.setInt(PARAMETER_1, iob_sharedDirectory.getId());
+            lob_preparedStatement.setInt(GC_PARAMETER_1, iob_sharedDirectory.getId());
 
             lva_rowCount = lob_preparedStatement.executeUpdate();
         } catch (SQLException ex) {
@@ -100,7 +100,7 @@ public class SharedDirectoryDaoImpl implements SharedDirectoryDao {
         try (Connection lob_connection = this.gob_databaseConnection.getConnection();
              PreparedStatement lob_preparedStatement = lob_connection.prepareStatement(GC_DELETE_SHARED_DIRECTORY)) {
 
-            lob_preparedStatement.setInt(PARAMETER_1, iob_sharedDirectory.getId());
+            lob_preparedStatement.setInt(GC_PARAMETER_1, iob_sharedDirectory.getId());
 
             lva_rowCount = lob_preparedStatement.executeUpdate();
         } catch (SQLException ex) {
@@ -117,8 +117,8 @@ public class SharedDirectoryDaoImpl implements SharedDirectoryDao {
         try (Connection lob_connection = this.gob_databaseConnection.getConnection();
              PreparedStatement lob_preparedStatement = lob_connection.prepareStatement(GC_REMOVE_MEMBER_FROM_SHARED_DIRECTORY)) {
 
-            lob_preparedStatement.setInt(PARAMETER_1, iob_user.getUserId());
-            lob_preparedStatement.setInt(PARAMETER_2, iob_sharedDirectory.getId());
+            lob_preparedStatement.setInt(GC_PARAMETER_1, iob_user.getUserId());
+            lob_preparedStatement.setInt(GC_PARAMETER_2, iob_sharedDirectory.getId());
 
             lva_rowCount = lob_preparedStatement.executeUpdate();
         } catch (SQLException ex) {
@@ -152,21 +152,21 @@ public class SharedDirectoryDaoImpl implements SharedDirectoryDao {
                 lob_owner = new User();
                 lva_sharedDirectoryExists = false;
 
-                lva_sharedDirectoryID = lob_rs.getInt(COL_SHARED_D_ID);
+                lva_sharedDirectoryID = lob_rs.getInt(GC_COL_SHARED_D_ID);
                 for (SharedDirectory lob_tmp : lob_sharedDirectoryList) {
                     if (lob_tmp.getId() == lva_sharedDirectoryID) {
-                        lob_member.setUserId(lob_rs.getInt(COL_SHARED_D_MEMBER_MEMBER));
+                        lob_member.setUserId(lob_rs.getInt(GC_COL_SHARED_D_MEMBER_MEMBER_ID));
                         lob_tmp.getMembers().add(lob_member);
                         lva_sharedDirectoryExists = true;
                     }
                 }
 
                 if (!lva_sharedDirectoryExists) {
-                    lob_sharedDirectory.setId(lob_rs.getInt(COL_SHARED_D_ID));
-                    lob_owner.setUserId(lob_rs.getInt(COL_SHARED_D_OWNER));
+                    lob_sharedDirectory.setId(lob_rs.getInt(GC_COL_SHARED_D_ID));
+                    lob_owner.setUserId(lob_rs.getInt(GC_COL_SHARED_D_OWNER));
                     lob_sharedDirectory.setOwner(lob_owner);
-                    lob_sharedDirectory.setDirectoryName(lob_rs.getString(COL_SHARED_D_GROUP_NAME));
-                    lob_member.setUserId(lob_rs.getInt(COL_SHARED_D_MEMBER_MEMBER));
+                    lob_sharedDirectory.setDirectoryName(lob_rs.getString(GC_COL_SHARED_D_GROUP_NAME));
+                    lob_member.setUserId(lob_rs.getInt(GC_COL_SHARED_D_MEMBER_MEMBER_ID));
                     lob_memberList.add(lob_member);
                     lob_sharedDirectory.setMembers(lob_memberList);
                     lob_sharedDirectoryList.add(lob_sharedDirectory);
