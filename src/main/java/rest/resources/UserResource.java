@@ -107,16 +107,6 @@ public class UserResource {
     @Path(GC_USER_ADD_NEW_USER_PATH)
     public Response registerNewUser(@Context ContainerRequestContext iob_requestContext, User iob_user) {
         boolean lva_userAdded;
-        User lob_user;
-
-        lob_user = getUserFromContext(iob_requestContext);
-
-        if (checkIfUsersNotEqual(lob_user, iob_user)) {
-            return Response
-                    .status(Response.Status.FORBIDDEN)
-                    .entity(GC_USERS)
-                    .build();
-        }
 
         try {
             lva_userAdded = gob_userService.createNewUserInDatabase(iob_user);
