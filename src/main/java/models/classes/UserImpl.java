@@ -1,13 +1,9 @@
 package models.classes;
 
-import models.exceptions.UserException;
 import models.interfaces.User;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Objects;
-
-import static models.constants.UserConstants.*;
-import static utilities.Utils.isStringEmpty;
 
 @XmlRootElement
 public class UserImpl implements User{

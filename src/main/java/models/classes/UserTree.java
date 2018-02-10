@@ -47,7 +47,7 @@ public class UserTree {
     }
 
     private void addFilesToTree(File iob_file) {
-        //we have to add the child nodes of the file if the file is a direcotry
+        //we have to add the child nodes of the file if the file is a directory
         if (iob_file.isDirectory()) {
             //add the directory itself
             addFile(iob_file, true);

@@ -1,8 +1,6 @@
 package dao.classes;
 
-import builder.DaoObjectBuilder;
 import builder.ModelObjectBuilder;
-import dao.enums.ColNameSharedDirectory;
 import dao.interfaces.SharedDirectoryDao;
 import models.interfaces.SharedDirectory;
 import models.interfaces.User;

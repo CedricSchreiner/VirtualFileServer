@@ -213,7 +213,7 @@ public class FileServiceImpl implements FileService{
      * @throws IOException
      */
     private boolean writeFile(byte[] iva_content, String iva_filename, User iob_user) throws IOException {
-        //----------------------------------------Vaiables--------------------------------------------
+        //----------------------------------------Variables--------------------------------------------
         File lob_file = new File(iva_filename);
         FileOutputStream lob_fileOutputStream;
         FileTreeCollection lob_fileTrees = FileTreeCollection.getInstance();

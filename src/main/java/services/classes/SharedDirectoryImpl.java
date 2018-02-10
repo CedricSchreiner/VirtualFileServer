@@ -24,7 +24,7 @@ public class SharedDirectoryImpl implements SharedDirectoryService {
 
 
         if(ili_sharedDir.isEmpty()){
-            throw new SharedDirectoryIsEmptyException(GC_ERR_MSG_SHARED_DIRECTORY_ISEMPTY);
+            throw new SharedDirectoryIsEmptyException(GC_ERR_MSG_SHARED_DIRECTORY_IS_EMPTY);
         }else if(gob_userDao.getUser(iob_user.getEmail()) == null) {
             throw new UserEmptyException(GC_ERR_MSG_USER_NOT_EXIST);
         }else{

@@ -50,7 +50,7 @@ public class AdminDaoImpl implements AdminDao {
     /**
      * Not used
      * @param iva_user the user
-     * @return
+     * @return null
      */
     @Override
     public boolean removeAdmin(User iva_user) {
