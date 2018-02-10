@@ -6,8 +6,6 @@ import services.classes.AuthService;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.HttpHeaders;
 
-import static services.classes.PasswordService.checkPasswordEquals;
-
 public class RestUtils {
     public static User getUserFromContext(ContainerRequestContext iob_requestContext) {
         AuthService lob_authService;
