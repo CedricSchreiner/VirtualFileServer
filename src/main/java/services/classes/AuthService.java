@@ -44,6 +44,10 @@ public class AuthService {
 
         lob_user = gob_userService.getUserByEmail(lva_email);
 
+        if (lob_user.getEmail() == null) {
+            return null;
+        }
+
         if (!lob_user.getEmail().equals(lva_email)) {
             return null;
         }

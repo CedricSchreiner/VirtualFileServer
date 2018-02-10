@@ -11,6 +11,7 @@ import services.interfaces.FileService;
 
 import javax.ws.rs.*;
 import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -28,8 +29,8 @@ public class FileResource {
     @GET
     @Path(GC_FILE_DOWNLOAD_PATH + GC_PATH_PARAMETER_FILE_PATH)
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Response downloadFile(@PathParam(GC_PARAMETER_PATH_NAME) String iva_filePath, ContainerRequestContext iob_requestContext) {
+    public Response downloadFile(@PathParam(GC_PARAMETER_PATH_NAME) String iva_filePath,
+                                 @Context ContainerRequestContext iob_requestContext) {
         FileTreeCollection lob_tree_collection = FileTreeCollection.getInstance();
         User lob_user = getUserFromContext(iob_requestContext);
 
@@ -63,65 +64,79 @@ public class FileResource {
     }
 
     @POST
-    @Path(GC_FILE_RENAME_PATH + GC_PATH_PARAMETER_FILE_PATH + GC_PATH_PARAMETER_NEW_FILE_NAME)
-    public Response renameFile(User iob_user, @PathParam(GC_PARAMETER_PATH_NAME) String iva_path, @PathParam(GC_PARAMETER_NEW_FILE_NAME) String iva_newFileName) {
-        if(!gob_fileService.renameFile(iva_path, iva_newFileName, iob_user)) {
+    @Path(GC_FILE_RENAME_PATH)
+    @Consumes(MediaType.TEXT_PLAIN)
+    public Response renameFile(@Context ContainerRequestContext iob_requestContext,
+                               @QueryParam(GC_PARAMETER_PATH_NAME) String iva_path, String iva_newFileName) {
+
+        User lob_user = getUserFromContext(iob_requestContext);
+
+        if(!gob_fileService.renameFile(iva_path, iva_newFileName, lob_user)) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
         return Response.ok().entity(FILE_RENAMED).build();
     }
 
     @POST
-    @Path(GC_FILE_DELETE_PATH + GC_PATH_PARAMETER_FILE_PATH)
-    public Response deleteFile(User iob_user, @PathParam(GC_PARAMETER_PATH_NAME) String iva_path) {
-        if (!gob_fileService.deleteFile(iva_path, iob_user)) {
+    @Path(GC_FILE_DELETE_PATH)
+    public Response deleteFile(@Context ContainerRequestContext iob_requestContext, String iva_path) {
+
+        User lob_user = getUserFromContext(iob_requestContext);
+
+        if (!gob_fileService.deleteFile(iva_path, lob_user)) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
         return Response.ok().entity(FILE_DELETED).build();
     }
 
     @POST
-    @Path(GC_FILE_MOVE_PATH + GC_PATH_PARAMETER_FILE_PATH + GC_PATH_PARAMETER_NEW_FILE_PATH)
-    public Response moveFile(User iob_user, @PathParam(GC_PARAMETER_PATH_NAME) String iva_path, @PathParam(GC_PARAMETER_NEW_FILE_PATH) String iva_newFilePath) {
-        if (!gob_fileService.moveFile(iva_path, iva_newFilePath, iob_user)) {
+    @Path(GC_FILE_MOVE_PATH)
+    public Response moveFile(@Context ContainerRequestContext iob_requestContext,
+                             @QueryParam(GC_PARAMETER_PATH_NAME) String iva_path, String iva_newFilePath) {
+
+        User lob_user = getUserFromContext(iob_requestContext);
+
+        if (!gob_fileService.moveFile(iva_path, iva_newFilePath, lob_user)) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
         return Response.ok().entity(FILE_MOVED).build();
     }
 
     @POST
-    @Path(GC_FILE_REMOVE_DIR_ONLY_PATH + GC_PATH_PARAMETER_FILE_PATH)
-    public Response deleteDirectoryOnly(User iob_user, @PathParam(GC_PARAMETER_PATH_NAME) String iva_filePath) {
-        if (!gob_fileService.deleteDirectoryOnly(iva_filePath, iob_user)) {
+    @Path(GC_FILE_REMOVE_DIR_ONLY_PATH)
+    public Response deleteDirectoryOnly(@Context ContainerRequestContext iob_requestContext, String iva_filePath) {
+        User lob_user = getUserFromContext(iob_requestContext);
+
+        if (!gob_fileService.deleteDirectoryOnly(iva_filePath, lob_user)) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
         return Response.ok().entity(DIRECTORY_DELETED).build();
     }
 
     @POST
-    @Path(GC_CREATE_DIRECTORY_PATH + GC_PATH_PARAMETER_FILE_PATH)
-    public Response createDirectory(User iob_user, @PathParam(GC_PARAMETER_PATH_NAME) String iva_filePath) {
-        if (!gob_fileService.createDirectory(iva_filePath, iob_user)) {
+    @Path(GC_CREATE_DIRECTORY_PATH)
+    public Response createDirectory(@Context ContainerRequestContext iob_requestContext, String iva_filePath) {
+        User lob_user = getUserFromContext(iob_requestContext);
+
+        if (!gob_fileService.createDirectory(iva_filePath, lob_user)) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
         return Response.ok().entity(DIRECTORY_DELETED).build();
     }
 
     private User getUserFromContext(ContainerRequestContext iob_requestContext) {
+        //----------------------------Variables----------------------------------
         AuthService lob_authService;
         String iva_authCredentials;
+        //-----------------------------------------------------------------------
 
-        if(iob_requestContext.getUriInfo().getPath().contains("auth")) {
-            iva_authCredentials = iob_requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
+        iva_authCredentials = iob_requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
+        lob_authService = new AuthService();
 
-            lob_authService = new AuthService();
-
-            if(lob_authService.authenticateUser(iva_authCredentials) == null) {
-                return null;
-            }
-
-            return lob_authService.authenticateUser(iva_authCredentials);
+        if(lob_authService.authenticateUser(iva_authCredentials) == null) {
+            return null;
         }
-        return null;
+
+        return lob_authService.authenticateUser(iva_authCredentials);
     }
 }

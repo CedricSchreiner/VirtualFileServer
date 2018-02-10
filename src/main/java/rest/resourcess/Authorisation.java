@@ -1,5 +1,6 @@
 package rest.resourcess;
 
+import models.interfaces.User;
 import services.classes.AuthService;
 
 import javax.ws.rs.container.ContainerRequestContext;
@@ -20,7 +21,9 @@ public class Authorisation implements ContainerRequestFilter {
             iva_authCredentials = iob_containerRequest.getHeaderString(HttpHeaders.AUTHORIZATION);
             lob_authService = new AuthService();
 
-            if(lob_authService.authenticateUser(iva_authCredentials) == null) {
+            User test = lob_authService.authenticateUser(iva_authCredentials);
+
+            if(test == null) {
                 unauthorizedStatus = Response
                         .status(Response.Status.UNAUTHORIZED)
                         .entity("User cant access the resource")

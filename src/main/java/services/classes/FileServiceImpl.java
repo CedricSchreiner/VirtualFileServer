@@ -6,7 +6,6 @@ import models.classes.UserImpl;
 import models.interfaces.User;
 import org.apache.commons.io.IOUtils;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
-import rest.Initializer;
 import services.interfaces.FileService;
 import utilities.Utils;
 
@@ -73,6 +72,7 @@ public class FileServiceImpl implements FileService{
     public boolean renameFile(String iva_filePath, String iva_newFileName, User iob_user) {
         //---------------------------------------Variables----------------------------------------
         File lob_file;
+        String lva_newFilePath;
         //----------------------------------------------------------------------------------------
 
         if (iob_user == null) {
@@ -81,8 +81,8 @@ public class FileServiceImpl implements FileService{
 
         iva_filePath = createUserFilePath(iva_filePath, iob_user);
         gob_fileTreeCollection = FileTreeCollection.getInstance();
-        lob_file = gob_fileTreeCollection.getTreeFromUser(iob_user).getFile(iva_filePath);
-        return lob_file.renameTo(new File(lob_file.getParent() + iva_newFileName));
+        return gob_fileTreeCollection.getTreeFromUser(iob_user).renameFile(iva_filePath, iva_newFileName);
+        //return lob_file.renameTo(new File(lva_newFilePath));
     }
 
     /**
@@ -109,12 +109,22 @@ public class FileServiceImpl implements FileService{
      * @return true of the file was successfully moved, otherwise false
      */
     public boolean moveFile(String iva_filePath, String iva_newFilePath, User iob_user) {
+        //------------------------------Variables----------------------------------------
+        String lva_fileName;
+        //-------------------------------------------------------------------------------
+
         if (iob_user == null) {
             return false;
         }
 
         //TODO check if is allow to move the file to the destination
         iva_filePath = createUserFilePath(iva_filePath, iob_user);
+        iva_newFilePath = createUserFilePath(iva_newFilePath, iob_user);
+
+        //lva_fileName = iva_filePath.replaceFirst(".*\\\\", "");
+        //iva_newFilePath = iva_newFilePath + "\\" + lva_fileName;
+        //iva_newFilePath = iva_newFilePath.replaceFirst("[^\\\\]*$", lva_fileName);
+
         gob_fileTreeCollection = FileTreeCollection.getInstance();
         return gob_fileTreeCollection.getTreeFromUser(iob_user).moveFile(iva_filePath, iva_newFilePath);
     }
@@ -223,6 +233,6 @@ public class FileServiceImpl implements FileService{
     }
 
     private String createUserFilePath(String iva_relativePath, User iob_user) {
-        return Initializer.getUserBasePath() + iob_user.getName() + iob_user.getUserId() + "\\" + iva_relativePath;
+        return Utils.getRootDirectory() + iob_user.getName() + iob_user.getUserId() + "\\" + iva_relativePath;
     }
 }
