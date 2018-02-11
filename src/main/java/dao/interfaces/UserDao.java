@@ -1,6 +1,6 @@
 package dao.interfaces;
 
-import models.interfaces.User;
+import models.classes.User;
 
 import java.util.List;
 

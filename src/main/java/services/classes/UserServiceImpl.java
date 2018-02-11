@@ -2,11 +2,11 @@ package services.classes;
 
 import builder.DaoObjectBuilder;
 import dao.interfaces.UserDao;
+import models.classes.User;
 import models.exceptions.UserAlreadyExistsException;
 import models.exceptions.UserDirectoryNotCreated;
 import models.exceptions.UserEmptyException;
 import models.exceptions.UsersNotEqualException;
-import models.interfaces.User;
 import services.interfaces.UserService;
 import utilities.Utils;
 
@@ -43,7 +43,7 @@ public class UserServiceImpl implements UserService {
             lva_userName = lob_user.getName().toLowerCase();
             lva_userDirectoryName = lva_userName + lob_user.getUserId();
 
-            lob_dir = new File(Utils.getRootDirectory() +  lva_userDirectoryName);
+            lob_dir = new File(Utils.getRootDirectory() + lva_userDirectoryName);
 
             if (!lob_dir.mkdir()) {
                 throw new UserDirectoryNotCreated(GC_USER_DIRECTORY_NOT_CREATED);
@@ -82,7 +82,7 @@ public class UserServiceImpl implements UserService {
     /**
      * change the password of a user
      *
-     * @param iob_user change the password of this user
+     * @param iob_user        change the password of this user
      * @param iva_newPassword the new password
      * @return true if the password was changed
      */

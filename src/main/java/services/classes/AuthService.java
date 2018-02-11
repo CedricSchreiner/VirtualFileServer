@@ -1,7 +1,7 @@
 package services.classes;
 
 import builder.ServiceObjectBuilder;
-import models.interfaces.User;
+import models.classes.User;
 import services.interfaces.UserService;
 
 import java.io.IOException;

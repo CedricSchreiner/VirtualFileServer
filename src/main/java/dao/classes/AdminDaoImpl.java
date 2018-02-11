@@ -1,7 +1,7 @@
 package dao.classes;
 
 import dao.interfaces.AdminDao;
-import models.interfaces.User;
+import models.classes.User;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import utilities.Utils;
 
@@ -9,17 +9,17 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import static dao.constants.AdminDaoConstants.COL_ADMIN_USER_ID;
-import static dao.constants.AdminDaoConstants.TABLE_ADMIN;
-import static dao.constants.DaoConstants.PARAMETER_1;
+import static dao.constants.AdminDaoConstants.GC_COL_ADMIN_USER_ID;
+import static dao.constants.AdminDaoConstants.GC_TABLE_ADMIN;
+import static dao.constants.DaoConstants.GC_PARAMETER_1;
 
 public class AdminDaoImpl implements AdminDao {
 // Prepared Statements -------------------------------------------------------------------------------------------------
     /**
      * INSERT INTO Admin (userId) VALUES (?)
      */
-    private static final String GC_ADD_ADMIN = "INSERT INTO " + TABLE_ADMIN +
-            " (" + COL_ADMIN_USER_ID + ") VALUES (?)";
+    private static final String GC_ADD_ADMIN = "INSERT INTO " + GC_TABLE_ADMIN +
+            " (" + GC_COL_ADMIN_USER_ID + ") VALUES (?)";
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -27,6 +27,7 @@ public class AdminDaoImpl implements AdminDao {
 
     /**
      * Adds an user to the admin data table
+     *
      * @param iva_user the user
      * @return number of changed rows
      */
@@ -37,7 +38,7 @@ public class AdminDaoImpl implements AdminDao {
         try (Connection lob_connection = this.gob_databaseConnection.getConnection();
              PreparedStatement lob_preparedStatement = lob_connection.prepareStatement(GC_ADD_ADMIN)) {
 
-            lob_preparedStatement.setInt(PARAMETER_1, iva_user.getUserId());
+            lob_preparedStatement.setInt(GC_PARAMETER_1, iva_user.getUserId());
 
             lva_rowCount = lob_preparedStatement.executeUpdate();
         } catch (SQLException ex) {
@@ -49,8 +50,9 @@ public class AdminDaoImpl implements AdminDao {
 
     /**
      * Not used
+     *
      * @param iva_user the user
-     * @return
+     * @return null
      */
     @Override
     public boolean removeAdmin(User iva_user) {

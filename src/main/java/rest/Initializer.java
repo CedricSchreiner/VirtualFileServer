@@ -2,21 +2,25 @@ package rest;
 
 import builder.ServiceObjectBuilder;
 import models.classes.FileTreeCollection;
+import models.classes.User;
 import models.classes.UserTree;
-import models.interfaces.User;
-import services.classes.UserServiceImpl;
 import services.interfaces.UserService;
 import utilities.Utils;
-
-import static rest.constants.InitializerConstants.*;
 
 import javax.servlet.http.HttpServlet;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import static rest.constants.InitializerConstants.GC_FILE_BASE_PATH;
 
-public class Initializer extends HttpServlet{
+
+public class Initializer extends HttpServlet {
+
+    //TODO change the path at the end of the project
+    public static String getUserBasePath() {
+        return GC_FILE_BASE_PATH.replace("$", System.getProperty("user.name"));
+    }
 
     /**
      * Add all file paths, from the files that are saved by the user, in the associated tree
@@ -35,19 +39,14 @@ public class Initializer extends HttpServlet{
             lob_rootDirectory.mkdir();
         }
 
-            for (User lob_user : lco_userList) {
-                try {
-                    //get the directory of the user, build the tree and add it to the collection
-                    lob_userTree = new UserTree(lob_user, Utils.getRootDirectory());
-                    lob_fileTree.addTreeToCollection(lob_userTree);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+        for (User lob_user : lco_userList) {
+            try {
+                //get the directory of the user, build the tree and add it to the collection
+                lob_userTree = new UserTree(lob_user, Utils.getRootDirectory());
+                lob_fileTree.addTreeToCollection(lob_userTree);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-    }
-
-    //TODO change the path at the end of the project
-    public static String getUserBasePath() {
-        return GC_FILE_BASE_PATH.replace("$", System.getProperty("user.name"));
+        }
     }
 }

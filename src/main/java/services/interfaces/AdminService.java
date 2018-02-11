@@ -1,6 +1,6 @@
 package services.interfaces;
 
-import models.interfaces.User;
+import models.classes.User;
 
 public interface AdminService {
     boolean addNewAdmin(User iob_user);

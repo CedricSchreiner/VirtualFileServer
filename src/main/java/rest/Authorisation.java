@@ -1,6 +1,5 @@
-package rest.resourcess;
+package rest;
 
-import models.interfaces.User;
 import services.classes.AuthService;
 
 import javax.ws.rs.container.ContainerRequestContext;
@@ -9,39 +8,47 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 
+import static rest.constants.AdminResourceConstants.GC_ADMIN_NOT_AUTHORISED;
+import static rest.constants.RestConstants.GC_ADMIN_URI;
+import static rest.constants.RestConstants.GC_USER_URI;
+import static rest.constants.UserResourceConstants.GC_USER_NOT_AUTHORISED;
+
 @Provider
 public class Authorisation implements ContainerRequestFilter {
+
     @Override
     public void filter(ContainerRequestContext iob_containerRequest) {
         AuthService lob_authService;
         String iva_authCredentials;
-        Response unauthorizedStatus;
+        Response lob_unauthorizedStatus;
 
-        if(iob_containerRequest.getUriInfo().getPath().contains("auth")) {
+        if (iob_containerRequest.getUriInfo().getPath().contains(GC_USER_URI)) {
             iva_authCredentials = iob_containerRequest.getHeaderString(HttpHeaders.AUTHORIZATION);
             lob_authService = new AuthService();
 
-            User test = lob_authService.authenticateUser(iva_authCredentials);
+            if (lob_authService.authenticateUser(iva_authCredentials) == null) {
 
-            if(test == null) {
-                unauthorizedStatus = Response
+                lob_unauthorizedStatus = Response
                         .status(Response.Status.UNAUTHORIZED)
-                        .entity("User cant access the resource")
+                        .entity(GC_USER_NOT_AUTHORISED)
                         .build();
-                iob_containerRequest.abortWith(unauthorizedStatus);
+
+                iob_containerRequest.abortWith(lob_unauthorizedStatus);
             }
         }
 
-        if (iob_containerRequest.getUriInfo().getPath().contains("adminAuth")) {
+        if (iob_containerRequest.getUriInfo().getPath().contains(GC_ADMIN_URI)) {
             iva_authCredentials = iob_containerRequest.getHeaderString(HttpHeaders.AUTHORIZATION);
             lob_authService = new AuthService();
 
-            if(lob_authService.authenticateAdmin(iva_authCredentials) == null) {
-                unauthorizedStatus = Response
+            if (lob_authService.authenticateAdmin(iva_authCredentials) == null) {
+
+                lob_unauthorizedStatus = Response
                         .status(Response.Status.UNAUTHORIZED)
-                        .entity("You are not an admin!")
+                        .entity(GC_ADMIN_NOT_AUTHORISED)
                         .build();
-                iob_containerRequest.abortWith(unauthorizedStatus);
+
+                iob_containerRequest.abortWith(lob_unauthorizedStatus);
             }
         }
     }

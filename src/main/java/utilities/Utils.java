@@ -1,6 +1,6 @@
 package utilities;
 
-import models.interfaces.User;
+import models.classes.User;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
@@ -66,7 +66,8 @@ public class Utils {
      * @return a relative path to the file that can be send to the client
      */
     public static String createRelativePath(String iva_path, User iob_user) {
-        String rva_relativePath = getRootDirectory();
-        return rva_relativePath;
+        return getRootDirectory();
     }
+
+
 }
