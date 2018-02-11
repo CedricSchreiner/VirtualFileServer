@@ -2,7 +2,7 @@ package rest.constants;
 
 public abstract class FileResourceConstants {
 
-    public static final String GC_FILE_RESOURCE_PATH = "/files";
+    public static final String GC_FILE_RESOURCE_PATH = "/auth/files";
     public static final String GC_FILE_UPLOAD_PATH = "/upload";
     public static final String GC_FILE_DOWNLOAD_PATH = "/download";
     public static final String GC_FILE_RENAME_PATH = "/rename";

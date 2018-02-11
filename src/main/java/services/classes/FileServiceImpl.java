@@ -2,7 +2,6 @@ package services.classes;
 
 import fileTree.interfaces.Tree;
 import models.classes.FileTreeCollection;
-import models.classes.UserImpl;
 import models.interfaces.User;
 import org.apache.commons.io.IOUtils;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
@@ -24,41 +23,20 @@ public class FileServiceImpl implements FileService{
      *
      * @param ico_inputList contains file content and path
      */
-    public boolean addNewFile(List<InputPart> ico_inputList) {
-        //-------------------------------------Variables------------------------------------------
-        String lva_filePath;
-        byte[] lar_fileContentBytes;
-        User lob_user ;
-        User lob_dbUser;
-        UserServiceImpl lob_userService = new UserServiceImpl();
-        //----------------------------------------------------------------------------------------
-        for (int i = 0; i < (ico_inputList.size() / 2); i += 3) {
-            try {
-            //get the file content
-            lar_fileContentBytes = getFileContent(i, ico_inputList);
-
-            //get the absolute path of the file
-            lva_filePath = getFilePath(i + 1, ico_inputList);
-
-            //get the user who owns the file
-            lob_user = getUser(i + 2, ico_inputList);
-
-            if (lob_user != null) {
-                lob_dbUser = lob_userService.getUserByEmail(lob_user.getEmail());
-                if (lob_dbUser.getEmail() != null) {
-                    if (PasswordService.checkPasswordEquals(lob_user.getPassword(), lob_dbUser.getPassword())) {
-                        lva_filePath = Utils.getRootDirectory() + lob_user.getName() + lob_user.getUserId() + "\\" + lva_filePath;
-
-                        return writeFile(lar_fileContentBytes, lva_filePath, lob_user);
-                    }
-                }
-            }
-
-            } catch (IOException e) {
-                e.printStackTrace();
-                return false;
-            }
+    public boolean addNewFile(List<InputPart> ico_inputList, String iva_filePath, User iob_user) {
+        if (iob_user == null) {
+            return false;
         }
+
+        try {
+            byte[] lar_fileContentBytes = getFileContent(0, ico_inputList);
+            iva_filePath = createUserFilePath(iva_filePath, iob_user);
+            return writeFile(lar_fileContentBytes, iva_filePath, iob_user);
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
         return false;
     }
 
@@ -70,11 +48,6 @@ public class FileServiceImpl implements FileService{
      * @return true if the renaming was successful, otherwise false
      */
     public boolean renameFile(String iva_filePath, String iva_newFileName, User iob_user) {
-        //---------------------------------------Variables----------------------------------------
-        File lob_file;
-        String lva_newFilePath;
-        //----------------------------------------------------------------------------------------
-
         if (iob_user == null) {
             return false;
         }
@@ -82,7 +55,6 @@ public class FileServiceImpl implements FileService{
         iva_filePath = createUserFilePath(iva_filePath, iob_user);
         gob_fileTreeCollection = FileTreeCollection.getInstance();
         return gob_fileTreeCollection.getTreeFromUser(iob_user).renameFile(iva_filePath, iva_newFileName);
-        //return lob_file.renameTo(new File(lva_newFilePath));
     }
 
     /**
@@ -109,10 +81,6 @@ public class FileServiceImpl implements FileService{
      * @return true of the file was successfully moved, otherwise false
      */
     public boolean moveFile(String iva_filePath, String iva_newFilePath, User iob_user) {
-        //------------------------------Variables----------------------------------------
-        String lva_fileName;
-        //-------------------------------------------------------------------------------
-
         if (iob_user == null) {
             return false;
         }
@@ -120,11 +88,6 @@ public class FileServiceImpl implements FileService{
         //TODO check if is allow to move the file to the destination
         iva_filePath = createUserFilePath(iva_filePath, iob_user);
         iva_newFilePath = createUserFilePath(iva_newFilePath, iob_user);
-
-        //lva_fileName = iva_filePath.replaceFirst(".*\\\\", "");
-        //iva_newFilePath = iva_newFilePath + "\\" + lva_fileName;
-        //iva_newFilePath = iva_newFilePath.replaceFirst("[^\\\\]*$", lva_fileName);
-
         gob_fileTreeCollection = FileTreeCollection.getInstance();
         return gob_fileTreeCollection.getTreeFromUser(iob_user).moveFile(iva_filePath, iva_newFilePath);
     }
@@ -168,42 +131,6 @@ public class FileServiceImpl implements FileService{
         return IOUtils.toByteArray(
                 ico_inputList.get(iva_index).getBody(InputStream.class,null)
         );
-    }
-
-    private String getFilePath(int iva_index, List<InputPart> ico_inputList) throws IOException{
-        return new String(
-                IOUtils.toByteArray(ico_inputList.get(iva_index).getBody(InputStream.class, null))
-        );
-    }
-
-    private User getUser(int iva_index, List<InputPart> ico_inputList) throws IOException {
-        //----------------------------------------------Variables------------------------------------------
-        String lva_userString = new String(
-                IOUtils.toByteArray(ico_inputList.get(iva_index).getBody(InputStream.class, null))
-        );
-        //-------------------------------------------------------------------------------------------------
-        return createUserFromString(lva_userString);
-    }
-
-    private User createUserFromString(String iva_userString) {
-        //-----------------------------Variables------------------------
-        User rob_user = null;
-        try {
-            String[] lar_userAttributes = iva_userString.split("\\|", 6);
-            String lva_email = lar_userAttributes[0];
-            String lva_password = lar_userAttributes[1];
-            String lva_name = lar_userAttributes[2];
-            boolean lva_isAdmin = Boolean.getBoolean(lar_userAttributes[3]);
-            int lva_userId = Integer.valueOf(lar_userAttributes[4]);
-            int lva_adminId = Integer.valueOf(lar_userAttributes[5]);
-            rob_user = new UserImpl(lva_email, lva_password, lva_name, lva_isAdmin, lva_userId, lva_adminId);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        //--------------------------------------------------------------
-
-        return rob_user;
     }
 
     /**

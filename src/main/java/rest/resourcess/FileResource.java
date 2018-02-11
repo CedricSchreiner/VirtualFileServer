@@ -53,10 +53,14 @@ public class FileResource {
     @POST
     @Path(GC_FILE_UPLOAD_PATH)
     @Consumes({MediaType.MULTIPART_FORM_DATA})
-    public Response uploadFile(MultipartFormDataInput iob_input) {
+    public Response uploadFile(MultipartFormDataInput iob_input, @QueryParam(GC_PARAMETER_PATH_NAME) String iva_filePath
+            , @Context ContainerRequestContext iob_requestContext) {
         Map<String, List<InputPart>> lco_uploadForm = iob_input.getFormDataMap();
         List<InputPart> lob_inputParts = lco_uploadForm.get(GC_ATTACHMENT);
-        if (!gob_fileService.addNewFile(lob_inputParts)) {
+
+        User lob_user = getUserFromContext(iob_requestContext);
+
+        if (!gob_fileService.addNewFile(lob_inputParts, iva_filePath, lob_user)) {
             return Response.status(Response.Status.EXPECTATION_FAILED).build();
         }
 

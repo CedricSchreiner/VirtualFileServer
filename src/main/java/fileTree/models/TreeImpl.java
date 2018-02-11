@@ -329,7 +329,6 @@ public class TreeImpl implements Tree {
         //----------------------Variables-----------------------
         FileNode lob_parent;
         FileNode lob_node;
-        boolean lva_moveFailed = true;
         //------------------------------------------------------
 
         try {
@@ -348,16 +347,17 @@ public class TreeImpl implements Tree {
             if (lob_parent != null) {
                 for (FileNode lob_child : lob_node.getChildren()) {
                     if(!moveFile(lob_child.getFile(), lob_parent.getFile().getCanonicalPath())){
-                        lva_moveFailed = false;
+                        return false;
                     }
+
                     lob_node.removeChild(lob_node.getFile());
                     lob_child.setParent(lob_parent);
                     lob_parent.addChild(lob_child);
                 }
                 lob_parent.removeChild(lob_node.getFile());
-                if (lva_moveFailed) {
-                    lob_node.getFile().delete();
-                }
+                refreshTree(gob_rootNode, "");
+
+                lob_node.getFile().delete();
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -369,25 +369,26 @@ public class TreeImpl implements Tree {
     /**
      * move a file
      *
-     * @param iob_node file to move
+     * @param iob_file file to move
      * @param iva_destinationNode new file path
      * @return true if the file was moved, otherwise false
      */
     @Override
-    public boolean moveFile(File iob_node, String iva_destinationNode) {
+    public boolean moveFile(File iob_file, String iva_destinationNode) {
         try {
-            FileNode lob_node = searchNode(gob_rootNode, iva_destinationNode, 0);
-
-            if (lob_node == null){
+            FileNode lob_fileNode = searchNode(gob_rootNode, iob_file.getCanonicalPath(), 0);
+            FileNode lob_destination = searchNode(gob_rootNode, iva_destinationNode, 0);
+            File lob_destinationFile;
+            if (lob_fileNode == null || lob_destination == null) {
                 return false;
             }
 
-            File file = lob_node.getFile();
+            lob_destinationFile = lob_destination.getFile();
 
-            if (iob_node.isDirectory()) {
-                FileUtils.moveDirectoryToDirectory(iob_node, file, false);
+            if (lob_fileNode.getFile().isDirectory()) {
+                FileUtils.moveDirectoryToDirectory(iob_file, lob_destinationFile, false);
             } else {
-                FileUtils.moveFileToDirectory(iob_node, file, false);
+                FileUtils.moveFileToDirectory(iob_file, lob_destinationFile, false);
             }
             return true;
         } catch (Exception e) {
@@ -528,6 +529,36 @@ public class TreeImpl implements Tree {
         }
 
         return lob_difference;
+    }
+
+    /**
+     * its possible that some nodes point to files, do not exist anymore. This can happen after a directory or a file
+     * has been moved
+     *
+     * WARNIG: This method must be called with a node that points to a correct file, otherwise the
+     * behaviour is unexpected
+     *
+     * @param iob_nodeToUpdate node that could contain a non existing file
+     * @param iva_parentPath path of the parent file (must have a correct file path)
+     */
+    private void refreshTree(FileNode iob_nodeToUpdate, String iva_parentPath) {
+        //---------------------------------Variables----------------------------
+        String lva_newFilePath;
+        //----------------------------------------------------------------------
+
+        try {
+            if (!iob_nodeToUpdate.getFile().exists()) {
+                lva_newFilePath = iva_parentPath + "\\" + iob_nodeToUpdate.getFile().getName();
+
+                iob_nodeToUpdate.setFile(new File(lva_newFilePath));
+            }
+
+            for (FileNode lob_child : iob_nodeToUpdate.getChildren()) {
+                refreshTree(lob_child, iob_nodeToUpdate.getFile().getCanonicalPath());
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
     }
 
     private FileNode addNode(FileNode iob_parent, FileNode iob_nodeToInsert, int depth) throws IOException{

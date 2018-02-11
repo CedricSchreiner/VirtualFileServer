@@ -12,7 +12,7 @@ public interface FileService {
      *
      * @param ico_inputList contains file content and path
      */
-    boolean addNewFile(List<InputPart> ico_inputList);
+    boolean addNewFile(List<InputPart> ico_inputList, String iva_filePath, User iob_user);
 
     /**
      * rename a existing file
