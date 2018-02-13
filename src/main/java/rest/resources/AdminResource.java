@@ -15,9 +15,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import static rest.constants.AdminResourceConstants.*;
-import static rest.constants.RestConstants.GC_USERS;
-import static utilities.RestUtils.checkIfUsersNotEqual;
-import static utilities.RestUtils.getUserFromContext;
 
 @Path(GC_ADMIN_PATH)
 @Produces(MediaType.APPLICATION_JSON)
@@ -29,16 +26,6 @@ public class AdminResource {
     @Path(GC_ADD_NEW_ADMIN_PATH)
     public Response addNewAdmin(@Context ContainerRequestContext iob_requestContext, User iob_user) {
         boolean lva_adminAdded;
-        User lob_user;
-
-        lob_user = getUserFromContext(iob_requestContext);
-
-        if (checkIfUsersNotEqual(lob_user, iob_user)) {
-            return Response
-                    .status(Response.Status.FORBIDDEN)
-                    .entity(GC_USERS)
-                    .build();
-        }
 
         try {
             lva_adminAdded = adminService.addNewAdmin(iob_user);
