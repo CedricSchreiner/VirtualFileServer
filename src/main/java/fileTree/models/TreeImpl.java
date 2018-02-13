@@ -525,6 +525,57 @@ public class TreeImpl implements Tree {
     }
 
     /**
+     * replace the file of a node and move the node to the corresponding position in the tree
+     *
+     * @param iob_file    the old file that is not needed or does not exist anymore
+     * @param iob_newFile the new file
+     * @param iob_nodePointer use this only if you are sure that the node is in the correct position and just the file has
+     *                      to be replaced
+     */
+    @Override
+    public boolean replaceFile(File iob_file, File iob_newFile, FileNode iob_nodePointer) {
+        try {
+            String lva_filePath;
+            FileNode lob_oldFileNode;
+            if (iob_nodePointer == null) {
+                lob_oldFileNode = searchNode(gob_rootNode, iob_file.getCanonicalPath(), 0);
+            } else {
+                lob_oldFileNode = iob_nodePointer;
+            }
+
+            FileNode lob_newParent;
+            String lva_parentNodePath;
+            String lva_parentFilePath;
+            if (lob_oldFileNode == null) {
+                return false;
+            }
+
+            lob_oldFileNode.setFile(iob_newFile);
+            lva_parentNodePath = lob_oldFileNode.getParent().getFile().getCanonicalPath();
+            lva_parentFilePath = lob_oldFileNode.getFile().getParent();
+            //the node must be moved in the tree if the parents of the file and the node are not the same
+            if (!lva_parentFilePath.equals(lva_parentNodePath) || iob_newFile.isDirectory()) {
+                lob_newParent = searchNode(gob_rootNode, lva_parentFilePath, 0);
+                if (lob_newParent == null) {
+                    return false;
+                }
+                lob_oldFileNode.getParent().getChildren().remove(lob_oldFileNode);
+                lob_newParent.getChildren().add(lob_oldFileNode);
+                lob_oldFileNode.setParent(lob_newParent);
+                for (FileNode lob_child : lob_oldFileNode.getChildren()) {
+                    lva_filePath = iob_newFile.getCanonicalPath() + "\\" + lob_child.getFile().getName();
+                    replaceFile(lob_child.getFile(), new File(lva_filePath), lob_child);
+                }
+            }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * its possible that some nodes point to files, do not exist anymore. This can happen after a directory or a file
      * has been moved
      *
