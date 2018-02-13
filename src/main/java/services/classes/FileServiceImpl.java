@@ -2,7 +2,7 @@ package services.classes;
 
 import fileTree.interfaces.Tree;
 import models.classes.FileTreeCollection;
-import models.interfaces.User;
+import models.classes.User;
 import org.apache.commons.io.IOUtils;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import services.interfaces.FileService;
