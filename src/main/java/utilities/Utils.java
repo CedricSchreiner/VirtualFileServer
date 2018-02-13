@@ -8,6 +8,7 @@ import org.jdom2.input.SAXBuilder;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 
 public class Utils {
     public static void check(boolean argument, String msg) {
@@ -41,7 +42,8 @@ public class Utils {
         String rootDirectoryPath = "";
 
         try {
-            String filePath = Utils.class.getClassLoader().getResource("virtualFileServerConfig.xml").getPath();
+            String filePath = Objects.requireNonNull(Utils.class.getClassLoader()
+                    .getResource("virtualFileServerConfig.xml")).getPath();
             File file = new File(filePath);
 
             SAXBuilder builder = new SAXBuilder();
