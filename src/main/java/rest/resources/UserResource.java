@@ -140,6 +140,7 @@ public class UserResource {
         return gob_userService.getAllUser();
     }
 
+    @GET
     @Path(GC_USER_UNREGISTER_IP)
     public void unregisterIp(@Context ContainerRequestContext iob_requestContext,
                              @Context HttpServletRequest iob_servletRequest) {
@@ -150,6 +151,7 @@ public class UserResource {
         lob_ipCache = Cache.getIpCache();
         lob_user = getUserFromContext(iob_requestContext);
         lva_ipAddress = iob_servletRequest.getRemoteAddr();
+
         lob_ipCache.removeEntry(lob_user.getEmail(), lva_ipAddress);
     }
 }
