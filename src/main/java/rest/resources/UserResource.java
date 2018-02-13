@@ -1,6 +1,7 @@
 package rest.resources;
 
 import builder.ServiceObjectBuilder;
+import cache.Cache;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import models.classes.User;
 import models.exceptions.UserAlreadyExistsException;
@@ -8,6 +9,7 @@ import models.exceptions.UserEmptyException;
 import models.exceptions.UsersNotEqualException;
 import services.interfaces.UserService;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
@@ -30,10 +32,12 @@ public class UserResource {
     @PUT
     @Path(GC_USER_LOGIN_PATH)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response login(@Context ContainerRequestContext iob_requestContext, User iob_user) {
+    public Response login(@Context HttpServletRequest iob_servletRequest, @Context ContainerRequestContext iob_requestContext, User iob_user) {
         User lob_user;
         String lva_jsonString;
         ObjectMapper lob_mapper;
+        String lva_ipAddress;
+        Cache lob_ipCache = Cache.getIpCache();
 
         lob_user = getUserFromContext(iob_requestContext);
 
@@ -49,6 +53,9 @@ public class UserResource {
             lob_user = gob_userService.getUserByEmail(iob_user.getEmail());
             lob_mapper = new ObjectMapper();
             lva_jsonString = lob_mapper.writeValueAsString(lob_user);
+            lva_ipAddress = iob_servletRequest.getRemoteAddr();
+
+            lob_ipCache.put(lob_user.getEmail(), lva_ipAddress);
 
             return Response.ok()
                     .entity(lva_jsonString)
@@ -131,5 +138,18 @@ public class UserResource {
     @Path(GC_USER_GET_ALL_USER_PATH)
     public List<User> getAllUser() {
         return gob_userService.getAllUser();
+    }
+
+    @Path(GC_USER_UNREGISTER_IP)
+    public void unregisterIp(@Context ContainerRequestContext iob_requestContext,
+                             @Context HttpServletRequest iob_servletRequest) {
+        Cache lob_ipCache;
+        User lob_user;
+        String lva_ipAddress;
+
+        lob_ipCache = Cache.getIpCache();
+        lob_user = getUserFromContext(iob_requestContext);
+        lva_ipAddress = iob_servletRequest.getRemoteAddr();
+        lob_ipCache.removeEntry(lob_user.getEmail(), lva_ipAddress);
     }
 }

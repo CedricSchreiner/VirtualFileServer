@@ -11,6 +11,7 @@ public abstract class UserResourceConstants {
     public static final String GC_USER_CHANGE_PASSWORD_PATH = "/auth/changePassword/";
     public static final String GC_USER_ADD_NEW_USER_PATH    = "addNewUser/";
     public static final String GC_USER_GET_ALL_USER_PATH    = "/adminAuth/getAllUser";
+    public static final String GC_USER_UNREGISTER_IP        = "/auth/unregisterIp";
 
 // ---------------------------------------------------------------------------------------------------------------------
 
