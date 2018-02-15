@@ -11,4 +11,5 @@ public interface SharedDirectoryDao {
     boolean deleteSharedDirectory(SharedDirectory iob_sharedDirectory);
     boolean removeMemberFromSharedDirectory(SharedDirectory iob_sharedDirectory, User iob_user);
     List<SharedDirectory> getAllSharedDirectories();
+    SharedDirectory getSharedDirectoryById(int iva_id);
 }
