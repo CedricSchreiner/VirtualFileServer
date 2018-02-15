@@ -210,9 +210,9 @@ public class SharedDirectoryDaoImpl implements SharedDirectoryDao {
                 lob_owner = new User();
 
 // TODO
-// SELECT * FROM User as User1 CROSS JOIN (SharedDirectory CROSS JOIN (SharedDirectoryMember CROSS JOIN User
-// ON SharedDirectoryMember.member = User.userId)
-// ON SharedDirectory.id = SharedDirectoryMember.groupId) ON User1.userId = SharedDirectory.owner
+// SELECT * FROM User as owner CROSS JOIN (SharedDirectory CROSS JOIN (SharedDirectoryMember CROSS JOIN User AS member
+// ON SharedDirectoryMember.member = member.userId)
+// ON SharedDirectory.id = SharedDirectoryMember.groupId) ON owner.userId = SharedDirectory.owner
 
                 if (!lva_sharedDirectoryExists) {
                     lob_sharedDirectory = new SharedDirectory();
