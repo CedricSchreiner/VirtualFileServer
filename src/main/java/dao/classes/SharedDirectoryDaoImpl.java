@@ -13,12 +13,14 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static dao.constants.AdminDaoConstants.GC_COL_ADMIN_ID;
+import static dao.constants.DaoConstants.GC_CONSTRAINT_FAILED;
 import static dao.constants.DaoConstants.GC_PARAMETER_1;
 import static dao.constants.DaoConstants.GC_PARAMETER_2;
 import static dao.constants.SharedDirectoryConstants.*;
-import static dao.constants.UserDaoConstants.GC_COL_USER_ID;
-import static dao.constants.UserDaoConstants.GC_TABLE_USER;
+import static dao.constants.UserDaoConstants.*;
 import static models.constants.SharedDirectoryConstants.GC_ERR_SHARED_DIRECTORY_ALREADY_EXISTS;
+import static models.constants.SharedDirectoryConstants.GC_ERR_S_DIR_MEMBER_ALREADY_EXISTS;
 
 public class SharedDirectoryDaoImpl implements SharedDirectoryDao {
     // Prepared Statements -------------------------------------------------------------------------------------------------
@@ -52,14 +54,15 @@ public class SharedDirectoryDaoImpl implements SharedDirectoryDao {
             GC_COL_SHARED_D_MEMBER_GROUP_ID + " = ?";
 
     private static final String GC_GET_S_DIR_BY_ID = String.format("SELECT * FROM %s AS owner CROSS JOIN (%s LEFT OUTER" +
-                    " JOIN (%s CROSS JOIN %s AS member ON %s.member = member.%s) ON %s.%s = %s.%s) ON owner.%s = %s.%s",
+                    " JOIN (%s CROSS JOIN %s AS member ON %s.member = member.%s) ON %s.%s = %s.%s) ON owner.%s = %s.%s WHERE %s.%s = ?",
             GC_TABLE_USER, GC_TABLE_SHARED_DIRECTORY, GC_TABLE_SHARED_DIRECTORY_MEMBER, GC_TABLE_USER,
             GC_TABLE_SHARED_DIRECTORY_MEMBER, GC_COL_USER_ID, GC_TABLE_SHARED_DIRECTORY, GC_COL_SHARED_D_ID,
-            GC_TABLE_SHARED_DIRECTORY_MEMBER, GC_COL_SHARED_D_MEMBER_GROUP_ID, GC_COL_USER_ID, GC_TABLE_SHARED_DIRECTORY, GC_COL_SHARED_D_OWNER);
+            GC_TABLE_SHARED_DIRECTORY_MEMBER, GC_COL_SHARED_D_MEMBER_GROUP_ID, GC_COL_USER_ID,
+            GC_TABLE_SHARED_DIRECTORY, GC_COL_SHARED_D_OWNER, GC_TABLE_SHARED_DIRECTORY, GC_COL_SHARED_D_ID);
 
 
 
-
+    // TODO löschen
     String a = "SELECT * FROM User as owner CROSS JOIN (SharedDirectory LEFT OUTER JOIN (SharedDirectoryMember " +
     "CROSS JOIN User as member ON " +"SharedDirectoryMember.member = User.userId) ON SharedDirectory.id = SharedDirectoryMember.groupId) " +
             "ON User1.userId = SharedDirectory.owner";
@@ -90,7 +93,7 @@ public class SharedDirectoryDaoImpl implements SharedDirectoryDao {
 
             lva_rowCount = lob_preparedStatement.executeUpdate();
         } catch (SQLException ex) {
-            if (ex.getMessage().contains("A UNIQUE constraint failed")) {
+            if (ex.getMessage().contains(GC_CONSTRAINT_FAILED)) {
                 throw new SharedDirectoryException(GC_ERR_SHARED_DIRECTORY_ALREADY_EXISTS);
             }
 
@@ -234,7 +237,12 @@ public class SharedDirectoryDaoImpl implements SharedDirectoryDao {
                 if (!lva_sharedDirectoryExists) {
                     lob_sharedDirectory = new SharedDirectory();
                     lob_sharedDirectory.setId(lob_rs.getInt(GC_COL_SHARED_D_ID));
-                    lob_owner.setUserId(lob_rs.getInt(GC_COL_SHARED_D_OWNER));
+
+                    lob_owner.setUserId(lob_rs.getInt(GC_COL_USER_ID));
+                    lob_owner.setEmail(lob_rs.getString(GC_COL_USER_EMAIL));
+                    lob_owner.setPassword(lob_rs.getString(GC_COL_USER_PASSWORD));
+                    lob_owner.setName(lob_rs.getString(GC_COL_USER_NAME));
+
                     lob_sharedDirectory.setOwner(lob_owner);
                     lob_sharedDirectory.setDirectoryName(lob_rs.getString(GC_COL_SHARED_D_GROUP_NAME));
 
@@ -242,6 +250,10 @@ public class SharedDirectoryDaoImpl implements SharedDirectoryDao {
 
                     if (lva_memberId != 0) {
                         lob_member.setUserId(lva_memberId);
+                        lob_member.setEmail(lob_rs.getString(12));
+                        lob_member.setPassword(lob_rs.getString(13));
+                        lob_member.setName(lob_rs.getString(14));
+
                         lob_memberList.add(lob_member);
                     }
 
@@ -252,22 +264,21 @@ public class SharedDirectoryDaoImpl implements SharedDirectoryDao {
 
                     if (lva_memberId != 0) {
                         lob_member.setUserId(lva_memberId);
+                        lob_member.setEmail(lob_rs.getString(12));
+                        lob_member.setPassword(lob_rs.getString(13));
+                        lob_member.setName(lob_rs.getString(14));
                         lob_sharedDirectory.getMembers().add(lob_member);
                     }
                 }
             }
         } catch (SQLException ex) {
-            if (ex.getMessage().contains("A UNIQUE constraint failed")) {
-                throw new SharedDirectoryException("GC_ERR_S_DIR_MEMBER_ALREADY_EXISTS");
+            if (ex.getMessage().contains(GC_CONSTRAINT_FAILED)) {
+                throw new SharedDirectoryException(GC_ERR_S_DIR_MEMBER_ALREADY_EXISTS);
             }
 
             ex.printStackTrace();
         }
 
         return lob_sharedDirectory;
-    }
-
-    public static void main(String[] args) {
-        System.out.println(GC_GET_S_DIR_BY_ID);
     }
 }

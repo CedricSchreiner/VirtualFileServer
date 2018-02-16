@@ -91,6 +91,8 @@ public class SharedDirectoryServiceImpl implements SharedDirectoryService {
             throw new SharedDirectoryException(GC_ERR_S_DIR_DOES_NOT_EXISTS);
         }
 
+        iob_member = gob_userService.getUserByEmail(iob_member.getEmail());
+
         return gob_sharedDirectoryDao.addNewMemberToSharedDirectory(lob_sharedDirectory, iob_member);
     }
 

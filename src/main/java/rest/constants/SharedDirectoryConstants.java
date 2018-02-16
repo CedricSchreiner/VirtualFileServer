@@ -24,4 +24,6 @@ public abstract class SharedDirectoryConstants {
     public static final String GC_S_DIR_MEMBER_NOT_REMOVED = "Member could not be removed!";
     public static final String GC_S_DIR_SUCCESSFULLY_ADDED = "Shared directory successfully added!";
     public static final String GC_S_DIR_COULD_NOT_BE_ADDED = "Shared directory could not be added!";
+    public static final String GC_S_DIR_MEMBER_SUCCESSFULLY_ADDED = "Member successfully added!";
+    public static final String GC_S_DIR_MEMBER_NOT_ADDED = "Member could not be added!";
 }
