@@ -16,6 +16,8 @@ import java.util.List;
 import static dao.constants.DaoConstants.GC_PARAMETER_1;
 import static dao.constants.DaoConstants.GC_PARAMETER_2;
 import static dao.constants.SharedDirectoryConstants.*;
+import static dao.constants.UserDaoConstants.GC_COL_USER_ID;
+import static dao.constants.UserDaoConstants.GC_TABLE_USER;
 import static models.constants.SharedDirectoryConstants.GC_ERR_SHARED_DIRECTORY_ALREADY_EXISTS;
 
 public class SharedDirectoryDaoImpl implements SharedDirectoryDao {
@@ -49,10 +51,30 @@ public class SharedDirectoryDaoImpl implements SharedDirectoryDao {
     private static final String GC_REMOVE_MEMBER = "DELETE FROM " + GC_TABLE_SHARED_DIRECTORY_MEMBER + " WHERE " +
             GC_COL_SHARED_D_MEMBER_GROUP_ID + " = ?";
 
-    private static final String GC_GET_S_DIR_BY_ID = "SELECT * FROM " + GC_TABLE_SHARED_DIRECTORY +
+    private static final String GC_GET_S_DIR_BY_ID = String.format("SELECT * FROM %s AS owner CROSS JOIN (%s LEFT OUTER" +
+                    " JOIN (%s CROSS JOIN %s AS member ON %s.member = member.%s) ON %s.%s = %s.%s) ON owner.%s = %s.%s",
+            GC_TABLE_USER, GC_TABLE_SHARED_DIRECTORY, GC_TABLE_SHARED_DIRECTORY_MEMBER, GC_TABLE_USER,
+            GC_TABLE_SHARED_DIRECTORY_MEMBER, GC_COL_USER_ID, GC_TABLE_SHARED_DIRECTORY, GC_COL_SHARED_D_ID,
+            GC_TABLE_SHARED_DIRECTORY_MEMBER, GC_COL_SHARED_D_MEMBER_GROUP_ID, GC_COL_USER_ID, GC_TABLE_SHARED_DIRECTORY, GC_COL_SHARED_D_OWNER);
+
+
+
+
+    String a = "SELECT * FROM User as owner CROSS JOIN (SharedDirectory LEFT OUTER JOIN (SharedDirectoryMember " +
+    "CROSS JOIN User as member ON " +"SharedDirectoryMember.member = User.userId) ON SharedDirectory.id = SharedDirectoryMember.groupId) " +
+            "ON User1.userId = SharedDirectory.owner";
+
+
+
+
+
+
+    /*"SELECT * FROM " + GC_TABLE_SHARED_DIRECTORY +
             " LEFT OUTER JOIN " + GC_TABLE_SHARED_DIRECTORY_MEMBER + " ON " + GC_TABLE_SHARED_DIRECTORY + "." +
             GC_COL_SHARED_D_ID + " = " + GC_TABLE_SHARED_DIRECTORY_MEMBER + "." + GC_COL_SHARED_D_MEMBER_GROUP_ID +
             " WHERE " + GC_TABLE_SHARED_DIRECTORY + "." + GC_COL_SHARED_D_ID + " = ?";
+    */
+
 // ---------------------------------------------------------------------------------------------------------------------
 
     private final DatabaseConnection gob_databaseConnection = DatabaseConnection.getInstance();
@@ -209,12 +231,6 @@ public class SharedDirectoryDaoImpl implements SharedDirectoryDao {
                 lob_member = new User();
                 lob_owner = new User();
 
-// TODO
-//SELECT *
-//FROM User as User1 CROSS JOIN (SharedDirectory LEFT OUTER JOIN (SharedDirectoryMember
-// CROSS JOIN User ON SharedDirectoryMember.member = User.userId) ON SharedDirectory.id = SharedDirectoryMember.groupId)
-// ON User1.userId = SharedDirectory.owner
-
                 if (!lva_sharedDirectoryExists) {
                     lob_sharedDirectory = new SharedDirectory();
                     lob_sharedDirectory.setId(lob_rs.getInt(GC_COL_SHARED_D_ID));
@@ -249,5 +265,9 @@ public class SharedDirectoryDaoImpl implements SharedDirectoryDao {
         }
 
         return lob_sharedDirectory;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(GC_GET_S_DIR_BY_ID);
     }
 }
