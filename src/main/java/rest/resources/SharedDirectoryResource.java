@@ -158,6 +158,8 @@ public class SharedDirectoryResource {
         // Get the user who requested this resource
         // Check if the user who requested and who wants to create the shared directory are the same
         lob_user = getUserFromContext(iob_requestContext);
+
+        iob_sharedDirectory = gob_sharedDirectoryService.getSharedDirectoryById(iob_sharedDirectory.getId());
         if (checkIfUsersNotEqual(lob_user, iob_sharedDirectory.getOwner())) {
 
             return Response

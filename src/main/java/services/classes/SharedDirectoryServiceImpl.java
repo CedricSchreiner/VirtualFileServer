@@ -3,7 +3,6 @@ package services.classes;
 import builder.DaoObjectBuilder;
 import builder.ServiceObjectBuilder;
 import dao.interfaces.SharedDirectoryDao;
-import dao.interfaces.UserDao;
 import models.classes.SharedDirectory;
 import models.classes.User;
 import models.exceptions.SharedDirectoryException;
@@ -13,11 +12,12 @@ import services.interfaces.UserService;
 import java.util.ArrayList;
 import java.util.List;
 
-import static models.constants.SharedDirectoryConstants.*;
+import static models.constants.SharedDirectoryConstants.GC_ERR_S_DIR_DOES_NOT_EXISTS;
+import static models.constants.SharedDirectoryConstants.GC_ERR_S_DIR_MEMBER_ALREADY_EXISTS;
+import static models.constants.SharedDirectoryConstants.GC_ERR_S_DIR_MEMBER_DOES_NOT_EXISTS;
 import static models.constants.UserConstants.GC_EMPTY_USER;
 
 public class SharedDirectoryServiceImpl implements SharedDirectoryService {
-    private UserDao gob_userDao = DaoObjectBuilder.getUserDaoObject();
     private SharedDirectoryDao gob_sharedDirectoryDao = DaoObjectBuilder.getSharedDirectoryObject();
     private UserService gob_userService = ServiceObjectBuilder.getUserServiceObject();
 
@@ -39,11 +39,11 @@ public class SharedDirectoryServiceImpl implements SharedDirectoryService {
 
     /**
      * Adds a new shared directory and all its member
+     *
      * @param iob_sharedDirectory the shared directory
      * @return false if an exception occurred otherwise true
      */
     public boolean addNewSharedDirectory(SharedDirectory iob_sharedDirectory) {
-        List<SharedDirectory> lob_sharedDirectories;
         boolean lva_hasSharedDirectoryAdded;
         boolean lva_hasMemberAdded = false;
         User lob_user;
@@ -78,8 +78,9 @@ public class SharedDirectoryServiceImpl implements SharedDirectoryService {
 
     /**
      * Adds a member to a shared directory
+     *
      * @param iob_sharedDirectory the shared directory
-     * @param iob_member the new member
+     * @param iob_member          the new member
      * @return false if an exception occurred otherwise true
      */
     public boolean addNewMemberToSharedDirectory(SharedDirectory iob_sharedDirectory, User iob_member) {
@@ -115,13 +116,15 @@ public class SharedDirectoryServiceImpl implements SharedDirectoryService {
             throw new SharedDirectoryException(GC_ERR_S_DIR_DOES_NOT_EXISTS);
         }
 
+        iob_member = gob_userService.getUserByEmail(iob_member.getEmail());
+
         for (User lob_user : lob_sharedDirectory.getMembers()) {
             if (lob_user.getUserId() == iob_member.getUserId()) {
                 return gob_sharedDirectoryDao.removeMemberFromSharedDirectory(iob_sharedDirectory, iob_member);
             }
         }
 
-        throw new SharedDirectoryException(GC_ERR_S_DIR_MEMBER_ALREADY_EXISTS);
+        throw new SharedDirectoryException(GC_ERR_S_DIR_MEMBER_DOES_NOT_EXISTS);
     }
 
     public SharedDirectory getSharedDirectoryById(int iva_id) {
@@ -129,7 +132,7 @@ public class SharedDirectoryServiceImpl implements SharedDirectoryService {
     }
 
     private boolean areTheDirectoriesEqual(SharedDirectory iob_dir1, SharedDirectory iob_dir2) {
-        return  (iob_dir1.getOwner().getUserId() == iob_dir2.getOwner().getUserId() &&
+        return (iob_dir1.getOwner().getUserId() == iob_dir2.getOwner().getUserId() &&
                 iob_dir1.getDirectoryName().equals(iob_dir2.getDirectoryName()));
     }
 }
