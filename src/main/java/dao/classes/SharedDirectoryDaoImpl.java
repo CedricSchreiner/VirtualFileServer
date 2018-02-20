@@ -13,10 +13,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static dao.constants.AdminDaoConstants.GC_COL_ADMIN_ID;
-import static dao.constants.DaoConstants.GC_CONSTRAINT_FAILED;
-import static dao.constants.DaoConstants.GC_PARAMETER_1;
-import static dao.constants.DaoConstants.GC_PARAMETER_2;
+import static dao.constants.DaoConstants.*;
 import static dao.constants.SharedDirectoryConstants.*;
 import static dao.constants.UserDaoConstants.*;
 import static models.constants.SharedDirectoryConstants.GC_ERR_SHARED_DIRECTORY_ALREADY_EXISTS;
@@ -59,24 +56,6 @@ public class SharedDirectoryDaoImpl implements SharedDirectoryDao {
             GC_TABLE_SHARED_DIRECTORY_MEMBER, GC_COL_USER_ID, GC_TABLE_SHARED_DIRECTORY, GC_COL_SHARED_D_ID,
             GC_TABLE_SHARED_DIRECTORY_MEMBER, GC_COL_SHARED_D_MEMBER_GROUP_ID, GC_COL_USER_ID,
             GC_TABLE_SHARED_DIRECTORY, GC_COL_SHARED_D_OWNER, GC_TABLE_SHARED_DIRECTORY, GC_COL_SHARED_D_ID);
-
-
-
-    // TODO löschen
-    String a = "SELECT * FROM User as owner CROSS JOIN (SharedDirectory LEFT OUTER JOIN (SharedDirectoryMember " +
-    "CROSS JOIN User as member ON " +"SharedDirectoryMember.member = User.userId) ON SharedDirectory.id = SharedDirectoryMember.groupId) " +
-            "ON User1.userId = SharedDirectory.owner";
-
-
-
-
-
-
-    /*"SELECT * FROM " + GC_TABLE_SHARED_DIRECTORY +
-            " LEFT OUTER JOIN " + GC_TABLE_SHARED_DIRECTORY_MEMBER + " ON " + GC_TABLE_SHARED_DIRECTORY + "." +
-            GC_COL_SHARED_D_ID + " = " + GC_TABLE_SHARED_DIRECTORY_MEMBER + "." + GC_COL_SHARED_D_MEMBER_GROUP_ID +
-            " WHERE " + GC_TABLE_SHARED_DIRECTORY + "." + GC_COL_SHARED_D_ID + " = ?";
-    */
 
 // ---------------------------------------------------------------------------------------------------------------------
 
