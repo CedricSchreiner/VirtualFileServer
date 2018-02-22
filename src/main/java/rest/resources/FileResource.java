@@ -75,7 +75,7 @@ public class FileResource {
 
         User lob_user = getUserFromContext(iob_requestContext);
 
-        if (!gob_fileService.renameFile(iva_path, iva_newFileName, lob_user)) {
+        if (!gob_fileService.moveFile(iva_path, iva_newFileName, lob_user)) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
         return Response.ok().entity(FILE_RENAMED).build();

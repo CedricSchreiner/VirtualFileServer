@@ -15,16 +15,6 @@ public interface FileService {
     boolean addNewFile(List<InputPart> ico_inputList, String iva_filePath, User iob_user);
 
     /**
-     * rename a existing file
-     *
-     * @param iva_filePath    the path of the file
-     * @param iva_newFileName new name of the file
-     * @param iob_user        the user that wants to change the file name
-     * @return true if the renaming was successful, otherwise false
-     */
-    boolean renameFile(String iva_filePath, String iva_newFileName, User iob_user);
-
-    /**
      * delete a file
      *
      * @param iva_filePath the path of the file
@@ -34,12 +24,12 @@ public interface FileService {
     boolean deleteFile(String iva_filePath, User iob_user);
 
     /**
-     * move a existing file to a new location
+     * move a or rename existing file to a new location
      *
      * @param iva_filePath    the current path of the file
      * @param iva_newFilePath the new path of the file
-     * @param iob_user        the user who wants to move the file
-     * @return true of the file was successfully moved, otherwise false
+     * @param iob_user        the user who wants to move or rename the file
+     * @return true of the file was successfully moved or renamed, otherwise false
      */
     boolean moveFile(String iva_filePath, String iva_newFilePath, User iob_user);
 

@@ -41,23 +41,6 @@ public class FileServiceImpl implements FileService{
     }
 
     /**
-     * rename a existing file
-     * @param iva_filePath the path of the file
-     * @param iva_newFileName new name of the file
-     * @param iob_user the user that wants to change the file name
-     * @return true if the renaming was successful, otherwise false
-     */
-    public boolean renameFile(String iva_filePath, String iva_newFileName, User iob_user) {
-        if (iob_user == null) {
-            return false;
-        }
-
-        iva_filePath = createUserFilePath(iva_filePath, iob_user);
-        gob_fileTreeCollection = FileTreeCollection.getInstance();
-        return gob_fileTreeCollection.getTreeFromUser(iob_user).renameFile(iva_filePath, iva_newFileName);
-    }
-
-    /**
      * delete a file
      * @param iva_filePath the path of the file
      * @param iob_user the user who wants to delete the file
@@ -74,11 +57,12 @@ public class FileServiceImpl implements FileService{
     }
 
     /**
-     * move a existing file to a new location
-     * @param iva_filePath the current path of the file
+     * move a or rename existing file to a new location
+     *
+     * @param iva_filePath    the current path of the file
      * @param iva_newFilePath the new path of the file
-     * @param iob_user the user who wants to move the file
-     * @return true of the file was successfully moved, otherwise false
+     * @param iob_user        the user who wants to move or rename the file
+     * @return true of the file was successfully moved or renamed, otherwise false
      */
     public boolean moveFile(String iva_filePath, String iva_newFilePath, User iob_user) {
         if (iob_user == null) {
@@ -87,9 +71,13 @@ public class FileServiceImpl implements FileService{
 
         //TODO check if is allow to move the file to the destination
         iva_filePath = createUserFilePath(iva_filePath, iob_user);
-        iva_newFilePath = createUserFilePath(iva_newFilePath, iob_user);
+        String lva_newFilePath = createUserFilePath(iva_newFilePath, iob_user);
+        if (iva_newFilePath.isEmpty()) {
+            lva_newFilePath = lva_newFilePath.replaceFirst("\\\\$", "");
+        }
+
         gob_fileTreeCollection = FileTreeCollection.getInstance();
-        return gob_fileTreeCollection.getTreeFromUser(iob_user).moveFile(iva_filePath, iva_newFilePath);
+        return gob_fileTreeCollection.getTreeFromUser(iob_user).moveFile(iva_filePath, lva_newFilePath, false);
     }
 
     /**
