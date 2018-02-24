@@ -115,6 +115,25 @@ public class FileServiceImpl implements FileService{
         return gob_fileTreeCollection.getTreeFromUser(iob_user).addFile(lob_newDirectory, true);
     }
 
+    /**
+     * rename a flle on the server
+     *
+     * @param iva_filePath path of the file
+     * @param iob_user     the user who wants to rename a file
+     * @param iva_newFileName the new name of the file
+     * @return true if the file was renamed, otherwise false
+     */
+    @Override
+    public boolean renameFile(String iva_filePath, String iva_newFileName, User iob_user) {
+        if (iob_user == null) {
+            return false;
+        }
+
+        iva_filePath = createUserFilePath(iva_filePath, iob_user);
+        gob_fileTreeCollection = FileTreeCollection.getInstance();
+        return gob_fileTreeCollection.getTreeFromUser(iob_user).renameFile(iva_filePath, iva_newFileName);
+    }
+
     private byte[] getFileContent(int iva_index, List<InputPart> ico_inputList) throws IOException{
         return IOUtils.toByteArray(
                 ico_inputList.get(iva_index).getBody(InputStream.class,null)

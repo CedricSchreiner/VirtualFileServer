@@ -46,8 +46,17 @@ public interface FileService {
      * create a directory on the server
      *
      * @param iva_filePath path of the directory
-     * @param iob_user     th user wo wants to create a new directory
+     * @param iob_user     the user who wants to create a new directory
      * @return true if the directory was created, otherwise false
      */
     boolean createDirectory(String iva_filePath, User iob_user);
+
+    /**
+     * rename a flle on the server
+     * @param iva_filePath path of the file
+     * @param iob_user the user who wants to rename a file
+     * @param iva_newFileName the new name of the file
+     * @return true if the file was renamed, otherwise false
+     */
+    boolean renameFile(String iva_filePath, String iva_newFileName, User iob_user);
 }

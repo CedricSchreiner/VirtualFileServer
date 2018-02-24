@@ -5,7 +5,7 @@ public abstract class FileResourceConstants {
     public static final String GC_FILE_RESOURCE_PATH = "/auth/files";
     public static final String GC_FILE_UPLOAD_PATH = "/upload";
     public static final String GC_FILE_DOWNLOAD_PATH = "/download";
-    public static final String GC_FILE_RENAME_PATH = "/moveOrRename";
+    public static final String GC_FILE_RENAME_PATH = "/rename";
     public static final String GC_FILE_DELETE_PATH = "/delete";
     public static final String GC_FILE_MOVE_PATH = "/move";
     public static final String GC_FILE_REMOVE_DIR_ONLY_PATH = "/removeDirectoryOnly";
