@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserService {
 
         if (gob_userDao.createUser(iob_user)) {
             lob_user = getUserByEmail(iob_user.getEmail());
-            lva_userName = lob_user.getName().toLowerCase();
+            lva_userName = lob_user.getName();
             lva_userDirectoryName = lva_userName + lob_user.getUserId();
 
             lob_dir = new File(Utils.getRootDirectory() + lva_userDirectoryName);
