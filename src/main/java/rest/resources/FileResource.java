@@ -1,6 +1,9 @@
 package rest.resources;
 
 import builder.ServiceObjectBuilder;
+import com.thoughtworks.xstream.XStream;
+import fileTree.interfaces.Tree;
+import fileTree.interfaces.TreeDifference;
 import models.classes.FileTreeCollection;
 import models.classes.User;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
@@ -9,6 +12,7 @@ import rest.Initializer;
 import services.classes.AuthService;
 import services.interfaces.FileService;
 
+import javax.annotation.PostConstruct;
 import javax.ws.rs.*;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
@@ -126,6 +130,17 @@ public class FileResource {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
         return Response.ok().entity(DIRECTORY_DELETED).build();
+    }
+
+    @POST
+    @Path("compare")
+    @Consumes(MediaType.APPLICATION_XML)
+    public Response compareTrees(@Context ContainerRequestContext iob_requestContext, String iva_xmlTree) {
+        User lob_user = getUserFromContext(iob_requestContext);
+
+        TreeDifference rob_difference = gob_fileService.compareTrees(iva_xmlTree, lob_user);
+
+        return Response.ok().entity("jop").build();
     }
 
     private User getUserFromContext(ContainerRequestContext iob_requestContext) {

@@ -1,5 +1,7 @@
 package services.interfaces;
 
+import fileTree.interfaces.Tree;
+import fileTree.interfaces.TreeDifference;
 import models.classes.User;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 
@@ -59,4 +61,12 @@ public interface FileService {
      * @return true if the file was renamed, otherwise false
      */
     boolean renameFile(String iva_filePath, String iva_newFileName, User iob_user);
+
+    /**
+     * Compare the user tree with another tree
+     * @param iva_xmlTreeToCompare tree as xml string
+     * @param iob_user user who wants the result of the tree comparison
+     * @return the result of the comparison
+     */
+    TreeDifference compareTrees(String iva_xmlTreeToCompare, User iob_user);
 }

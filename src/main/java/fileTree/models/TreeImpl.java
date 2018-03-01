@@ -502,7 +502,7 @@ public class TreeImpl implements Tree {
 
             for (lob_thisFileIterator = lco_thisFiles.iterator(); lob_thisFileIterator.hasNext();) {
                 lob_thisFile = lob_thisFileIterator.next();
-                //remove everything including from the path including root to get a relative path
+                //create a relative path to compare both files
                 lva_thisFilePath = lob_thisFile.getCanonicalPath();
                 lva_thisFilePath = lva_thisFilePath.replace(lva_thisRootPath, "");
                 for(lob_treeFileIterator = lco_compareFiles.iterator(); lob_treeFileIterator.hasNext();) {
@@ -512,13 +512,13 @@ public class TreeImpl implements Tree {
                     //check if the relative paths are the same
                     if (lva_thisFilePath.equals(lva_treeFilePath)) {
                         //check if the file on the server is newer
-                        if (lob_thisFile.lastModified() > lob_treeFile.lastModified()) {
+                        if (lob_thisFile.lastModified() > (lob_treeFile.lastModified() + 60000)) {
                             //add the file to the update list
                             lob_difference.addFileToUpdate(lva_treeFilePath);
-                            lob_treeFileIterator.remove();
-                            lob_thisFileIterator.remove();
-                            break;
                         }
+                        lob_treeFileIterator.remove();
+                        lob_thisFileIterator.remove();
+                        break;
                     }
                 }
             }

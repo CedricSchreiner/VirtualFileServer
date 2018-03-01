@@ -1,6 +1,8 @@
 package services.classes;
 
+import com.thoughtworks.xstream.XStream;
 import fileTree.interfaces.Tree;
+import fileTree.interfaces.TreeDifference;
 import models.classes.FileTreeCollection;
 import models.classes.User;
 import org.apache.commons.io.IOUtils;
@@ -16,7 +18,7 @@ import java.util.List;
 
 public class FileServiceImpl implements FileService{
 
-    private static FileTreeCollection gob_fileTreeCollection;
+    private static FileTreeCollection gob_fileTreeCollection = FileTreeCollection.getInstance();
 
     /**
      * add a new file to the user directory
@@ -52,7 +54,7 @@ public class FileServiceImpl implements FileService{
         }
 
         iva_filePath = createUserFilePath(iva_filePath, iob_user);
-        gob_fileTreeCollection = FileTreeCollection.getInstance();
+//        gob_fileTreeCollection = FileTreeCollection.getInstance();
         return gob_fileTreeCollection.getTreeFromUser(iob_user).deleteFile(iva_filePath);
     }
 
@@ -76,7 +78,7 @@ public class FileServiceImpl implements FileService{
             lva_newFilePath = lva_newFilePath.replaceFirst("\\\\$", "");
         }
 
-        gob_fileTreeCollection = FileTreeCollection.getInstance();
+//        gob_fileTreeCollection = FileTreeCollection.getInstance();
         return gob_fileTreeCollection.getTreeFromUser(iob_user).moveFile(iva_filePath, lva_newFilePath, false);
     }
 
@@ -93,7 +95,7 @@ public class FileServiceImpl implements FileService{
 
         //TODO check if is allow to move the file to the destination
         iva_filePath = createUserFilePath(iva_filePath, iob_user);
-        gob_fileTreeCollection = FileTreeCollection.getInstance();
+//        gob_fileTreeCollection = FileTreeCollection.getInstance();
         return gob_fileTreeCollection.getTreeFromUser(iob_user).deleteDirectoryOnly(iva_filePath);
     }
 
@@ -110,7 +112,7 @@ public class FileServiceImpl implements FileService{
 
         //TODO check if is allow to move the file to the destination
         iva_filePath = createUserFilePath(iva_filePath, iob_user);
-        gob_fileTreeCollection = FileTreeCollection.getInstance();
+//        gob_fileTreeCollection = FileTreeCollection.getInstance();
         File lob_newDirectory = new File(iva_filePath);
         return gob_fileTreeCollection.getTreeFromUser(iob_user).addFile(lob_newDirectory, true);
     }
@@ -130,9 +132,41 @@ public class FileServiceImpl implements FileService{
         }
 
         iva_filePath = createUserFilePath(iva_filePath, iob_user);
-        gob_fileTreeCollection = FileTreeCollection.getInstance();
+//        gob_fileTreeCollection = FileTreeCollection.getInstance();
         return gob_fileTreeCollection.getTreeFromUser(iob_user).renameFile(iva_filePath, iva_newFileName);
     }
+
+    /**
+     * Compare the user tree with another tree
+     *
+     * @param iva_xmlTreeToCompare tree as xml string
+     * @param iob_user             user who wants the result of the tree comparison
+     * @return the result of the comparison
+     */
+    @Override
+    public TreeDifference compareTrees(String iva_xmlTreeToCompare, User iob_user) {
+        //--------------------------------Variables-----------------------------------
+        XStream lob_xmlParser;
+        Tree lob_tree;
+        Tree iob_userTree;
+        //----------------------------------------------------------------------------
+
+        if (iob_user == null) {
+            return null;
+        }
+
+        lob_xmlParser = new XStream();
+        lob_tree = (Tree) lob_xmlParser.fromXML(iva_xmlTreeToCompare);
+
+        if (lob_tree == null) {
+            return null;
+        }
+
+        iob_userTree = gob_fileTreeCollection.getTreeFromUser(iob_user);
+
+        return iob_userTree.compareTrees(lob_tree);
+    }
+
 
     private byte[] getFileContent(int iva_index, List<InputPart> ico_inputList) throws IOException{
         return IOUtils.toByteArray(
