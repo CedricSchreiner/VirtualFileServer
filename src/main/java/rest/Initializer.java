@@ -2,6 +2,7 @@ package rest;
 
 import builder.ServiceObjectBuilder;
 import models.classes.FileTreeCollection;
+import models.classes.SharedDirectoryTree;
 import models.classes.User;
 import models.classes.UserTree;
 import services.interfaces.UserService;
@@ -33,6 +34,10 @@ public class Initializer extends HttpServlet {
         List<User> lco_userList = lob_userService.getAllUser();
         File lob_rootDirectory = new File(Utils.getRootDirectory());
         UserTree lob_userTree;
+        SharedDirectoryTree lob_sharedDirectoryTree;
+        String lva_rootDirectory = Utils.getRootDirectory();
+        String lva_userRootDirectory;
+        String lva_userSharedDirectory;
         //-------------------------------------------------------------------------------------------
 
         if (!lob_rootDirectory.exists() || !lob_rootDirectory.isDirectory()) {
@@ -42,8 +47,11 @@ public class Initializer extends HttpServlet {
         for (User lob_user : lco_userList) {
             try {
                 //get the directory of the user, build the tree and add it to the collection
-                lob_userTree = new UserTree(lob_user, Utils.getRootDirectory());
-                lob_fileTree.addTreeToCollection(lob_userTree);
+                lva_userRootDirectory = lva_rootDirectory + lob_user.getName() + lob_user.getUserId();
+                lva_userSharedDirectory = lva_userRootDirectory + "_shared";
+                //TODO add all shared Directories
+                lob_userTree = new UserTree(lob_user, lva_userRootDirectory);
+                lob_fileTree.addUserTreeToCollection(lob_userTree);
             } catch (IOException e) {
                 e.printStackTrace();
             }
