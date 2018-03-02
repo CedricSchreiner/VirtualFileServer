@@ -1,5 +1,6 @@
 package rest.resources;
 
+import com.thoughtworks.xstream.XStream;
 import models.classes.SharedDirectory;
 import models.classes.User;
 import models.exceptions.SharedDirectoryException;
@@ -27,21 +28,29 @@ public class SharedDirectoryResource {
      * Add a new shared directory and al its member
      *
      * @param iob_requestContext  header with the user who requested this resource
-     * @param iob_sharedDirectory the new shared directory
+     * @param iva_sharedDirectoryAsXml the new shared directory
      * @return Response with the status message
      */
     @POST
     @Path(GC_ADD_NEW_SHARED_DIRECTORY)
-    @Consumes(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_XML)
     public Response addNewSharedDirectory(@Context ContainerRequestContext iob_requestContext,
-                                          SharedDirectory iob_sharedDirectory) {
+                                          String iva_sharedDirectoryAsXml) {
 
         User lob_user;
+
+        XStream lob_xmlParser = new XStream();
+        XStream.setupDefaultSecurity(lob_xmlParser);
+        Class[] lar_allowedClasses = {SharedDirectory.class, User.class};
+        lob_xmlParser.allowTypes(lar_allowedClasses);
+
+        SharedDirectory lob_sharedDirectory = (SharedDirectory)lob_xmlParser.fromXML(iva_sharedDirectoryAsXml);
+
 
         // Get the user who requested this resource
         // Check if the user who requested and who wants to create the shared directory are the same
         lob_user = getUserFromContext(iob_requestContext);
-        if (checkIfUsersNotEqual(lob_user, iob_sharedDirectory.getOwner())) {
+        if (checkIfUsersNotEqual(lob_user, lob_sharedDirectory.getOwner())) {
             return Response
                     .status(Response.Status.FORBIDDEN)
                     .entity(GC_USERS)
@@ -52,7 +61,7 @@ public class SharedDirectoryResource {
 
             // Add the new shared directory
             // If successfully return a positive response
-            if (gob_sharedDirectoryService.addNewSharedDirectory(iob_sharedDirectory)) {
+            if (gob_sharedDirectoryService.addNewSharedDirectory(lob_sharedDirectory)) {
 
                 return Response
                         .ok()

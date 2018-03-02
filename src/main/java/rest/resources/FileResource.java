@@ -135,12 +135,16 @@ public class FileResource {
     @POST
     @Path("compare")
     @Consumes(MediaType.APPLICATION_XML)
+    @Produces(MediaType.APPLICATION_XML)
     public Response compareTrees(@Context ContainerRequestContext iob_requestContext, String iva_xmlTree) {
         User lob_user = getUserFromContext(iob_requestContext);
 
-        TreeDifference rob_difference = gob_fileService.compareTrees(iva_xmlTree, lob_user);
+        TreeDifference lob_difference = gob_fileService.compareTrees(iva_xmlTree, lob_user);
 
-        return Response.ok().entity("jop").build();
+        XStream lob_xStream = new XStream();
+        String rva_xmlString = lob_xStream.toXML(lob_difference);
+
+        return Response.ok().entity(rva_xmlString).build();
     }
 
     private User getUserFromContext(ContainerRequestContext iob_requestContext) {

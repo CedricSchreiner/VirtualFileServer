@@ -1,8 +1,11 @@
 package services.classes;
 
 import com.thoughtworks.xstream.XStream;
+import fileTree.interfaces.FileNode;
 import fileTree.interfaces.Tree;
 import fileTree.interfaces.TreeDifference;
+import fileTree.models.FileNodeImpl;
+import fileTree.models.TreeImpl;
 import models.classes.FileTreeCollection;
 import models.classes.User;
 import org.apache.commons.io.IOUtils;
@@ -156,6 +159,13 @@ public class FileServiceImpl implements FileService{
         }
 
         lob_xmlParser = new XStream();
+
+
+        XStream.setupDefaultSecurity(lob_xmlParser); // to be removed after 1.5
+
+        Class[] lar_allowedClasses = {Tree.class, TreeImpl.class, FileNode.class, FileNodeImpl.class};
+        lob_xmlParser.allowTypes(lar_allowedClasses);
+
         lob_tree = (Tree) lob_xmlParser.fromXML(iva_xmlTreeToCompare);
 
         if (lob_tree == null) {
