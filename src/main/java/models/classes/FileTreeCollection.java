@@ -27,15 +27,6 @@ public class FileTreeCollection {
         this.gco_sharedDirectories.add(iob_sharedDirectoryTree);
     }
 
-    public SharedDirectory getSharedDirectoryFromTree(int iva_id) {
-        for (SharedDirectoryTree lob_sharedDirectory : gco_sharedDirectories) {
-            if (lob_sharedDirectory.getSharedDirectory().getId() == iva_id) {
-                return lob_sharedDirectory.getSharedDirectory();
-            }
-        }
-        return null;
-    }
-
     public Tree getTreeFromUser(User iob_user) {
         //--------------------Variables--------------------
         String lob_userEmail = iob_user.getEmail();
