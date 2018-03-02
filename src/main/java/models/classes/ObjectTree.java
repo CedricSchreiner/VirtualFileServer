@@ -10,6 +10,11 @@ public class ObjectTree {
     private Tree gob_tree;
 
     public ObjectTree(String iva_rootDirectory) throws IOException {
+        File lob_rootFile = new File(iva_rootDirectory);
+
+        if (!lob_rootFile.exists() || !lob_rootFile.isDirectory()) {
+            lob_rootFile.mkdir();
+        }
         this.gob_tree = new TreeImpl(iva_rootDirectory);
     }
 

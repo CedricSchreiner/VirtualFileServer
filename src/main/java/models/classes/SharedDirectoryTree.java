@@ -13,10 +13,6 @@ public class SharedDirectoryTree extends ObjectTree{
         try {
             File lob_userDirectory = new File(iva_rootDirectory);
 
-            if (!lob_userDirectory.exists() || !lob_userDirectory.isDirectory()) {
-                lob_userDirectory.mkdir();
-            }
-
             super.addFilesToTree(lob_userDirectory);
 
         } catch (Exception e) {
