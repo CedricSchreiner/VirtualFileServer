@@ -33,7 +33,9 @@ public class Initializer extends HttpServlet {
         List<User> lco_userList = lob_userService.getAllUser();
         File lob_rootDirectory = new File(Utils.getRootDirectory());
         File lob_sharedUserDirectory;
+        File lob_publicDirectory;
         UserTree lob_userTree;
+        SharedDirectory lob_dummyPublicDirectory;
         SharedDirectoryTree lob_sharedDirectoryTree;
         String lva_rootDirectory = Utils.getRootDirectory();
         String lva_userRootDirectory;
@@ -43,6 +45,22 @@ public class Initializer extends HttpServlet {
 
         if (!lob_rootDirectory.exists() || !lob_rootDirectory.isDirectory()) {
             lob_rootDirectory.mkdir();
+        }
+
+        lob_publicDirectory = new File(lva_rootDirectory + "\\Public");
+
+        if (!lob_publicDirectory.exists() || !lob_publicDirectory.isDirectory()) {
+            lob_publicDirectory.mkdir();
+        }
+
+        lob_dummyPublicDirectory = new SharedDirectory();
+        lob_dummyPublicDirectory.setId(0);
+
+        try {
+            lob_sharedDirectoryTree = new SharedDirectoryTree(lob_dummyPublicDirectory, lva_rootDirectory + "\\Public");
+            lob_fileTree.addSharedDirectoryTree(lob_sharedDirectoryTree);
+        } catch (IOException ex) {
+            ex.printStackTrace();
         }
 
         for (User lob_user : lco_userList) {

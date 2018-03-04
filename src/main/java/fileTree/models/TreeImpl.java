@@ -158,6 +158,14 @@ public class TreeImpl implements Tree {
     }
 
     /**
+     * @return the directory and all files that it contains
+     */
+    @Override
+    public Collection<File> getDirectory(File iob_file) {
+        return getDirectory(iob_file, new ArrayList<>());
+    }
+
+    /**
      * Get all nodes by the path
      *
      * @param ico_filePaths contains all file paths
@@ -304,6 +312,10 @@ public class TreeImpl implements Tree {
     @Override
     public boolean deleteDirectoryOnly(File iob_directory) {
         try {
+            if (!iob_directory.isDirectory()) {
+                return false;
+            }
+
             return deleteDirectoryOnly(iob_directory.getCanonicalPath());
         } catch (IOException e) {
             e.printStackTrace();
@@ -323,6 +335,7 @@ public class TreeImpl implements Tree {
         //----------------------Variables-----------------------
         FileNode lob_parent;
         FileNode lob_node;
+        FileNode lob_child;
         //------------------------------------------------------
 
         try {
@@ -339,18 +352,13 @@ public class TreeImpl implements Tree {
             }
 
             if (lob_parent != null) {
-                for (FileNode lob_child : lob_node.getChildren()) {
-//                    if(!moveFile(lob_child.getFile(), lob_parent.getFile().getCanonicalPath())){
-//                        return false;
-//                    }
-
-                    lob_node.removeChild(lob_node.getFile());
-                    lob_child.setParent(lob_parent);
-                    lob_parent.addChild(lob_child);
+                for (Object lob_object : lob_node.getChildren().toArray()) {
+                    lob_child = (FileNode) lob_object;
+                    if (!moveFile(lob_child.getFile(), lob_parent.getFile().getCanonicalPath(), false)) {
+                        return false;
+                    }
                 }
                 lob_parent.removeChild(lob_node.getFile());
-                refreshTreeParentNodes(gob_rootNode, "");
-
                 lob_node.getFile().delete();
             }
         } catch (IOException e) {
@@ -532,7 +540,7 @@ public class TreeImpl implements Tree {
             for (File lob_file : lco_compareFiles) {
                 lva_treeFilePath = lob_file.getCanonicalPath();
                 lva_treeFilePath = lva_treeFilePath.replace(lva_treeRootPath, "");
-                lob_difference.addFileToInsert(lva_treeFilePath);
+                lob_difference.addFileToDelete(lva_treeFilePath);
             }
 
         } catch (IOException e) {
@@ -541,6 +549,18 @@ public class TreeImpl implements Tree {
         }
 
         return lob_difference;
+    }
+
+    private Collection<File> getDirectory(File iob_pointer, Collection<File> ico_files) {
+        ico_files.add(iob_pointer);
+
+        if (iob_pointer.isDirectory()) {
+            for (File lob_child : iob_pointer.listFiles()) {
+                getDirectory(lob_child, ico_files);
+            }
+        }
+
+        return ico_files;
     }
 
     /**
@@ -752,13 +772,12 @@ public class TreeImpl implements Tree {
                 delete(lob_file.getFile().getCanonicalPath());
                 lob_iterator.remove();
             }
-            lob_nodeToRemove.getFile().delete();
+            return lob_nodeToRemove.getFile().delete();
 
         } catch (IOException e) {
             e.printStackTrace();
             return false;
         }
-        return true;
     }
 
 
