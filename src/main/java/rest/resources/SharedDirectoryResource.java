@@ -12,6 +12,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import java.util.List;
+
 import static builder.ServiceObjectBuilder.getSharedDirectoryServiceObject;
 import static rest.constants.RestConstants.GC_USERS;
 import static rest.constants.SharedDirectoryConstants.*;
@@ -38,11 +40,12 @@ public class SharedDirectoryResource {
                                           String iva_sharedDirectoryAsXml) {
 
         User lob_user;
-
+        List<SharedDirectory> lli_sharedDirectories;
         XStream lob_xmlParser = new XStream();
         XStream.setupDefaultSecurity(lob_xmlParser);
         Class[] lar_allowedClasses = {SharedDirectory.class, User.class};
         lob_xmlParser.allowTypes(lar_allowedClasses);
+        int sharedDirectoryId = 0;
 
         SharedDirectory lob_sharedDirectory = (SharedDirectory)lob_xmlParser.fromXML(iva_sharedDirectoryAsXml);
 
@@ -62,10 +65,17 @@ public class SharedDirectoryResource {
             // Add the new shared directory
             // If successfully return a positive response
             if (gob_sharedDirectoryService.addNewSharedDirectory(lob_sharedDirectory)) {
+                lli_sharedDirectories = gob_sharedDirectoryService.getSharedDirectoryOfUser(lob_user);
 
+                for (SharedDirectory lob_tmpSharedDirectory : lli_sharedDirectories) {
+                    if (lob_sharedDirectory.getDirectoryName()
+                            .equals(lob_tmpSharedDirectory.getDirectoryName())) {
+                       sharedDirectoryId = lob_tmpSharedDirectory.getId();
+                    }
+                }
                 return Response
                         .ok()
-                        .entity(GC_S_DIR_SUCCESSFULLY_ADDED)
+                        .entity(sharedDirectoryId)
                         .build();
             }
 

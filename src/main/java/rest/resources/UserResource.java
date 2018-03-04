@@ -32,7 +32,9 @@ public class UserResource {
     @PUT
     @Path(GC_USER_LOGIN_PATH)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response login(@Context HttpServletRequest iob_servletRequest, @Context ContainerRequestContext iob_requestContext, User iob_user) {
+    public Response login(@Context HttpServletRequest iob_servletRequest,
+                          @Context ContainerRequestContext iob_requestContext,
+                          User iob_user) {
         User lob_user;
         String lva_jsonString;
         ObjectMapper lob_mapper;
