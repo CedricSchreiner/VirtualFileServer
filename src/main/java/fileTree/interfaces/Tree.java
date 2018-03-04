@@ -44,6 +44,11 @@ public interface Tree {
     Collection<File> getRootSubFiles();
 
     /**
+     * @return the directory and all files that it contains
+     */
+    Collection<File> getDirectory(File iob_file);
+
+    /**
      * Get all nodes by the path
      * @param ico_filePaths contains all file paths
      * @return the found file or null if the file is not in the tree

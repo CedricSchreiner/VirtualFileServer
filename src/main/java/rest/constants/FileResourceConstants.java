@@ -11,13 +11,8 @@ public abstract class FileResourceConstants {
     public static final String GC_FILE_REMOVE_DIR_ONLY_PATH = "/removeDirectoryOnly";
     public static final String GC_CREATE_DIRECTORY_PATH = "/createDirectory";
 
-    public static final String GC_PATH_PARAMETER_FILE_PATH = "/{path}";
-    public static final String GC_PATH_PARAMETER_NEW_FILE_NAME = "/{newName}";
-    public static final String GC_PATH_PARAMETER_NEW_FILE_PATH = "/{newPath}";
-
     public static final String GC_PARAMETER_PATH_NAME = "path";
-    public static final String GC_PARAMETER_NEW_FILE_NAME = "newName";
-    public static final String GC_PARAMETER_NEW_FILE_PATH = "newPath";
+    public static final String GC_PARAMETER_DIRECTORY_ID = "directoryId";
 
     public static final String GC_ATTACHMENT = "attachment";
     public static final String GC_CONTENT_DISPOSITION = "Content-Disposition";
