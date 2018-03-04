@@ -328,10 +328,6 @@ public class FileServiceImpl implements FileService{
         return true;
     }
 
-    private String createUserFilePath(String iva_relativePath, User iob_user) {
-        return Utils.getRootDirectory() + iob_user.getName() + iob_user.getUserId() + "\\" + iva_relativePath;
-    }
-
     private String createFilePath(String iva_filePath, User iob_user, int iva_directoryId) {
         String lva_rootPath = Utils.getRootDirectory();
 

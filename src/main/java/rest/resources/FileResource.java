@@ -39,6 +39,9 @@ public class FileResource {
             return Response.status(404).build();
         }
 
+        if (lob_file.isDirectory()) {
+            return Response.status(204).build();
+        }
         Response.ResponseBuilder response = Response.ok(lob_file);
         response.header(GC_CONTENT_DISPOSITION, "attachment;filename=" + lob_file.getName());
         return response.build();
