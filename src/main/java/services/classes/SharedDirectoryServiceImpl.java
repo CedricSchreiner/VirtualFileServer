@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static models.constants.SharedDirectoryConstants.GC_ERR_S_DIR_DOES_NOT_EXISTS;
-import static models.constants.SharedDirectoryConstants.GC_ERR_S_DIR_MEMBER_ALREADY_EXISTS;
 import static models.constants.SharedDirectoryConstants.GC_ERR_S_DIR_MEMBER_DOES_NOT_EXISTS;
 import static models.constants.UserConstants.GC_EMPTY_USER;
 
@@ -21,7 +20,23 @@ public class SharedDirectoryServiceImpl implements SharedDirectoryService {
     private SharedDirectoryDao gob_sharedDirectoryDao = DaoObjectBuilder.getSharedDirectoryObject();
     private UserService gob_userService = ServiceObjectBuilder.getUserServiceObject();
 
-    public List<SharedDirectory> getSharedDirectoryOfUser(User iob_user) {
+    public List<SharedDirectory> getSharedDirectoriesOfUser(User iob_user) {
+        List<SharedDirectory> lli_sharedDirectories = new ArrayList<>(getSharedDirectory(iob_user));
+
+        for (SharedDirectory lob_sharedDirectory : gob_sharedDirectoryDao.getAllSharedDirectories()) {
+            if (lob_sharedDirectory.getMembers() != null) {
+                for (User lob_member : lob_sharedDirectory.getMembers()) {
+                    if (lob_member.getEmail().equals(iob_user.getEmail())) {
+                        lli_sharedDirectories.add(lob_sharedDirectory);
+                    }
+                }
+            }
+        }
+
+        return lli_sharedDirectories;
+    }
+
+    public List<SharedDirectory> getSharedDirectory(User iob_user) {
         List<SharedDirectory> lli_sharedDirectories;
         List<SharedDirectory> lli_sharedDirectoriesOfOUser = new ArrayList<>();
 
@@ -45,7 +60,7 @@ public class SharedDirectoryServiceImpl implements SharedDirectoryService {
      */
     public boolean addNewSharedDirectory(SharedDirectory iob_sharedDirectory) {
         boolean lva_hasSharedDirectoryAdded;
-        boolean lva_hasMemberAdded = false;
+        boolean lva_hasMemberAdded = true;
         User lob_user;
 
         // set all attributes of the owner instead of the id
@@ -61,7 +76,7 @@ public class SharedDirectoryServiceImpl implements SharedDirectoryService {
         lva_hasSharedDirectoryAdded = gob_sharedDirectoryDao.addNewSharedDirectory(iob_sharedDirectory);
 
         // set the id of the shared directory
-        for (SharedDirectory lob_sharedDirectory : getSharedDirectoryOfUser(lob_user)) {
+        for (SharedDirectory lob_sharedDirectory : getSharedDirectory(lob_user)) {
             if (areTheDirectoriesEqual(lob_sharedDirectory, iob_sharedDirectory)) {
                 iob_sharedDirectory.setId(lob_sharedDirectory.getId());
             }

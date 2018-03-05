@@ -2,7 +2,6 @@ package rest;
 
 import builder.ServiceObjectBuilder;
 import models.classes.*;
-import services.classes.SharedDirectoryServiceImpl;
 import services.interfaces.SharedDirectoryService;
 import services.interfaces.UserService;
 import utilities.Utils;
@@ -75,7 +74,7 @@ public class Initializer extends HttpServlet {
                     lob_sharedUserDirectory.mkdir();
                 }
 
-                for (SharedDirectory lob_sharedDirectory : lob_sharedDirectoryService.getSharedDirectoryOfUser(lob_user)) {
+                for (SharedDirectory lob_sharedDirectory : lob_sharedDirectoryService.getSharedDirectory(lob_user)) {
                     lva_userSharedDirectory = lva_userRootDirectory + "_shared\\" + lob_sharedDirectory.getId();
                     lob_sharedDirectoryTree = new SharedDirectoryTree(lob_sharedDirectory, lva_userSharedDirectory);
                     lob_fileTree.addSharedDirectoryTree(lob_sharedDirectoryTree);

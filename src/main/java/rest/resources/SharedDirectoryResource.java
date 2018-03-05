@@ -26,6 +26,27 @@ public class SharedDirectoryResource {
 
     private SharedDirectoryService gob_sharedDirectoryService = getSharedDirectoryServiceObject();
 
+    @GET
+    @Path("/getAllSharedDirectories")
+    public Response getAllSharedDirectories(@Context ContainerRequestContext iob_requestContext) {
+        User lob_user;
+        List<SharedDirectory> lli_sharedDirectories;
+        String lva_sharedDirectoryXML;
+        XStream lob_xmlParser = new XStream();
+        XStream.setupDefaultSecurity(lob_xmlParser);
+        Class[] lar_allowedClasses = {SharedDirectory.class, User.class};
+        lob_xmlParser.allowTypes(lar_allowedClasses);
+
+        lob_user = getUserFromContext(iob_requestContext);
+        lli_sharedDirectories = gob_sharedDirectoryService.getSharedDirectoriesOfUser(lob_user);
+        lva_sharedDirectoryXML = lob_xmlParser.toXML(lli_sharedDirectories);
+
+        return Response
+                .ok()
+                .entity(lva_sharedDirectoryXML)
+                .build();
+    }
+
     /**
      * Add a new shared directory and al its member
      *
@@ -65,7 +86,7 @@ public class SharedDirectoryResource {
             // Add the new shared directory
             // If successfully return a positive response
             if (gob_sharedDirectoryService.addNewSharedDirectory(lob_sharedDirectory)) {
-                lli_sharedDirectories = gob_sharedDirectoryService.getSharedDirectoryOfUser(lob_user);
+                lli_sharedDirectories = gob_sharedDirectoryService.getSharedDirectory(lob_user);
 
                 for (SharedDirectory lob_tmpSharedDirectory : lli_sharedDirectories) {
                     if (lob_sharedDirectory.getDirectoryName()

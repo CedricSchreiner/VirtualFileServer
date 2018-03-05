@@ -152,6 +152,7 @@ public class SharedDirectoryDaoImpl implements SharedDirectoryDao {
         SharedDirectory lob_sharedDirectory;
         User lob_owner;
         User lob_member;
+        int userId;
         int lva_sharedDirectoryID;
         boolean lva_sharedDirectoryExists;
 
@@ -159,7 +160,6 @@ public class SharedDirectoryDaoImpl implements SharedDirectoryDao {
              PreparedStatement lob_preparedStatement = lob_connection.prepareStatement(GC_GET_ALL_SHARED_DIRECTORIES)) {
 
             lob_rs = lob_preparedStatement.executeQuery();
-
 
             while (lob_rs.next()) {
                 lob_sharedDirectory = new SharedDirectory();
@@ -181,8 +181,14 @@ public class SharedDirectoryDaoImpl implements SharedDirectoryDao {
                     lob_owner.setUserId(lob_rs.getInt(GC_COL_SHARED_D_OWNER));
                     lob_sharedDirectory.setOwner(lob_owner);
                     lob_sharedDirectory.setDirectoryName(lob_rs.getString(GC_COL_SHARED_D_GROUP_NAME));
-                    lob_member.setUserId(lob_rs.getInt(GC_COL_SHARED_D_MEMBER_MEMBER_ID));
-                    lob_memberList.add(lob_member);
+
+                    userId = lob_rs.getInt(GC_COL_SHARED_D_MEMBER_MEMBER_ID);
+
+                    if(userId != 0) {
+                        lob_member.setUserId(userId);
+                        lob_memberList.add(lob_member);
+                    }
+
                     lob_sharedDirectory.setMembers(lob_memberList);
                     lob_sharedDirectoryList.add(lob_sharedDirectory);
                 }
