@@ -34,4 +34,6 @@ public interface UserService {
     User getUserByEmail(String iob_email);
 
     List<User> getAllUser();
+
+    User getUserById(int iva_id);
 }

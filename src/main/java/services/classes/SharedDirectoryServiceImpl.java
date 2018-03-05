@@ -39,11 +39,20 @@ public class SharedDirectoryServiceImpl implements SharedDirectoryService {
     public List<SharedDirectory> getSharedDirectory(User iob_user) {
         List<SharedDirectory> lli_sharedDirectories;
         List<SharedDirectory> lli_sharedDirectoriesOfOUser = new ArrayList<>();
+        User lob_tmpUser;
 
         lli_sharedDirectories = gob_sharedDirectoryDao.getAllSharedDirectories();
 
         for (SharedDirectory lob_sharedDirectory : lli_sharedDirectories) {
             if (lob_sharedDirectory.getOwner().getUserId() == iob_user.getUserId()) {
+                lob_sharedDirectory.setOwner(gob_userService.getUserById(iob_user.getUserId()));
+
+                for (int i = 0 ; i < lob_sharedDirectory.getMembers().size() ; i++) {
+                    lob_tmpUser = lob_sharedDirectory.getMembers().get(i);
+                    lob_tmpUser = gob_userService.getUserById(lob_tmpUser.getUserId());
+                    lob_sharedDirectory.getMembers().set(i, lob_tmpUser);
+                }
+
                 lli_sharedDirectoriesOfOUser.add(lob_sharedDirectory);
             }
         }

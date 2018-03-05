@@ -106,6 +106,16 @@ public class UserServiceImpl implements UserService {
     public List<User> getAllUser() {
         return gob_userDao.getAllUsers();
     }
+
+    public User getUserById(int iva_id) {
+        for (User lob_user : getAllUser()) {
+            if (lob_user.getUserId() == iva_id) {
+                return lob_user;
+            }
+        }
+
+        return null;
+    }
 }
 
 
