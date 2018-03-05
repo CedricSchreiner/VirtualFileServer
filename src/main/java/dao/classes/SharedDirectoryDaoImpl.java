@@ -146,7 +146,7 @@ public class SharedDirectoryDaoImpl implements SharedDirectoryDao {
     @Override
     public List<SharedDirectory> getAllSharedDirectories() {
         List<SharedDirectory> lob_sharedDirectoryList = new ArrayList<>();
-        List<User> lob_memberList = new ArrayList<>();
+        List<User> lob_memberList;
 
         ResultSet lob_rs;
         SharedDirectory lob_sharedDirectory;
@@ -163,6 +163,7 @@ public class SharedDirectoryDaoImpl implements SharedDirectoryDao {
 
             while (lob_rs.next()) {
                 lob_sharedDirectory = new SharedDirectory();
+                lob_memberList = new ArrayList<>();
                 lob_member = new User();
                 lob_owner = new User();
                 lva_sharedDirectoryExists = false;
@@ -182,7 +183,7 @@ public class SharedDirectoryDaoImpl implements SharedDirectoryDao {
                     lob_sharedDirectory.setOwner(lob_owner);
                     lob_sharedDirectory.setDirectoryName(lob_rs.getString(GC_COL_SHARED_D_GROUP_NAME));
 
-                    userId = lob_rs.getInt(GC_COL_SHARED_D_MEMBER_MEMBER_ID);
+                    userId = lob_rs.getInt("member");
 
                     if(userId != 0) {
                         lob_member.setUserId(userId);
