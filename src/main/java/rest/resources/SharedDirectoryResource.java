@@ -127,9 +127,9 @@ public class SharedDirectoryResource {
      * @return Response with the status message
      */
     @PUT
-    @Path(GC_ADD_NEW_MEMBER_TO_SHARED_DIRECTORY + GC_REMOVE_MEMBER_PARAM)
+    @Path(GC_ADD_NEW_MEMBER_TO_SHARED_DIRECTORY + GC_MEMBER_PARAM)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response addNewMemberToSharedDirectory(@PathParam(GC_REMOVE_MEMBER) int sharedDirectoryId,
+    public Response addNewMemberToSharedDirectory(@PathParam(GC_MEMBER) int sharedDirectoryId,
                                                   @Context ContainerRequestContext iob_requestContext,
                                                   User iob_user) {
 
@@ -247,9 +247,9 @@ public class SharedDirectoryResource {
      * @return Response with the status message
      */
     @PUT
-    @Path(GC_REMOVE_MEMBER_FROM_SHARED_DIRECTORY + GC_REMOVE_MEMBER_PARAM)
+    @Path(GC_REMOVE_MEMBER_FROM_SHARED_DIRECTORY + GC_MEMBER_PARAM)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response removeMemberFromSharedDirectory(@PathParam(GC_REMOVE_MEMBER) int sharedDirectoryId,
+    public Response removeMemberFromSharedDirectory(@PathParam(GC_MEMBER) int sharedDirectoryId,
                                                     @Context ContainerRequestContext iob_requestContext,
                                                     User iob_user) {
 

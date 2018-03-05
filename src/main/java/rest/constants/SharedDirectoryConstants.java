@@ -12,8 +12,8 @@ public abstract class SharedDirectoryConstants {
     public static final String GC_DELETE_SHARED_DIRECTORY               = "deleteSharedDirectory";
     public static final String GC_REMOVE_MEMBER_FROM_SHARED_DIRECTORY   = "removeMemberFromSharedDirectory";
 
-    public static final String GC_REMOVE_MEMBER_PARAM                   = "/{sharedDirectoryId}";
-    public static final String GC_REMOVE_MEMBER                         = "sharedDirectoryId";
+    public static final String GC_MEMBER_PARAM                          = "/{sharedDirectoryId}";
+    public static final String GC_MEMBER                                = "sharedDirectoryId";
 
 // ---------------------------------------------------------------------------------------------------------------------
 
