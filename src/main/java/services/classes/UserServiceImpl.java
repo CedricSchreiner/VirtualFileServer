@@ -45,8 +45,14 @@ public class UserServiceImpl implements UserService {
 
             lob_dir = new File(Utils.getRootDirectory() + lva_userDirectoryName);
 
-            if (!lob_dir.mkdir()) {
-                throw new UserDirectoryNotCreated(GC_USER_DIRECTORY_NOT_CREATED);
+            if (!lob_dir.exists() || !lob_dir.isDirectory()) {
+                if (lob_dir.delete()) {
+                    throw new UserDirectoryNotCreated(GC_USER_DIRECTORY_NOT_CREATED);
+                }
+
+                if (!lob_dir.mkdir()) {
+                    throw new UserDirectoryNotCreated(GC_USER_DIRECTORY_NOT_CREATED);
+                }
             }
 
             return true;

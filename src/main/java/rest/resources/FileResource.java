@@ -134,7 +134,7 @@ public class FileResource {
     @POST
     @Path("compare")
     @Consumes(MediaType.APPLICATION_XML)
-    @Produces(MediaType.APPLICATION_XML)
+    @Produces(MediaType.TEXT_PLAIN)
     public Response compareTrees(@Context ContainerRequestContext iob_requestContext, String iva_xmlTree, @QueryParam("DirectoryId") int iva_id) {
         User lob_user = getUserFromContext(iob_requestContext);
 
@@ -143,7 +143,7 @@ public class FileResource {
         XStream lob_xStream = new XStream();
         String rva_xmlString = lob_xStream.toXML(lob_difference);
 
-        return Response.ok().entity(rva_xmlString).build();
+        return Response.ok().encoding("UTF-16").entity(rva_xmlString).build();
     }
 
     private User getUserFromContext(ContainerRequestContext iob_requestContext) {
