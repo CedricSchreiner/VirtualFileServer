@@ -182,23 +182,28 @@ public class SharedDirectoryResource {
      * Delete a shared directory
      *
      * @param iob_requestContext  header with the user who requested this resource
-     * @param iob_sharedDirectory the shared directory to delete
+     * @param iva_sharedDirectoryAsXml the shared directory to delete
      * @return Response with the status message
      */
     @POST
     @Path(GC_DELETE_SHARED_DIRECTORY)
-    @Consumes(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_XML)
     public Response deleteSharedDirectory(@Context ContainerRequestContext iob_requestContext,
-                                          SharedDirectory iob_sharedDirectory) {
+                                          String iva_sharedDirectoryAsXml) {
 
         User lob_user;
+        XStream lob_xmlParser = new XStream();
+        XStream.setupDefaultSecurity(lob_xmlParser);
+        Class[] lar_allowedClasses = {SharedDirectory.class, User.class};
+        lob_xmlParser.allowTypes(lar_allowedClasses);
 
+        SharedDirectory lob_sharedDirectory = (SharedDirectory)lob_xmlParser.fromXML(iva_sharedDirectoryAsXml);
         // Get the user who requested this resource
         // Check if the user who requested and who wants to create the shared directory are the same
         lob_user = getUserFromContext(iob_requestContext);
 
-        iob_sharedDirectory = gob_sharedDirectoryService.getSharedDirectoryById(iob_sharedDirectory.getId());
-        if (checkIfUsersNotEqual(lob_user, iob_sharedDirectory.getOwner())) {
+        lob_sharedDirectory = gob_sharedDirectoryService.getSharedDirectoryById(lob_sharedDirectory.getId());
+        if (checkIfUsersNotEqual(lob_user, lob_sharedDirectory.getOwner())) {
 
             return Response
                     .status(Response.Status.FORBIDDEN)
@@ -210,7 +215,7 @@ public class SharedDirectoryResource {
 
             // Delete the shared directory
             // If successfully return a positive response
-            if (gob_sharedDirectoryService.deleteSharedDirectory(iob_sharedDirectory)) {
+            if (gob_sharedDirectoryService.deleteSharedDirectory(lob_sharedDirectory)) {
 
                 return Response
                         .ok()
