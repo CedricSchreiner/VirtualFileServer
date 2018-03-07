@@ -70,7 +70,6 @@ public class SharedDirectoryResource {
 
         SharedDirectory lob_sharedDirectory = (SharedDirectory)lob_xmlParser.fromXML(iva_sharedDirectoryAsXml);
 
-
         // Get the user who requested this resource
         // Check if the user who requested and who wants to create the shared directory are the same
         lob_user = getUserFromContext(iob_requestContext);
@@ -82,7 +81,6 @@ public class SharedDirectoryResource {
         }
 
         try {
-
             // Add the new shared directory
             // If successfully return a positive response
             if (gob_sharedDirectoryService.addNewSharedDirectory(lob_sharedDirectory)) {
@@ -260,9 +258,10 @@ public class SharedDirectoryResource {
         lob_sharedDirectory = gob_sharedDirectoryService.getSharedDirectoryById(sharedDirectoryId);
 
         // Get the user who requested this resource
-        // Check if the user who requested and who wants to create the shared directory are the same
         lob_user = getUserFromContext(iob_requestContext);
-        if (checkIfUsersNotEqual(lob_user, lob_sharedDirectory.getOwner())) {
+        if (checkIfUsersNotEqual(lob_user, lob_sharedDirectory.getOwner()) &&
+            checkIfUsersNotEqual(lob_user, iob_user)) {
+
             return Response
                     .status(Response.Status.FORBIDDEN)
                     .entity(GC_USERS)
