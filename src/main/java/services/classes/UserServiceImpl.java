@@ -7,10 +7,12 @@ import models.exceptions.UserAlreadyExistsException;
 import models.exceptions.UserDirectoryNotCreated;
 import models.exceptions.UserEmptyException;
 import models.exceptions.UsersNotEqualException;
+import rest.Initializer;
 import services.interfaces.UserService;
 import utilities.Utils;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import static models.constants.UserConstants.*;
@@ -45,16 +47,22 @@ public class UserServiceImpl implements UserService {
 
             lob_dir = new File(Utils.getRootDirectory() + lva_userDirectoryName);
 
-            if (!lob_dir.exists() || !lob_dir.isDirectory()) {
-                if (lob_dir.delete()) {
+//            if (!lob_dir.exists() || !lob_dir.isDirectory()) {
+                if (lob_dir.delete() && !lob_dir.isDirectory()) {
                     throw new UserDirectoryNotCreated(GC_USER_DIRECTORY_NOT_CREATED);
                 }
 
-                if (!lob_dir.mkdir()) {
+                if (!lob_dir.mkdir() && !lob_dir.exists()) {
                     throw new UserDirectoryNotCreated(GC_USER_DIRECTORY_NOT_CREATED);
                 }
+//            }
+
+            try {
+                Initializer.initUserTree(iob_user);
+                Initializer.initUsersSharedDirectories(iob_user);
+            } catch (IOException ex) {
+                ex.printStackTrace();
             }
-
             return true;
         }
 

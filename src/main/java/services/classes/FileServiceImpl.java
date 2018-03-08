@@ -316,8 +316,10 @@ public class FileServiceImpl implements FileService{
 
         lob_tree = getTreeFromDirectoryId(iob_user, iva_directoryId);
 
-        if (!lob_tree.addFile(lob_file, false)){
-            return false;
+        if (lob_tree.getFile(iva_filename) == null) {
+            if (!lob_tree.addFile(lob_file, false)){
+                return false;
+            }
         }
 
         lob_fileOutputStream = new FileOutputStream(lob_file);
