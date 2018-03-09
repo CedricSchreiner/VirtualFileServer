@@ -41,7 +41,7 @@ public class Utils {
     }
 
     public static String getRootDirectory() {
-        Document doc = null;
+        Document doc;
         String rootDirectoryPath = "";
 
         try {
