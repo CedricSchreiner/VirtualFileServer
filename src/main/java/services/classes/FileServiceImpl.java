@@ -25,8 +25,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static services.constants.FileServiceConstants.*;
 import static utilities.Utils.convertRelativeToAbsolutePath;
@@ -41,7 +43,6 @@ public class FileServiceImpl implements FileService{
      * @param iva_filePath    path of the file
      * @param iob_user        user who wants to download the file
      * @param iva_directoryId id of the directory where the file is
-     * @param iva_ipAddr Address of the user who send the request
      * @return the file if it is saved at the given path, otherwise null
      */
     @Override
@@ -387,6 +388,8 @@ public class FileServiceImpl implements FileService{
             }
         }
 
+        lli_ipList = lli_ipList.stream().distinct().collect(Collectors.toList());
+
         lob_command = new Command(iva_relativeFilePath, iva_command, iva_directoryId, iar_information);
         NotifyService notifyService = new NotifyService(lli_ipList, lob_command);
         notifyService.setName("NotifyService");
@@ -395,13 +398,22 @@ public class FileServiceImpl implements FileService{
 
     private List<String> addIpAddrFromUser(User iob_client, User iob_user, List<String> ili_list, String iva_ipAddr) {
         Cache lob_cache = Cache.getIpCache();
+        List<String> lob_ipList;
 
         if (!iob_user.getEmail().equals(iob_client.getEmail())) {
-            ili_list.addAll(lob_cache.get(iob_user.getEmail()));
+            lob_ipList = lob_cache.get(iob_user.getEmail());
+
+            if (lob_ipList != null) {
+                ili_list.addAll(lob_cache.get(iob_user.getEmail()));
+            }
         } else {
-            for (String lva_ip : lob_cache.get(iob_user.getEmail())) {
-                if (!lva_ip.equals(iva_ipAddr)) {
-                    ili_list.add(lva_ip);
+            lob_ipList = lob_cache.get(iob_user.getEmail());
+
+            if (lob_ipList != null) {
+                for (String lva_ip : lob_cache.get(iob_user.getEmail())) {
+                    if (!lva_ip.equals(iva_ipAddr)) {
+                        ili_list.add(lva_ip);
+                    }
                 }
             }
         }

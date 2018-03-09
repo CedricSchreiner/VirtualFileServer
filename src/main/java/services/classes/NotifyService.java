@@ -23,7 +23,8 @@ public class NotifyService extends Thread {
         for (String lva_ip : gli_ipList) {
             try (Socket socket = new Socket(lva_ip, 32001)) {
                 BufferedWriter lob_bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-                lob_bufferedWriter.write(gob_command.toString());
+                lob_bufferedWriter.append(gob_command.toString());
+                lob_bufferedWriter.flush();
             } catch (IOException ex) {
                 ex.printStackTrace();
             }

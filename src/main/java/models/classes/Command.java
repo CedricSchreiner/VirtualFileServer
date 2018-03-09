@@ -39,8 +39,10 @@ public class Command {
     public String toString() {
         StringBuilder rob_toString = new StringBuilder(gva_command + "_" + gob_relativeFilePath);
 
-        for (String lva_information : gar_information) {
-            rob_toString.append("_").append(lva_information);
+        if (gar_information != null) {
+            for (String lva_information : gar_information) {
+                rob_toString.append("_").append(lva_information);
+            }
         }
 
         return rob_toString.toString();
