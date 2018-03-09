@@ -23,8 +23,9 @@ public interface FileService {
      *
      * @param ico_inputList contains file content and path
      * @param iva_directoryId id of the directory
+     * @param iva_ipAddr Address of the user who send the request
      */
-    boolean addNewFile(List<InputPart> ico_inputList, String iva_filePath, User iob_user, int iva_directoryId);
+    boolean addNewFile(List<InputPart> ico_inputList, String iva_filePath, User iob_user, int iva_directoryId, String iva_ipAddr);
 
     /**
      * delete a file

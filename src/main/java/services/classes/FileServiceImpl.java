@@ -1,28 +1,35 @@
 package services.classes;
 
+import builder.ServiceObjectBuilder;
+import cache.Cache;
 import com.thoughtworks.xstream.XStream;
 import fileTree.interfaces.FileNode;
 import fileTree.interfaces.Tree;
 import fileTree.interfaces.TreeDifference;
 import fileTree.models.FileNodeImpl;
 import fileTree.models.TreeImpl;
+import models.classes.Command;
 import models.classes.FileTreeCollection;
 import models.classes.SharedDirectory;
 import models.classes.User;
+import models.constants.CommandConstants;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import services.interfaces.FileService;
-import utilities.Utils;
+import services.interfaces.SharedDirectoryService;
+import services.interfaces.UserService;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import static services.constants.FileServiceConstants.*;
+import static utilities.Utils.convertRelativeToAbsolutePath;
 
 public class FileServiceImpl implements FileService{
 
@@ -34,6 +41,7 @@ public class FileServiceImpl implements FileService{
      * @param iva_filePath    path of the file
      * @param iob_user        user who wants to download the file
      * @param iva_directoryId id of the directory where the file is
+     * @param iva_ipAddr Address of the user who send the request
      * @return the file if it is saved at the given path, otherwise null
      */
     @Override
@@ -43,7 +51,7 @@ public class FileServiceImpl implements FileService{
         }
 
         Tree tree;
-        iva_filePath = createFilePath(iva_filePath, iob_user, iva_directoryId);
+        iva_filePath = convertRelativeToAbsolutePath(iva_filePath, iob_user, iva_directoryId);
 
         if (iva_filePath == null) {
             return null;
@@ -67,17 +75,29 @@ public class FileServiceImpl implements FileService{
      *
      * @param ico_inputList contains file content and path
      * @param iva_directoryId id of the directory
+     * @param iva_ipAddr Address of the user who send the request
      */
-    public boolean addNewFile(List<InputPart> ico_inputList, String iva_filePath, User iob_user, int iva_directoryId) {
+    public boolean addNewFile(List<InputPart> ico_inputList, String iva_filePath, User iob_user, int iva_directoryId, String iva_ipAddr) {
+        String lva_relativePath = iva_filePath;
+
         if (iob_user == null) {
             return false;
         }
 
         try {
             byte[] lar_fileContentBytes = getFileContent(0, ico_inputList);
-            iva_filePath = createFilePath(iva_filePath, iob_user, iva_directoryId);
+            iva_filePath = convertRelativeToAbsolutePath(iva_filePath, iob_user, iva_directoryId);
 
-            return iva_filePath != null && writeFile(lar_fileContentBytes, iva_filePath, iob_user, iva_directoryId);
+            if (iva_filePath == null) {
+                return false;
+            }
+
+            if (writeFile(lar_fileContentBytes, iva_filePath, iob_user, iva_directoryId)) {
+                notifyClients(lva_relativePath, iob_user, CommandConstants.GC_ADD, iva_directoryId, iva_ipAddr);
+                return true;
+            }
+
+            return false;
 
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -101,7 +121,7 @@ public class FileServiceImpl implements FileService{
         }
 
         lob_tree = getTreeFromDirectoryId(iob_user, iva_directoryId);
-        iva_filePath = createFilePath(iva_filePath, iob_user, iva_directoryId);
+        iva_filePath = convertRelativeToAbsolutePath(iva_filePath, iob_user, iva_directoryId);
 
         return iva_filePath != null && lob_tree.deleteFile(iva_filePath);
 
@@ -127,8 +147,8 @@ public class FileServiceImpl implements FileService{
             return GC_MISSING_OR_WRONG_ARGUMENT;
         }
 
-        iva_filePath = createFilePath(iva_filePath, iob_user, iva_sourceDirectoryId);
-        iva_newFilePath = createFilePath(iva_newFilePath, iob_user, iva_destinationDirectoryId);
+        iva_filePath = convertRelativeToAbsolutePath(iva_filePath, iob_user, iva_sourceDirectoryId);
+        iva_newFilePath = convertRelativeToAbsolutePath(iva_newFilePath, iob_user, iva_destinationDirectoryId);
 
         if (iva_filePath == null || iva_newFilePath == null) {
             return GC_MISSING_OR_WRONG_ARGUMENT;
@@ -191,7 +211,7 @@ public class FileServiceImpl implements FileService{
         }
 
         //TODO check if is allow to move the file to the destination
-        iva_filePath = createFilePath(iva_filePath, iob_user, iva_directoryId);
+        iva_filePath = convertRelativeToAbsolutePath(iva_filePath, iob_user, iva_directoryId);
         lob_tree = getTreeFromDirectoryId(iob_user, iva_directoryId);
 
         if (iva_filePath == null || lob_tree == null) {
@@ -219,7 +239,7 @@ public class FileServiceImpl implements FileService{
 
         //TODO check if is allow to move the file to the destination
 //        iva_filePath = createUserFilePath(iva_filePath, iob_user);
-        iva_filePath = createFilePath(iva_filePath, iob_user, iva_directoryId);
+        iva_filePath = convertRelativeToAbsolutePath(iva_filePath, iob_user, iva_directoryId);
 
         if (iva_filePath == null) {
             return false;
@@ -247,7 +267,7 @@ public class FileServiceImpl implements FileService{
             return false;
         }
 
-        iva_filePath = createFilePath(iva_filePath, iob_user, iva_directoryId);
+        iva_filePath = convertRelativeToAbsolutePath(iva_filePath, iob_user, iva_directoryId);
 
         if (iva_filePath == null) {
             return false;
@@ -339,28 +359,54 @@ public class FileServiceImpl implements FileService{
         return true;
     }
 
-    private String createFilePath(String iva_filePath, User iob_user, int iva_directoryId) {
-        String lva_rootPath = Utils.getRootDirectory();
+    private void notifyClients(String iva_relativeFilePath, User iob_user, String iva_command, int iva_directoryId, String iva_ipAddr, String... iar_information) {
+        List<String> lli_ipList = new ArrayList<>();
+        UserService lob_userService;
+        SharedDirectoryService lob_sharedDirectoryService;
+        SharedDirectory lob_sharedDirectory;
+        Command lob_command;
 
         if (iva_directoryId < 0) {
-            iva_filePath = iva_filePath.replaceFirst("^Private", "");
-            iva_filePath = iob_user.getName() + iob_user.getUserId() + iva_filePath;
-            return lva_rootPath + iva_filePath.replaceFirst("^Private", "");
+            lli_ipList = addIpAddrFromUser(iob_user, iob_user, lli_ipList, iva_ipAddr);
         }
 
         if (iva_directoryId == 0) {
-            return lva_rootPath + iva_filePath;
-        } else {
-            SharedDirectoryServiceImpl service = new SharedDirectoryServiceImpl();
-            SharedDirectory lob_sharedDirectory  = service.getSharedDirectoryById(iva_directoryId);
-            if (lob_sharedDirectory == null) {
-                return null;
-            }
+            lob_userService = ServiceObjectBuilder.getUserServiceObject();
 
-            User lob_owner = lob_sharedDirectory.getOwner();
-            iva_filePath = iva_filePath.replaceFirst("^Shared", "");
-            return lob_owner.getName() + lob_owner.getUserId() + "_shared" + iva_filePath;
+            for (User lob_user : lob_userService.getAllUser()) {
+                lli_ipList = addIpAddrFromUser(iob_user, lob_user, lli_ipList, iva_ipAddr);
+            }
         }
+
+        if (iva_directoryId > 0) {
+            lob_sharedDirectoryService = ServiceObjectBuilder.getSharedDirectoryServiceObject();
+            lob_sharedDirectory = lob_sharedDirectoryService.getSharedDirectoryById(iva_directoryId);
+
+            for (User lob_member : lob_sharedDirectory.getMembers()) {
+                lli_ipList = addIpAddrFromUser(iob_user, lob_member, lli_ipList, iva_ipAddr);
+            }
+        }
+
+        lob_command = new Command(iva_relativeFilePath, iva_command, iva_directoryId, iar_information);
+        NotifyService notifyService = new NotifyService(lli_ipList, lob_command);
+        notifyService.setName("NotifyService");
+        notifyService.start();
+    }
+
+    private List<String> addIpAddrFromUser(User iob_client, User iob_user, List<String> ili_list, String iva_ipAddr) {
+        Cache lob_cache = Cache.getIpCache();
+
+        if (!iob_user.getEmail().equals(iob_client.getEmail())) {
+            ili_list.addAll(lob_cache.get(iob_user.getEmail()));
+        } else {
+            for (String lva_ip : lob_cache.get(iob_user.getEmail())) {
+                if (!lva_ip.equals(iva_ipAddr)) {
+                    ili_list.add(lva_ip);
+                }
+            }
+        }
+
+        return ili_list;
     }
 
     private Tree getTreeFromDirectoryId(User iob_User, int iva_directoryId) {

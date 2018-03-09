@@ -1,10 +1,13 @@
 package utilities;
 
+import builder.ServiceObjectBuilder;
+import models.classes.SharedDirectory;
 import models.classes.User;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
+import services.classes.SharedDirectoryServiceImpl;
 
 import java.io.File;
 import java.io.IOException;
@@ -71,5 +74,54 @@ public class Utils {
         return getRootDirectory();
     }
 
+    public static String convertFileToRelativPath(File iob_file, int iva_directoryId) {
+        String rva_relativeFilePath;
+        String lva_rootDirectory = getRootDirectory();
 
+        try {
+            rva_relativeFilePath = iob_file.getCanonicalPath();
+        } catch (IOException ex) {
+            return "";
+        }
+
+        rva_relativeFilePath = rva_relativeFilePath.replace(lva_rootDirectory, "");
+
+        if (iva_directoryId < 0) {
+            rva_relativeFilePath = rva_relativeFilePath.replaceFirst("^[^\\\\]*", "Private");
+        }
+
+        return rva_relativeFilePath;
+    }
+
+    public static String convertRelativeToAbsolutePath (String iva_relativeFilePath, User iob_user, int iva_directoryId) {
+        String lva_rootDirectory = Utils.getRootDirectory();
+        String rva_absolutePath = "";
+        SharedDirectoryServiceImpl service;
+        SharedDirectory lob_sharedDirectory;
+        User lob_owner;
+
+        if (iva_directoryId < 0) {
+            iva_relativeFilePath = iva_relativeFilePath.replaceFirst("^[^\\\\]*", "");
+            rva_absolutePath = lva_rootDirectory + iob_user.getName() + iob_user.getUserId() + iva_relativeFilePath;
+        }
+
+        if (iva_directoryId == 0) {
+            rva_absolutePath = lva_rootDirectory + iva_relativeFilePath;
+        }
+
+        if (iva_directoryId > 0) {
+            iva_relativeFilePath = iva_relativeFilePath.replaceFirst("^[^\\\\]*", "");
+            service = ServiceObjectBuilder.getSharedDirectoryServiceObject();
+            lob_sharedDirectory = service.getSharedDirectoryById(iva_directoryId);
+
+            if (lob_sharedDirectory == null) {
+                return null;
+            }
+            lob_owner = lob_sharedDirectory.getOwner();
+
+            rva_absolutePath = lva_rootDirectory + "\\" + lob_owner.getName() + lob_owner.getUserId() + "_shared" + iva_relativeFilePath;
+        }
+
+        return rva_absolutePath;
+    }
 }
