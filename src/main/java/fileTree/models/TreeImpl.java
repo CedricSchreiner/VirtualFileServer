@@ -162,7 +162,19 @@ public class TreeImpl implements Tree {
      */
     @Override
     public Collection<File> getDirectory(File iob_file) {
-        return getDirectory(iob_file, new ArrayList<>());
+        FileNode lob_node;
+        try {
+            lob_node = searchNode(gob_rootNode, iob_file.getAbsolutePath(), 0);
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
+            return new ArrayList<>();
+        }
+
+        if (lob_node == null) {
+            return new ArrayList<>();
+        }
+
+        return getDirectory(lob_node, new ArrayList<>());
     }
 
     /**
@@ -403,7 +415,7 @@ public class TreeImpl implements Tree {
             updateFilePath(lob_fileNode.getParent().getFile().toPath(), lob_fileNode);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
             return false;
         }
     }
@@ -551,11 +563,11 @@ public class TreeImpl implements Tree {
         return lob_difference;
     }
 
-    private Collection<File> getDirectory(File iob_pointer, Collection<File> ico_files) {
-        ico_files.add(iob_pointer);
+    private Collection<File> getDirectory(FileNode iob_pointer, Collection<File> ico_files) {
+        ico_files.add(iob_pointer.getFile());
 
-        if (iob_pointer.isDirectory()) {
-            for (File lob_child : iob_pointer.listFiles()) {
+        if (iob_pointer.getFile().isDirectory()) {
+            for (FileNode lob_child : iob_pointer.getChildren()) {
                 getDirectory(lob_child, ico_files);
             }
         }
@@ -772,7 +784,11 @@ public class TreeImpl implements Tree {
                 delete(lob_file.getFile().getCanonicalPath());
                 lob_iterator.remove();
             }
-            return lob_nodeToRemove.getFile().delete();
+
+            if (lob_nodeToRemove.getFile().exists()) {
+                return lob_nodeToRemove.getFile().delete();
+            }
+            return true;
 
         } catch (IOException e) {
             e.printStackTrace();

@@ -46,7 +46,7 @@ public interface FileService {
      * @param iva_destinationDirectoryId id of the destination directory
      * @return true of the file was successfully moved or renamed, otherwise false
      */
-    boolean moveFile(String iva_filePath, String iva_newFilePath, User iob_user, int iva_directoryId, int iva_destinationDirectoryId);
+    int moveFile(String iva_filePath, String iva_newFilePath, User iob_user, int iva_directoryId, int iva_destinationDirectoryId);
 
     /**
      * delete only the directory and move the files that the directory contains to the directories parent

@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import static rest.constants.FileResourceConstants.*;
+import static services.constants.FileServiceConstants.*;
 
 @Path(GC_FILE_RESOURCE_PATH)
 public class FileResource {
@@ -99,12 +100,23 @@ public class FileResource {
                              @QueryParam("sourceDirectoryId") int iva_sourceDirectoryId,
                              @QueryParam("destinationDirectoryId") int iva_destinationDirectoryId) {
 
+        int lva_result;
         User lob_user = getUserFromContext(iob_requestContext);
 
-        if (!gob_fileService.moveFile(iva_path, iva_newFilePath, lob_user, iva_sourceDirectoryId, iva_destinationDirectoryId)) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
+        lva_result = gob_fileService.moveFile(iva_path, iva_newFilePath, lob_user, iva_sourceDirectoryId, iva_destinationDirectoryId);
+        switch (lva_result) {
+            case GC_ERROR:
+                return Response.status(422).build();
+
+            case GC_MISSING_OR_WRONG_ARGUMENT:
+                return Response.status(Response.Status.BAD_REQUEST).build();
+
+            case GC_SUCCESS:
+                return Response.ok().entity(FILE_MOVED).build();
+
+            default:
+                return Response.status(Response.Status.BAD_REQUEST).build();
         }
-        return Response.ok().entity(FILE_MOVED).build();
     }
 
     @POST

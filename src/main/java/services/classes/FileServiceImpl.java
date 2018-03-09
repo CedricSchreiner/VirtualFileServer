@@ -22,6 +22,8 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 
+import static services.constants.FileServiceConstants.*;
+
 public class FileServiceImpl implements FileService{
 
     private static FileTreeCollection gob_fileTreeCollection = FileTreeCollection.getInstance();
@@ -115,36 +117,39 @@ public class FileServiceImpl implements FileService{
      * @param iva_destinationDirectoryId id of the destination directory
      * @return true of the file was successfully moved or renamed, otherwise false
      */
-    public boolean moveFile(String iva_filePath, String iva_newFilePath, User iob_user, int iva_sourceDirectoryId, int iva_destinationDirectoryId) {
+    public int moveFile(String iva_filePath, String iva_newFilePath, User iob_user, int iva_sourceDirectoryId, int iva_destinationDirectoryId) {
         Tree lob_sourceTree = getTreeFromDirectoryId(iob_user, iva_sourceDirectoryId);
         Tree lob_destinationTree = getTreeFromDirectoryId(iob_user, iva_destinationDirectoryId);
         File lob_file;
         Collection<File> lco_files;
 
         if (iob_user == null || lob_sourceTree == null || lob_destinationTree == null) {
-            return false;
+            return GC_MISSING_OR_WRONG_ARGUMENT;
         }
 
-        //TODO check if is allow to move the file to the destination
         iva_filePath = createFilePath(iva_filePath, iob_user, iva_sourceDirectoryId);
         iva_newFilePath = createFilePath(iva_newFilePath, iob_user, iva_destinationDirectoryId);
 
         if (iva_filePath == null || iva_newFilePath == null) {
-            return false;
+            return GC_MISSING_OR_WRONG_ARGUMENT;
         }
 
         if (lob_sourceTree == lob_destinationTree) {
-            return lob_sourceTree.moveFile(iva_filePath, iva_newFilePath, false);
+            if(lob_sourceTree.moveFile(iva_filePath, iva_newFilePath, false)) {
+                return GC_SUCCESS;
+            }
+            return GC_ERROR;
         }
 
         lob_file = lob_sourceTree.getFile(iva_filePath);
+        String lva_oldFileParent = iva_filePath.replaceFirst("\\\\[^\\\\]*$", "");
 
         if (lob_file == null) {
-            return false;
+            return GC_MISSING_OR_WRONG_ARGUMENT;
         }
 
+        //collect the files before they are moved
         lco_files = lob_sourceTree.getDirectory(lob_file);
-
 
         try {
             if (lob_file.isDirectory()) {
@@ -154,18 +159,22 @@ public class FileServiceImpl implements FileService{
             }
         } catch (IOException ex) {
             System.err.println(ex.getMessage());
-            return false;
+            return GC_ERROR;
         }
+
 
         for (File lob_child : lco_files) {
             String path = lob_child.getAbsolutePath();
-            path = path.replace(lob_sourceTree.getRoot().getAbsolutePath(), lob_destinationTree.getRoot().getAbsolutePath());
+            path = path.replace(lva_oldFileParent, lob_destinationTree.getRoot().getAbsolutePath());
             File lob_newFile = new File(path);
-            lob_destinationTree.addFile(lob_newFile, lob_newFile.isDirectory());
+            lob_destinationTree.addFile(lob_newFile, lob_child.isDirectory());
         }
 
-        return lob_sourceTree.deleteFile(lob_file);
+        if (lob_sourceTree.deleteFile(lob_file)) {
+            return GC_SUCCESS;
+        }
 
+        return GC_ERROR;
     }
 
     /**
