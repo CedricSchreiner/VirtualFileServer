@@ -33,9 +33,10 @@ public interface FileService {
      * @param iva_filePath the path of the file
      * @param iob_user     the user who wants to delete the file
      * @param iva_directoryId id of the directory
+     * @param iva_ipAddr Address of the user who send the request
      * @return true if the deletion was successful, otherwise false
      */
-    boolean deleteFile(String iva_filePath, User iob_user, int iva_directoryId);
+    boolean deleteFile(String iva_filePath, User iob_user, int iva_directoryId, String iva_ipAddr);
 
     /**
      * move a or rename existing file to a new location
@@ -45,9 +46,10 @@ public interface FileService {
      * @param iob_user        the user who wants to move or rename the file
      * @param iva_directoryId id of the source directory
      * @param iva_destinationDirectoryId id of the destination directory
+     * @param iva_ipAddr Address of the user who send the request
      * @return true of the file was successfully moved or renamed, otherwise false
      */
-    int moveFile(String iva_filePath, String iva_newFilePath, User iob_user, int iva_directoryId, int iva_destinationDirectoryId);
+    int moveFile(String iva_filePath, String iva_newFilePath, User iob_user, int iva_directoryId, int iva_destinationDirectoryId, String iva_ipAddr);
 
     /**
      * delete only the directory and move the files that the directory contains to the directories parent
@@ -55,9 +57,10 @@ public interface FileService {
      * @param iva_filePath the current path of the directory
      * @param iob_user     the user who wants to delete the directory
      * @param iva_directoryId id of the source directory
+     * @param iva_ipAddr Address of the user who send the request
      * @return true if the directory was deleted, otherwise false
      */
-    boolean deleteDirectoryOnly(String iva_filePath, User iob_user, int iva_directoryId);
+    boolean deleteDirectoryOnly(String iva_filePath, User iob_user, int iva_directoryId, String iva_ipAddr);
 
     /**
      * create a directory on the server
@@ -75,9 +78,10 @@ public interface FileService {
      * @param iob_user the user who wants to rename a file
      * @param iva_newFileName the new name of the file
      * @param iva_directoryId id of the source directory
+     * @param iva_ipAddr Address of the user who send the request
      * @return true if the file was renamed, otherwise false
      */
-    boolean renameFile(String iva_filePath, String iva_newFileName, User iob_user, int iva_directoryId);
+    boolean renameFile(String iva_filePath, String iva_newFileName, User iob_user, int iva_directoryId, String iva_ipAddr);
 
     /**
      * Compare the user tree with another tree

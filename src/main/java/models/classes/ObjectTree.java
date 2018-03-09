@@ -1,7 +1,7 @@
 package models.classes;
 
 import fileTree.interfaces.Tree;
-import fileTree.models.TreeImpl;
+import fileTree.classes.TreeImpl;
 
 import java.io.File;
 import java.io.IOException;

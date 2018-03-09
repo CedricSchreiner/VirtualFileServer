@@ -6,8 +6,8 @@ import com.thoughtworks.xstream.XStream;
 import fileTree.interfaces.FileNode;
 import fileTree.interfaces.Tree;
 import fileTree.interfaces.TreeDifference;
-import fileTree.models.FileNodeImpl;
-import fileTree.models.TreeImpl;
+import fileTree.classes.FileNodeImpl;
+import fileTree.classes.TreeImpl;
 import models.classes.Command;
 import models.classes.FileTreeCollection;
 import models.classes.SharedDirectory;
@@ -19,13 +19,13 @@ import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import services.interfaces.FileService;
 import services.interfaces.SharedDirectoryService;
 import services.interfaces.UserService;
+import utilities.Utils;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -112,10 +112,12 @@ public class FileServiceImpl implements FileService{
      * @param iva_filePath the path of the file
      * @param iob_user the user who wants to delete the file
      * @param iva_directoryId id of the directory
+     * @param iva_ipAddr Address of the user who send the request
      * @return true if the deletion was successful, otherwise false
      */
-    public boolean deleteFile(String iva_filePath, User iob_user, int iva_directoryId) {
+    public boolean deleteFile(String iva_filePath, User iob_user, int iva_directoryId, String iva_ipAddr) {
         Tree lob_tree;
+        String lva_relativeFilePath = iva_filePath;
 
         if (iob_user == null) {
             return false;
@@ -124,7 +126,16 @@ public class FileServiceImpl implements FileService{
         lob_tree = getTreeFromDirectoryId(iob_user, iva_directoryId);
         iva_filePath = convertRelativeToAbsolutePath(iva_filePath, iob_user, iva_directoryId);
 
-        return iva_filePath != null && lob_tree.deleteFile(iva_filePath);
+        if (iva_filePath == null) {
+            return false;
+        }
+
+        if (lob_tree.deleteFile(iva_filePath)) {
+            notifyClients(lva_relativeFilePath, iob_user, CommandConstants.GC_DELETE, iva_directoryId, iva_ipAddr);
+        }
+
+        return true;
+//        return iva_filePath != null && lob_tree.deleteFile(iva_filePath);
 
     }
 
@@ -138,10 +149,13 @@ public class FileServiceImpl implements FileService{
      * @param iva_destinationDirectoryId id of the destination directory
      * @return true of the file was successfully moved or renamed, otherwise false
      */
-    public int moveFile(String iva_filePath, String iva_newFilePath, User iob_user, int iva_sourceDirectoryId, int iva_destinationDirectoryId) {
+    public int moveFile(String iva_filePath, String iva_newFilePath, User iob_user, int iva_sourceDirectoryId, int iva_destinationDirectoryId, String iva_ipAddr) {
         Tree lob_sourceTree = getTreeFromDirectoryId(iob_user, iva_sourceDirectoryId);
         Tree lob_destinationTree = getTreeFromDirectoryId(iob_user, iva_destinationDirectoryId);
+        String lva_currentRelativeFilePath = iva_filePath;
+        String lva_newRelativeFilePath = iva_newFilePath;
         File lob_file;
+        File lob_newFile;
         Collection<File> lco_files;
 
         if (iob_user == null || lob_sourceTree == null || lob_destinationTree == null) {
@@ -157,6 +171,7 @@ public class FileServiceImpl implements FileService{
 
         if (lob_sourceTree == lob_destinationTree) {
             if(lob_sourceTree.moveFile(iva_filePath, iva_newFilePath, false)) {
+                notifyClients(lva_currentRelativeFilePath, iob_user, CommandConstants.GC_MOVE, iva_sourceDirectoryId,iva_ipAddr, lva_newRelativeFilePath);
                 return GC_SUCCESS;
             }
             return GC_ERROR;
@@ -187,11 +202,21 @@ public class FileServiceImpl implements FileService{
         for (File lob_child : lco_files) {
             String path = lob_child.getAbsolutePath();
             path = path.replace(lva_oldFileParent, lob_destinationTree.getRoot().getAbsolutePath());
-            File lob_newFile = new File(path);
+            lob_newFile = new File(path);
             lob_destinationTree.addFile(lob_newFile, lob_child.isDirectory());
         }
 
         if (lob_sourceTree.deleteFile(lob_file)) {
+            notifyClients(lva_currentRelativeFilePath, iob_user, CommandConstants.GC_DELETE, iva_sourceDirectoryId, iva_ipAddr);
+            lva_newRelativeFilePath += "\\" + lob_file.getName();
+
+            lob_newFile = new File(Utils.getRootDirectory() + lva_newRelativeFilePath);
+            lco_files = lob_destinationTree.getDirectory(lob_newFile);
+
+            for (File lob_child : lco_files) {
+                lva_newRelativeFilePath = Utils.convertFileToRelativPath(lob_child, iva_destinationDirectoryId);
+                notifyClients(lva_newRelativeFilePath, iob_user, CommandConstants.GC_ADD, iva_destinationDirectoryId, iva_ipAddr);
+            }
             return GC_SUCCESS;
         }
 
@@ -203,25 +228,29 @@ public class FileServiceImpl implements FileService{
      * @param iva_filePath the current path of the directory
      * @param iob_user the user who wants to delete the directory
      * @param iva_directoryId id of the source directory
+     * @param iva_ipAddr Address of the user who send the request
      * @return true if the directory was deleted, otherwise false
      */
-    public boolean deleteDirectoryOnly(String iva_filePath, User iob_user, int iva_directoryId) {
+    public boolean deleteDirectoryOnly(String iva_filePath, User iob_user, int iva_directoryId, String iva_ipAddr) {
         Tree lob_tree;
+        String lva_relativePath = iva_filePath;
+
         if (iob_user == null) {
             return false;
         }
 
-        //TODO check if is allow to move the file to the destination
         iva_filePath = convertRelativeToAbsolutePath(iva_filePath, iob_user, iva_directoryId);
         lob_tree = getTreeFromDirectoryId(iob_user, iva_directoryId);
 
         if (iva_filePath == null || lob_tree == null) {
             return false;
         }
-//        iva_filePath = createUserFilePath(iva_filePath, iob_user);
-//        gob_fileTreeCollection = FileTreeCollection.getInstance();
-//        return gob_fileTreeCollection.getTreeFromUser(iob_user).deleteDirectoryOnly(iva_filePath);
-        return lob_tree.deleteDirectoryOnly(iva_filePath);
+
+        if (lob_tree.deleteDirectoryOnly(iva_filePath)) {
+            notifyClients(lva_relativePath, iob_user, CommandConstants.GC_DELETE_DIR, iva_directoryId, iva_ipAddr);
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -238,8 +267,6 @@ public class FileServiceImpl implements FileService{
             return false;
         }
 
-        //TODO check if is allow to move the file to the destination
-//        iva_filePath = createUserFilePath(iva_filePath, iob_user);
         iva_filePath = convertRelativeToAbsolutePath(iva_filePath, iob_user, iva_directoryId);
 
         if (iva_filePath == null) {
@@ -249,7 +276,6 @@ public class FileServiceImpl implements FileService{
         File lob_newDirectory = new File(iva_filePath);
         lob_tree = getTreeFromDirectoryId(iob_user, iva_directoryId);
         return lob_tree.addFile(lob_newDirectory, true);
-//        return gob_fileTreeCollection.getTreeFromUser(iob_user).addFile(lob_newDirectory, true);
     }
 
     /**
@@ -258,11 +284,13 @@ public class FileServiceImpl implements FileService{
      * @param iob_user the user who wants to rename a file
      * @param iva_newFileName the new name of the file
      * @param iva_directoryId id of the source directory
+     * @param iva_ipAddr Address of the user who send the request
      * @return true if the file was renamed, otherwise false
      */
     @Override
-    public boolean renameFile(String iva_filePath, String iva_newFileName, User iob_user, int iva_directoryId) {
+    public boolean renameFile(String iva_filePath, String iva_newFileName, User iob_user, int iva_directoryId, String iva_ipAddr) {
         Tree lob_tree;
+        String lva_relativePath = iva_filePath;
 
         if (iob_user == null) {
             return false;
@@ -275,7 +303,12 @@ public class FileServiceImpl implements FileService{
         }
 
         lob_tree = getTreeFromDirectoryId(iob_user, iva_directoryId);
-        return lob_tree.renameFile(iva_filePath, iva_newFileName);
+
+        if (lob_tree.renameFile(iva_filePath, iva_newFileName)) {
+            notifyClients(lva_relativePath, iob_user, CommandConstants.GC_RENAME, iva_directoryId, iva_ipAddr, iva_newFileName);
+            return true;
+        }
+        return false;
     }
 
     /**

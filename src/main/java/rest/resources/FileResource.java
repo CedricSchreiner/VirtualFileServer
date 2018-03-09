@@ -74,11 +74,13 @@ public class FileResource {
     @Consumes(MediaType.TEXT_PLAIN)
     public Response renameFile(@Context ContainerRequestContext iob_requestContext,
                                @QueryParam(GC_PARAMETER_PATH_NAME) String iva_path,
-                               @QueryParam(GC_PARAMETER_DIRECTORY_ID) int iva_directoryId, String iva_newFileName) {
+                               @QueryParam(GC_PARAMETER_DIRECTORY_ID) int iva_directoryId,
+                               String iva_newFileName,
+                               @Context HttpServletRequest iob_servletRequest) {
 
         User lob_user = getUserFromContext(iob_requestContext);
 
-        if (!gob_fileService.renameFile(iva_path, iva_newFileName, lob_user, iva_directoryId)) {
+        if (!gob_fileService.renameFile(iva_path, iva_newFileName, lob_user, iva_directoryId, iob_servletRequest.getRemoteAddr())) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
         return Response.ok().entity(FILE_RENAMED).build();
@@ -87,11 +89,12 @@ public class FileResource {
     @POST
     @Path(GC_FILE_DELETE_PATH)
     public Response deleteFile(@Context ContainerRequestContext iob_requestContext, String iva_path,
-                               @QueryParam(GC_PARAMETER_DIRECTORY_ID) int iva_directoryId) {
+                               @QueryParam(GC_PARAMETER_DIRECTORY_ID) int iva_directoryId,
+                               @Context HttpServletRequest iob_servletRequest) {
 
         User lob_user = getUserFromContext(iob_requestContext);
 
-        if (!gob_fileService.deleteFile(iva_path, lob_user, iva_directoryId)) {
+        if (!gob_fileService.deleteFile(iva_path, lob_user, iva_directoryId, iob_servletRequest.getRemoteAddr())) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
         return Response.ok().entity(FILE_DELETED).build();
@@ -102,12 +105,13 @@ public class FileResource {
     public Response moveFile(@Context ContainerRequestContext iob_requestContext,
                              @QueryParam(GC_PARAMETER_PATH_NAME) String iva_path, String iva_newFilePath,
                              @QueryParam("sourceDirectoryId") int iva_sourceDirectoryId,
-                             @QueryParam("destinationDirectoryId") int iva_destinationDirectoryId) {
+                             @QueryParam("destinationDirectoryId") int iva_destinationDirectoryId,
+                             @Context HttpServletRequest iob_servletRequest) {
 
         int lva_result;
         User lob_user = getUserFromContext(iob_requestContext);
 
-        lva_result = gob_fileService.moveFile(iva_path, iva_newFilePath, lob_user, iva_sourceDirectoryId, iva_destinationDirectoryId);
+        lva_result = gob_fileService.moveFile(iva_path, iva_newFilePath, lob_user, iva_sourceDirectoryId, iva_destinationDirectoryId, iob_servletRequest.getRemoteAddr());
         switch (lva_result) {
             case GC_ERROR:
                 return Response.status(422).build();
@@ -126,10 +130,11 @@ public class FileResource {
     @POST
     @Path(GC_FILE_REMOVE_DIR_ONLY_PATH)
     public Response deleteDirectoryOnly(@Context ContainerRequestContext iob_requestContext, String iva_filePath,
-                                        @QueryParam(GC_PARAMETER_DIRECTORY_ID) int iva_directoryId) {
+                                        @QueryParam(GC_PARAMETER_DIRECTORY_ID) int iva_directoryId,
+                                        @Context HttpServletRequest iob_servletRequest) {
         User lob_user = getUserFromContext(iob_requestContext);
 
-        if (!gob_fileService.deleteDirectoryOnly(iva_filePath, lob_user, iva_directoryId)) {
+        if (!gob_fileService.deleteDirectoryOnly(iva_filePath, lob_user, iva_directoryId, iob_servletRequest.getRemoteAddr())) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
         return Response.ok().entity(DIRECTORY_DELETED).build();
