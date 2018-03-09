@@ -9,6 +9,7 @@ import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import services.classes.AuthService;
 import services.interfaces.FileService;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
@@ -51,14 +52,17 @@ public class FileResource {
     @POST
     @Path(GC_FILE_UPLOAD_PATH)
     @Consumes({MediaType.MULTIPART_FORM_DATA})
-    public Response uploadFile(MultipartFormDataInput iob_input, @QueryParam(GC_PARAMETER_PATH_NAME) String iva_filePath
-            ,@QueryParam(GC_PARAMETER_DIRECTORY_ID) int iva_directoryId, @Context ContainerRequestContext iob_requestContext) {
+    public Response uploadFile(MultipartFormDataInput iob_input,
+                               @QueryParam(GC_PARAMETER_PATH_NAME) String iva_filePath,
+                               @QueryParam(GC_PARAMETER_DIRECTORY_ID) int iva_directoryId,
+                               @Context ContainerRequestContext iob_requestContext,
+                               @Context HttpServletRequest iob_servletRequest) {
         Map<String, List<InputPart>> lco_uploadForm = iob_input.getFormDataMap();
         List<InputPart> lob_inputParts = lco_uploadForm.get(GC_ATTACHMENT);
 
         User lob_user = getUserFromContext(iob_requestContext);
 
-        if (!gob_fileService.addNewFile(lob_inputParts, iva_filePath, lob_user, iva_directoryId)) {
+        if (!gob_fileService.addNewFile(lob_inputParts, iva_filePath, lob_user, iva_directoryId, iob_servletRequest.getRemoteAddr())) {
             return Response.status(Response.Status.EXPECTATION_FAILED).build();
         }
 
