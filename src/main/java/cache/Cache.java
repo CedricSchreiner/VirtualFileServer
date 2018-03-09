@@ -40,8 +40,8 @@ public class Cache {
             iva_value = "127.0.0.1";
         }
 
-        for (String lob_ip : lob_ipList) {
-            if (iva_value.equals(lob_ip)) {
+        for (String lva_ip : lob_ipList) {
+            if (iva_value.equals(lva_ip)) {
                 return;
             }
         }
