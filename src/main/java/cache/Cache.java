@@ -36,6 +36,16 @@ public class Cache {
             lob_ipList = new ArrayList<>();
         }
 
+        if (iva_value.equals("localhost")) {
+            iva_value = "127.0.0.1";
+        }
+
+        for (String lva_ip : lob_ipList) {
+            if (iva_value.equals(lva_ip)) {
+                return;
+            }
+        }
+
         lob_ipList.add(iva_value);
         gob_dataCacheMap.put(iva_key, lob_ipList);
     }
