@@ -47,15 +47,13 @@ public class UserServiceImpl implements UserService {
 
             lob_dir = new File(Utils.getRootDirectory() + lva_userDirectoryName);
 
-//            if (!lob_dir.exists() || !lob_dir.isDirectory()) {
-                if (lob_dir.delete() && !lob_dir.isDirectory()) {
-                    throw new UserDirectoryNotCreated(GC_USER_DIRECTORY_NOT_CREATED);
-                }
+            if (lob_dir.delete() && !lob_dir.isDirectory()) {
+                throw new UserDirectoryNotCreated(GC_USER_DIRECTORY_NOT_CREATED);
+            }
 
-                if (!lob_dir.mkdir() && !lob_dir.exists()) {
-                    throw new UserDirectoryNotCreated(GC_USER_DIRECTORY_NOT_CREATED);
-                }
-//            }
+            if (!lob_dir.mkdir() && !lob_dir.exists()) {
+                throw new UserDirectoryNotCreated(GC_USER_DIRECTORY_NOT_CREATED);
+            }
 
             try {
                 Initializer.initUserTree(iob_user);

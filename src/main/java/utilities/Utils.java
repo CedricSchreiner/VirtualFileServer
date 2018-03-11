@@ -110,16 +110,17 @@ public class Utils {
         }
 
         if (iva_directoryId > 0) {
-            iva_relativeFilePath = iva_relativeFilePath.replaceFirst("^[^\\\\]*", "");
             service = ServiceObjectBuilder.getSharedDirectoryServiceObject();
             lob_sharedDirectory = service.getSharedDirectoryById(iva_directoryId);
 
             if (lob_sharedDirectory == null) {
                 return null;
             }
+
+            iva_relativeFilePath = iva_relativeFilePath.replaceFirst("^[^\\\\]*\\\\[^\\\\]*", Integer.toString(lob_sharedDirectory.getId()));
             lob_owner = lob_sharedDirectory.getOwner();
 
-            rva_absolutePath = lva_rootDirectory + "\\" + lob_owner.getName() + lob_owner.getUserId() + "_shared" + iva_relativeFilePath;
+            rva_absolutePath = lva_rootDirectory + lob_owner.getName() + lob_owner.getUserId() + "_shared\\" + iva_relativeFilePath;
         }
 
         return rva_absolutePath;

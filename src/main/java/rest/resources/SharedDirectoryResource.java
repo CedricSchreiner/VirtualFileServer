@@ -3,9 +3,12 @@ package rest.resources;
 import com.thoughtworks.xstream.XStream;
 import models.classes.SharedDirectory;
 import models.classes.User;
+import models.constants.CommandConstants;
 import models.exceptions.SharedDirectoryException;
+import services.classes.NotifyService;
 import services.interfaces.SharedDirectoryService;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
@@ -21,7 +24,7 @@ import static utilities.RestUtils.checkIfUsersNotEqual;
 import static utilities.RestUtils.getUserFromContext;
 
 @Path(GC_SHARED_DIRECTORY_BASE_PATH)
-@Produces(MediaType.APPLICATION_JSON)
+@Produces(MediaType.TEXT_PLAIN)
 public class SharedDirectoryResource {
 
     private SharedDirectoryService gob_sharedDirectoryService = getSharedDirectoryServiceObject();
@@ -58,7 +61,8 @@ public class SharedDirectoryResource {
     @Path(GC_ADD_NEW_SHARED_DIRECTORY)
     @Consumes(MediaType.APPLICATION_XML)
     public Response addNewSharedDirectory(@Context ContainerRequestContext iob_requestContext,
-                                          String iva_sharedDirectoryAsXml) {
+                                          String iva_sharedDirectoryAsXml,
+                                          @Context HttpServletRequest iob_servletRequest) {
 
         User lob_user;
         List<SharedDirectory> lli_sharedDirectories;
@@ -66,7 +70,7 @@ public class SharedDirectoryResource {
         XStream.setupDefaultSecurity(lob_xmlParser);
         Class[] lar_allowedClasses = {SharedDirectory.class, User.class};
         lob_xmlParser.allowTypes(lar_allowedClasses);
-        int sharedDirectoryId = 0;
+        int lva_sharedDirectoryId = 0;
 
         SharedDirectory lob_sharedDirectory = (SharedDirectory)lob_xmlParser.fromXML(iva_sharedDirectoryAsXml);
 
@@ -89,12 +93,15 @@ public class SharedDirectoryResource {
                 for (SharedDirectory lob_tmpSharedDirectory : lli_sharedDirectories) {
                     if (lob_sharedDirectory.getDirectoryName()
                             .equals(lob_tmpSharedDirectory.getDirectoryName())) {
-                       sharedDirectoryId = lob_tmpSharedDirectory.getId();
+                       lva_sharedDirectoryId = lob_tmpSharedDirectory.getId();
                     }
                 }
+
+                NotifyService.notifyClients("Shared\\" + lva_sharedDirectoryId, lob_user, CommandConstants.GC_ADD_SHARED_DIR, lva_sharedDirectoryId, iob_servletRequest.getRemoteAddr());
+
                 return Response
                         .ok()
-                        .entity(sharedDirectoryId)
+                        .entity(lva_sharedDirectoryId)
                         .build();
             }
 
@@ -129,6 +136,7 @@ public class SharedDirectoryResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response addNewMemberToSharedDirectory(@PathParam(GC_MEMBER) int sharedDirectoryId,
                                                   @Context ContainerRequestContext iob_requestContext,
+                                                  @Context HttpServletRequest iob_servletRequest,
                                                   User iob_user) {
 
         User lob_user;
@@ -141,7 +149,6 @@ public class SharedDirectoryResource {
         // Check if the user who requested and who wants to create the shared directory are the same
         lob_user = getUserFromContext(iob_requestContext);
         if (checkIfUsersNotEqual(lob_user, lob_sharedDirectory.getOwner())) {
-
             return Response
                     .status(Response.Status.FORBIDDEN)
                     .entity(GC_USERS)
@@ -154,6 +161,7 @@ public class SharedDirectoryResource {
             // If successfully return a positive response
             if (gob_sharedDirectoryService.addNewMemberToSharedDirectory(lob_sharedDirectory, iob_user)) {
 
+                NotifyService.notifyClients("Shared\\" + lob_sharedDirectory.getId(), lob_user, CommandConstants.GC_ADD_SHARED_DIR, sharedDirectoryId, iob_servletRequest.getRemoteAddr());
                 return Response
                         .ok()
                         .entity(GC_S_DIR_MEMBER_SUCCESSFULLY_ADDED)
@@ -189,6 +197,7 @@ public class SharedDirectoryResource {
     @Path(GC_DELETE_SHARED_DIRECTORY)
     @Consumes(MediaType.APPLICATION_XML)
     public Response deleteSharedDirectory(@Context ContainerRequestContext iob_requestContext,
+                                          @Context HttpServletRequest iob_servletRequest,
                                           String iva_sharedDirectoryAsXml) {
 
         User lob_user;
@@ -215,8 +224,10 @@ public class SharedDirectoryResource {
 
             // Delete the shared directory
             // If successfully return a positive response
+            List<String> lli_ipList = NotifyService.collectIps("Shared\\" + lob_sharedDirectory.getId(), lob_user, lob_sharedDirectory.getId(), iob_servletRequest.getRemoteAddr());
             if (gob_sharedDirectoryService.deleteSharedDirectory(lob_sharedDirectory)) {
 
+                NotifyService.notifyClients("Shared\\" + lob_sharedDirectory.getId(), CommandConstants.GC_DELETE_SHARED_DIR, lob_sharedDirectory.getId(), lli_ipList, iob_servletRequest.getRemoteAddr());
                 return Response
                         .ok()
                         .entity(GC_S_DIR_SUCCESSFULLY_DELETED)
@@ -254,6 +265,7 @@ public class SharedDirectoryResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response removeMemberFromSharedDirectory(@PathParam(GC_MEMBER) int sharedDirectoryId,
                                                     @Context ContainerRequestContext iob_requestContext,
+                                                    @Context HttpServletRequest iob_servletRequest,
                                                     User iob_user) {
 
         User lob_user;
@@ -279,6 +291,8 @@ public class SharedDirectoryResource {
             // If successfully return a positive response
             if (gob_sharedDirectoryService.removeMemberFromSharedDirectory(lob_sharedDirectory, iob_user)) {
 
+                NotifyService.notifyClient("Shared\\" + lob_sharedDirectory.getId(), iob_user, CommandConstants.GC_DELETE_SHARED_DIR, lob_sharedDirectory.getId(), lob_sharedDirectory.getDirectoryName());
+                NotifyService.notifyClients("Shared\\" + lob_sharedDirectory.getId(), lob_user, CommandConstants.GC_ADD_SHARED_DIR, lob_sharedDirectory.getId(), iob_servletRequest.getRemoteAddr());
                 return Response
                         .ok()
                         .entity(GC_S_DIR_MEMBER_REMOVED)

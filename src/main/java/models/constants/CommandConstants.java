@@ -1,6 +1,6 @@
 package models.constants;
 
-public class CommandConstants {
+public abstract class CommandConstants {
     public static final String GC_ADD = "add";
     public static final String GC_MOVE = "move";
     public static final String GC_DELETE = "delete";

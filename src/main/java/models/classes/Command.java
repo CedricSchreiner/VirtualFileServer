@@ -45,6 +45,8 @@ public class Command {
             }
         }
 
+        rob_toString.append("_").append(gva_directoryId);
+
         return rob_toString.toString();
     }
 }

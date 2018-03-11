@@ -24,8 +24,9 @@ public interface FileService {
      * @param ico_inputList contains file content and path
      * @param iva_directoryId id of the directory
      * @param iva_ipAddr Address of the user who send the request
+     * @param iva_lastModified last time the file was modified
      */
-    boolean addNewFile(List<InputPart> ico_inputList, String iva_filePath, User iob_user, int iva_directoryId, String iva_ipAddr);
+    boolean addNewFile(List<InputPart> ico_inputList, String iva_filePath, User iob_user, int iva_directoryId, String iva_ipAddr, long iva_lastModified);
 
     /**
      * delete a file
@@ -68,9 +69,10 @@ public interface FileService {
      * @param iva_filePath path of the directory
      * @param iob_user     the user who wants to create a new directory
      * @param iva_directoryId id of the source directory
+     * @param iva_ipAddr Address of the user who send the request
      * @return true if the directory was created, otherwise false
      */
-    boolean createDirectory(String iva_filePath, User iob_user, int iva_directoryId);
+    boolean createDirectory(String iva_filePath, User iob_user, int iva_directoryId, String iva_ipAddr);
 
     /**
      * rename a flle on the server

@@ -55,6 +55,7 @@ public class FileResource {
     public Response uploadFile(MultipartFormDataInput iob_input,
                                @QueryParam(GC_PARAMETER_PATH_NAME) String iva_filePath,
                                @QueryParam(GC_PARAMETER_DIRECTORY_ID) int iva_directoryId,
+                               @QueryParam("lastModified") long iva_lastModified,
                                @Context ContainerRequestContext iob_requestContext,
                                @Context HttpServletRequest iob_servletRequest) {
         Map<String, List<InputPart>> lco_uploadForm = iob_input.getFormDataMap();
@@ -62,7 +63,7 @@ public class FileResource {
 
         User lob_user = getUserFromContext(iob_requestContext);
 
-        if (!gob_fileService.addNewFile(lob_inputParts, iva_filePath, lob_user, iva_directoryId, iob_servletRequest.getRemoteAddr())) {
+        if (!gob_fileService.addNewFile(lob_inputParts, iva_filePath, lob_user, iva_directoryId, iob_servletRequest.getRemoteAddr(), iva_lastModified)) {
             return Response.status(Response.Status.EXPECTATION_FAILED).build();
         }
 
@@ -143,10 +144,11 @@ public class FileResource {
     @POST
     @Path(GC_CREATE_DIRECTORY_PATH)
     public Response createDirectory(@Context ContainerRequestContext iob_requestContext, String iva_filePath,
-                                    @QueryParam(GC_PARAMETER_DIRECTORY_ID) int iva_directoryId) {
+                                    @QueryParam(GC_PARAMETER_DIRECTORY_ID) int iva_directoryId,
+                                    @Context HttpServletRequest iob_servletRequest) {
         User lob_user = getUserFromContext(iob_requestContext);
 
-        if (!gob_fileService.createDirectory(iva_filePath, lob_user, iva_directoryId)) {
+        if (!gob_fileService.createDirectory(iva_filePath, lob_user, iva_directoryId, iob_servletRequest.getRemoteAddr())) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
         return Response.ok().entity(DIRECTORY_DELETED).build();

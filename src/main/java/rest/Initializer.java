@@ -79,7 +79,6 @@ public class Initializer extends HttpServlet {
     public static void initUsersSharedDirectories(User iob_user) throws IOException{
         FileTreeCollection lob_collection = FileTreeCollection.getInstance();
         SharedDirectoryService lob_sharedDirectoryService = ServiceObjectBuilder.getSharedDirectoryServiceObject();
-        String lva_userSharedDirectory;
         SharedDirectoryTree lob_sharedDirectoryTree;
 
         File lob_userSharedDirectory =  new File(gva_rootDirectory + iob_user.getName() + iob_user.getUserId() + "_shared");
@@ -89,9 +88,14 @@ public class Initializer extends HttpServlet {
         }
 
         for (SharedDirectory lob_sharedDirectory : lob_sharedDirectoryService.getSharedDirectory(iob_user)) {
-            lva_userSharedDirectory = lob_userSharedDirectory + "\\" + lob_sharedDirectory.getId();
-            lob_sharedDirectoryTree = new SharedDirectoryTree(lob_sharedDirectory, lva_userSharedDirectory);
+            lob_sharedDirectoryTree = initSharedDirectory(lob_sharedDirectory, iob_user);
             lob_collection.addSharedDirectoryTree(lob_sharedDirectoryTree);
         }
+    }
+
+    public static SharedDirectoryTree initSharedDirectory(SharedDirectory iob_sharedDirectory, User iob_user) throws IOException {
+        File lob_userSharedDirectoryFile =  new File(gva_rootDirectory + iob_user.getName() + iob_user.getUserId() + "_shared");
+        String lva_userSharedDirectory = lob_userSharedDirectoryFile + "\\" + iob_sharedDirectory.getId();
+        return new SharedDirectoryTree(iob_sharedDirectory, lva_userSharedDirectory);
     }
 }
