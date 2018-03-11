@@ -106,6 +106,7 @@ public class Utils {
         }
 
         if (iva_directoryId == 0) {
+            iva_relativeFilePath = iva_relativeFilePath.replaceFirst("[^\\\\]*", "Public");
             rva_absolutePath = lva_rootDirectory + iva_relativeFilePath;
         }
 
