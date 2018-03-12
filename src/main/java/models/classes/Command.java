@@ -37,15 +37,15 @@ public class Command {
 
     @Override
     public String toString() {
-        StringBuilder rob_toString = new StringBuilder(gva_command + "_" + gob_relativeFilePath);
+        StringBuilder rob_toString = new StringBuilder(gva_command + "|" + gob_relativeFilePath);
 
         if (gar_information != null) {
             for (String lva_information : gar_information) {
-                rob_toString.append("_").append(lva_information);
+                rob_toString.append("|").append(lva_information);
             }
         }
 
-        rob_toString.append("_").append(gva_directoryId);
+        rob_toString.append("|").append(gva_directoryId);
 
         return rob_toString.toString();
     }
