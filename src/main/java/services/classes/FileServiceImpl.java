@@ -272,23 +272,28 @@ public class FileServiceImpl implements FileService{
      */
     public boolean createDirectory(String iva_filePath, User iob_user, int iva_directoryId, String iva_ipAddr) {
         Tree lob_tree;
-        String lva_relativePath = iva_filePath;
+        String lva_relativeFilePathForClient;
         if (iob_user == null) {
             return false;
         }
 
-        iva_filePath = convertRelativeToAbsolutePath(iva_filePath, iob_user, iva_directoryId);
+        try {
+            iva_filePath = convertRelativeToAbsolutePath(iva_filePath, iob_user, iva_directoryId);
 
-        if (iva_filePath == null) {
-            return false;
-        }
+            if (iva_filePath == null) {
+                return false;
+            }
 
-        File lob_newDirectory = new File(iva_filePath);
-        lob_tree = getTreeFromDirectoryId(iob_user, iva_directoryId);
+            File lob_newDirectory = new File(iva_filePath);
+            lob_tree = getTreeFromDirectoryId(iob_user, iva_directoryId);
 
-        if (lob_tree.addFile(lob_newDirectory, true)) {
-            notifyClients(lva_relativePath, iob_user, CommandConstants.GC_ADD, iva_directoryId, iva_ipAddr);
-            return true;
+            if (lob_tree.addFile(lob_newDirectory, true)) {
+                lva_relativeFilePathForClient = Utils.buildRelativeFilePathForClient(lob_newDirectory, iva_directoryId);
+                notifyClients(lva_relativeFilePathForClient, iob_user, CommandConstants.GC_ADD, iva_directoryId, iva_ipAddr);
+                return true;
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
         }
         return false;
     }
