@@ -204,9 +204,9 @@ public class FileServiceImpl implements FileService{
 
         if (lob_sourceTree.deleteFile(lob_file)) {
             notifyClients(lva_currentRelativeFilePath, iob_user, CommandConstants.GC_DELETE, iva_sourceDirectoryId, iva_ipAddr);
-            lva_newRelativeFilePath += "\\" + lob_file.getName();
-
-            lob_newFile = new File(Utils.getRootDirectory() + lva_newRelativeFilePath);
+//            lva_newRelativeFilePath += "\\" + lob_file.getName();
+//            lva_newRelativeFilePath = Utils.getRootDirectory() + lva_newRelativeFilePath + "\\" + lob_file.getName();
+            lob_newFile = new File(iva_newFilePath + "\\" + lob_file.getName());
             lco_files = lob_destinationTree.getDirectory(lob_newFile);
 
             for (File lob_child : lco_files) {
