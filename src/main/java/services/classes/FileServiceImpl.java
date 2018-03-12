@@ -157,8 +157,7 @@ public class FileServiceImpl implements FileService{
     public int moveFile(String iva_filePath, String iva_newFilePath, User iob_user, int iva_sourceDirectoryId, int iva_destinationDirectoryId, String iva_ipAddr) {
         Tree lob_sourceTree = getTreeFromDirectoryId(iob_user, iva_sourceDirectoryId);
         Tree lob_destinationTree = getTreeFromDirectoryId(iob_user, iva_destinationDirectoryId);
-//        String lva_relativeFile = iva_filePath;
-        String lva_relativeFilePathForClient = iva_newFilePath;
+        String lva_relativeFilePathForClient;
         File lob_file;
         File lob_newFile;
         Collection<File> lco_files;
