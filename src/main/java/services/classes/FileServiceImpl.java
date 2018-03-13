@@ -206,6 +206,11 @@ public class FileServiceImpl implements FileService {
         lob_serverMappedFiles = lob_fileMapperCache.getAll();
         lob_clientMappedFiles = (Collection<MappedFile>) lob_xmlParser.fromXML(iva_xmlTreeToCompare);
 
+        for (MappedFile lob_mappedFile : lob_clientMappedFiles) {
+            lob_mappedFile.setFilePath(new File(Utils.getRootDirectory() +
+                    "\\" + lob_mappedFile.getFilePath()).toPath());
+        }
+
 
         lob_serverMappedFiles.removeIf(lob_serverMappedFile -> {
             for (Iterator<MappedFile> lob_mappedFileIterator = lob_clientMappedFiles.iterator();
