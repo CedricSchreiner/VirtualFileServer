@@ -203,9 +203,9 @@ public class FileServiceImpl implements FileService {
 
         Collection<MappedFile> lob_serverMappedFiles;
         Collection<MappedFile> lob_clientMappedFiles;
-        lob_serverMappedFiles = lob_fileMapperCache.getAll();
+//        lob_serverMappedFiles = lob_fileMapperCache.getAll();
+        lob_serverMappedFiles = filterFilesForComparison(lob_fileMapperCache.getAll(), iob_user);
         lob_clientMappedFiles = (Collection<MappedFile>) lob_xmlParser.fromXML(iva_xmlTreeToCompare);
-
 
         lob_serverMappedFiles.removeIf(lob_serverMappedFile -> {
             for (Iterator<MappedFile> lob_mappedFileIterator = lob_clientMappedFiles.iterator();
@@ -579,8 +579,8 @@ public class FileServiceImpl implements FileService {
         return 0;
     }
 
-    private Collection<File> filterFilesForComparison(Collection<MappedFile> ico_files, User iob_user) {
-        Collection<File> lco_files = new ArrayList<>();
+    private Collection<MappedFile> filterFilesForComparison(Collection<MappedFile> ico_files, User iob_user) {
+        Collection<MappedFile> lco_files = new ArrayList<>();
         File lob_privateDirectory = new File(Utils.getRootDirectory() + iob_user.getName() + iob_user.getUserId());
         File lob_publicDirectory = new File(Utils.getRootDirectory() + "Public");
         File lob_sharedDirectory;
@@ -604,7 +604,7 @@ public class FileServiceImpl implements FileService {
         for (MappedFile lob_mappedFile : ico_files) {
             for (File lob_file : lco_filter) {
                 if (lob_mappedFile.getFilePath().startsWith(lob_file.toPath())) {
-                    lco_files.add(lob_mappedFile.getFilePath().toFile());
+                    lco_files.add(lob_mappedFile);
                 }
             }
         }
