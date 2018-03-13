@@ -1,15 +1,18 @@
 package services.classes;
 
+import builder.ServiceObjectBuilder;
 import cache.FileMapperCache;
 import com.thoughtworks.xstream.XStream;
 import models.classes.FileDifference;
 import models.classes.MappedFile;
+import models.classes.SharedDirectory;
 import models.classes.User;
 import models.constants.CommandConstants;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import services.interfaces.FileService;
+import services.interfaces.SharedDirectoryService;
 import sun.reflect.generics.tree.Tree;
 import utilities.Utils;
 
@@ -20,6 +23,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -525,11 +529,36 @@ public class FileServiceImpl implements FileService{
         return 0;
     }
 
-//    private Tree getTreeFromDirectoryId(User iob_User, int iva_directoryId) {
-//        if (iva_directoryId < 0) {
-//            return gob_fileTreeCollection.getTreeFromUser(iob_User);
-//        }
-//
-//        return gob_fileTreeCollection.getSharedDirectoryTree(iva_directoryId);
-//    }
+    private Collection<File> filterFilesForComparison(Collection<MappedFile> ico_files, User iob_user) {
+        Collection<File> lco_files = new ArrayList<>();
+        File lob_privateDirectory = new File(Utils.getRootDirectory() + iob_user.getName() + iob_user.getUserId());
+        File lob_publicDirectory = new File(Utils.getRootDirectory() + "Public");
+        File lob_sharedDirectory;
+        String lva_sharedDirectoryPath = Utils.getRootDirectory() + "Shared\\";
+        Collection<File> lco_sharedDirectories = new ArrayList<>();
+        Collection<File> lco_filter = new ArrayList<>();
+
+        lco_filter.add(lob_privateDirectory);
+        lco_filter.add(lob_publicDirectory);
+
+        SharedDirectoryService lob_sharedDirectoryService = ServiceObjectBuilder.getSharedDirectoryServiceObject();
+        List<SharedDirectory> lli_directories = lob_sharedDirectoryService.getSharedDirectoriesOfUser(iob_user);
+
+        for (SharedDirectory lob_directory : lli_directories) {
+            lob_sharedDirectory = new File(lva_sharedDirectoryPath + lob_directory.getId());
+            lco_sharedDirectories.add(lob_sharedDirectory);
+        }
+
+        lco_filter.addAll(lco_sharedDirectories);
+
+        for (MappedFile lob_mappedFile : ico_files) {
+            for (File lob_file : lco_filter) {
+                if (lob_mappedFile.getFilePath().startsWith(lob_file.toPath())) {
+                    lco_files.add(lob_mappedFile.getFilePath().toFile());
+                }
+            }
+        }
+
+        return lco_files;
+    }
 }
