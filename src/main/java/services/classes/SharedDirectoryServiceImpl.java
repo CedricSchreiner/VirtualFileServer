@@ -3,9 +3,7 @@ package services.classes;
 import builder.DaoObjectBuilder;
 import builder.ServiceObjectBuilder;
 import dao.interfaces.SharedDirectoryDao;
-import models.classes.FileTreeCollection;
 import models.classes.SharedDirectory;
-import models.classes.SharedDirectoryTree;
 import models.classes.User;
 import models.exceptions.SharedDirectoryException;
 import rest.Initializer;
@@ -103,8 +101,8 @@ public class SharedDirectoryServiceImpl implements SharedDirectoryService {
             }
         }
         try {
-            SharedDirectoryTree lob_tree = Initializer.initSharedDirectory(iob_sharedDirectory, lob_user);
-            FileTreeCollection.getInstance().addSharedDirectoryTree(lob_tree);
+            Initializer.initSharedDirectory(iob_sharedDirectory, lob_user);
+//            FileTreeCollection.getInstance().addSharedDirectoryTree(lob_tree);
         }catch (IOException ex) {
             ex.printStackTrace();
         }

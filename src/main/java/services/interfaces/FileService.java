@@ -1,6 +1,5 @@
 package services.interfaces;
 
-import fileTree.interfaces.TreeDifference;
 import models.classes.User;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 
@@ -26,7 +25,7 @@ public interface FileService {
      * @param iva_ipAddr Address of the user who send the request
      * @param iva_lastModified last time the file was modified
      */
-    boolean addNewFile(List<InputPart> ico_inputList, String iva_filePath, User iob_user, int iva_directoryId, String iva_ipAddr, long iva_lastModified);
+    int addNewFile(List<InputPart> ico_inputList, String iva_filePath, User iob_user, int iva_directoryId, String iva_ipAddr, long iva_lastModified);
 
     /**
      * delete a file
@@ -85,14 +84,14 @@ public interface FileService {
      */
     boolean renameFile(String iva_filePath, String iva_newFileName, User iob_user, int iva_directoryId, String iva_ipAddr);
 
-    /**
-     * Compare the user tree with another tree
-     * @param iva_xmlTreeToCompare tree as xml string
-     * @param iob_user user who wants the result of the tree comparison
-     * @param iva_directoryId > 0: shared directory
-     *                        = 0: public directory
-     *                        < 0: private directory
-     * @return the result of the comparison
-     */
-    TreeDifference compareTrees(String iva_xmlTreeToCompare, User iob_user, int iva_directoryId);
+//    /**
+//     * Compare the user tree with another tree
+//     * @param iva_xmlTreeToCompare tree as xml string
+//     * @param iob_user user who wants the result of the tree comparison
+//     * @param iva_directoryId > 0: shared directory
+//     *                        = 0: public directory
+//     *                        < 0: private directory
+//     * @return the result of the comparison
+//     */
+//    TreeDifference compareTrees(String iva_xmlTreeToCompare, User iob_user, int iva_directoryId);
 }
