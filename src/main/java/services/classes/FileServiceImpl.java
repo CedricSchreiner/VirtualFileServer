@@ -158,6 +158,7 @@ public class FileServiceImpl implements FileService{
         Tree lob_sourceTree = getTreeFromDirectoryId(iob_user, iva_sourceDirectoryId);
         Tree lob_destinationTree = getTreeFromDirectoryId(iob_user, iva_destinationDirectoryId);
         String lva_relativeFilePathForClient;
+        String lva_newRelativeFilePathForClient;
         File lob_file;
         File lob_newFile;
         Collection<File> lco_files;
@@ -178,7 +179,8 @@ public class FileServiceImpl implements FileService{
                 if(lob_sourceTree.moveFile(iva_filePath, iva_newFilePath, false)) {
                     lob_file = new File(iva_filePath);
                     lva_relativeFilePathForClient = Utils.buildRelativeFilePathForClient(lob_file, iva_sourceDirectoryId);
-                    notifyClients(lva_relativeFilePathForClient, iob_user, CommandConstants.GC_MOVE, iva_sourceDirectoryId,iva_ipAddr, lva_relativeFilePathForClient);
+                    lva_newRelativeFilePathForClient = Utils.buildRelativeFilePathForClient(new File(iva_newFilePath), iva_destinationDirectoryId);
+                    notifyClients(lva_relativeFilePathForClient, iob_user, CommandConstants.GC_MOVE, iva_sourceDirectoryId,iva_ipAddr, lva_newRelativeFilePathForClient);
                     return GC_SUCCESS;
                 }
                 return GC_ERROR;
@@ -203,7 +205,8 @@ public class FileServiceImpl implements FileService{
 
             for (File lob_child : lco_files) {
                 String path = lob_child.getAbsolutePath();
-                path = path.replace(lva_oldFileParent, lob_destinationTree.getRoot().getAbsolutePath());
+//                path = path.replace(lva_oldFileParent, lob_destinationTree.getRoot().getAbsolutePath());
+                path = path.replace(lva_oldFileParent, iva_newFilePath);
                 lob_newFile = new File(path);
                 lob_destinationTree.addFile(lob_newFile, lob_child.isDirectory());
             }
@@ -241,23 +244,29 @@ public class FileServiceImpl implements FileService{
      */
     public boolean deleteDirectoryOnly(String iva_filePath, User iob_user, int iva_directoryId, String iva_ipAddr) {
         Tree lob_tree;
-        String lva_relativePath = iva_filePath;
+        String lva_relativeFilePathForClient;
 
         if (iob_user == null) {
             return false;
         }
 
-        iva_filePath = convertRelativeToAbsolutePath(iva_filePath, iob_user, iva_directoryId);
-        lob_tree = getTreeFromDirectoryId(iob_user, iva_directoryId);
+        try {
+            iva_filePath = convertRelativeToAbsolutePath(iva_filePath, iob_user, iva_directoryId);
+            lob_tree = getTreeFromDirectoryId(iob_user, iva_directoryId);
 
-        if (iva_filePath == null || lob_tree == null) {
-            return false;
+            if (iva_filePath == null || lob_tree == null) {
+                return false;
+            }
+
+            if (lob_tree.deleteDirectoryOnly(iva_filePath)) {
+                lva_relativeFilePathForClient = Utils.buildRelativeFilePathForClient(new File(iva_filePath), iva_directoryId);
+                notifyClients(lva_relativeFilePathForClient, iob_user, CommandConstants.GC_DELETE_DIR, iva_directoryId, iva_ipAddr);
+                return true;
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
         }
 
-        if (lob_tree.deleteDirectoryOnly(iva_filePath)) {
-            notifyClients(lva_relativePath, iob_user, CommandConstants.GC_DELETE_DIR, iva_directoryId, iva_ipAddr);
-            return true;
-        }
         return false;
     }
 
@@ -310,23 +319,28 @@ public class FileServiceImpl implements FileService{
     @Override
     public boolean renameFile(String iva_filePath, String iva_newFileName, User iob_user, int iva_directoryId, String iva_ipAddr) {
         Tree lob_tree;
-        String lva_relativePath = iva_filePath;
+        String lva_relativeFilePathForClient;
 
         if (iob_user == null) {
             return false;
         }
 
-        iva_filePath = convertRelativeToAbsolutePath(iva_filePath, iob_user, iva_directoryId);
+        try {
+            iva_filePath = convertRelativeToAbsolutePath(iva_filePath, iob_user, iva_directoryId);
 
-        if (iva_filePath == null) {
-            return false;
-        }
+            if (iva_filePath == null) {
+                return false;
+            }
 
-        lob_tree = getTreeFromDirectoryId(iob_user, iva_directoryId);
+            lob_tree = getTreeFromDirectoryId(iob_user, iva_directoryId);
 
-        if (lob_tree.renameFile(iva_filePath, iva_newFileName)) {
-            notifyClients(lva_relativePath, iob_user, CommandConstants.GC_RENAME, iva_directoryId, iva_ipAddr, iva_newFileName);
-            return true;
+            if (lob_tree.renameFile(iva_filePath, iva_newFileName)) {
+                lva_relativeFilePathForClient = Utils.buildRelativeFilePathForClient(new File(iva_filePath) ,iva_directoryId);
+                notifyClients(lva_relativeFilePathForClient, iob_user, CommandConstants.GC_RENAME, iva_directoryId, iva_ipAddr, iva_newFileName);
+                return true;
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
         }
         return false;
     }

@@ -36,7 +36,7 @@ public class NotifyService extends Thread {
                 lob_bufferedWriter.append(gob_command.toString());
                 lob_bufferedWriter.flush();
             } catch (Exception ex) {
-                ex.printStackTrace();
+                System.out.println(ex.getMessage() + " IP: " + lva_ip);
             }
         }
     }
