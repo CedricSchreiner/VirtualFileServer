@@ -2,6 +2,8 @@ package rest.resources;
 
 import builder.ServiceObjectBuilder;
 import com.thoughtworks.xstream.XStream;
+import models.classes.FileDifference;
+import models.classes.TreeDifference;
 import models.classes.User;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
@@ -159,20 +161,20 @@ public class FileResource {
 //        return Response.ok().entity(DIRECTORY_DELETED).build();
 //    }
 //
-//    @POST
-//    @Path("compare")
-//    @Consumes(MediaType.APPLICATION_XML)
-//    @Produces(MediaType.TEXT_PLAIN)
-//    public Response compareTrees(@Context ContainerRequestContext iob_requestContext, String iva_xmlTree, @QueryParam("DirectoryId") int iva_id) {
-//        User lob_user = getUserFromContext(iob_requestContext);
-//
-//        TreeDifference lob_difference = gob_fileService.compareTrees(iva_xmlTree, lob_user, iva_id);
-//
-//        XStream lob_xStream = new XStream();
-//        String rva_xmlString = lob_xStream.toXML(lob_difference);
-//
-//        return Response.ok().encoding("UTF-16").entity(rva_xmlString).build();
-//    }
+    @POST
+    @Path("compare")
+    @Consumes(MediaType.APPLICATION_XML)
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response compareTrees(@Context ContainerRequestContext iob_requestContext, String lva_clientFilesAsXml) {
+        User lob_user = getUserFromContext(iob_requestContext);
+
+        FileDifference lob_difference = gob_fileService.compareFiles(lva_clientFilesAsXml, lob_user, 0);
+
+        XStream lob_xStream = new XStream();
+        String rva_xmlString = lob_xStream.toXML(lob_difference);
+
+        return Response.ok().entity(rva_xmlString).build();
+    }
 
     private User getUserFromContext(ContainerRequestContext iob_requestContext) {
         //----------------------------Variables----------------------------------
