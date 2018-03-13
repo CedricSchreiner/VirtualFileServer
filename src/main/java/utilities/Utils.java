@@ -74,20 +74,32 @@ public class Utils {
         return getRootDirectory();
     }
 
-    public static String convertFileToRelativPath(File iob_file, int iva_directoryId) {
+    /**
+     * Convert a file from the server to a relative file path that can be send to the client
+     * Private File: C:\VirtualFileSystem\{User}\textFile.txt -> Private\textFile.txt
+     * Public File: C:\VirtualFileSystem\Public\textFile.txt -> Public\textFile.txt
+     * Shared Directory: C:\VirtualFileSystem\{User}_shared\textFile.txt -> Shared\textFile.txt
+     * @param iob_file file on the server
+     * @param iva_directoryId directory id in which the file is
+     * @return a relative file path for the client
+     */
+    public static String buildRelativeFilePathForClient(File iob_file, int iva_directoryId) throws IOException{
         String rva_relativeFilePath;
         String lva_rootDirectory = getRootDirectory();
 
-        try {
-            rva_relativeFilePath = iob_file.getCanonicalPath();
-        } catch (IOException ex) {
-            return "";
-        }
-
+        rva_relativeFilePath = iob_file.getCanonicalPath();
         rva_relativeFilePath = rva_relativeFilePath.replace(lva_rootDirectory, "");
 
         if (iva_directoryId < 0) {
             rva_relativeFilePath = rva_relativeFilePath.replaceFirst("^[^\\\\]*", "Private");
+        }
+
+        if (iva_directoryId == 0) {
+            rva_relativeFilePath = rva_relativeFilePath.replaceFirst("^[^\\\\]*", "Public");
+        }
+
+        if (iva_directoryId > 0) {
+            rva_relativeFilePath = rva_relativeFilePath.replaceFirst("^[^\\\\]*", "Shared");
         }
 
         return rva_relativeFilePath;
@@ -126,4 +138,17 @@ public class Utils {
 
         return rva_absolutePath;
     }
+
+//    /**
+//     * Convert a file from the server to a relative file path that can be send to the client
+//     * Private File: C:\VirtualFileSystem\{User}\textFile.txt -> Private\textFile.txt
+//     * Public File: C:\VirtualFileSystem\Public\textFile.txt -> Public\textFile.txt
+//     * Shared Directory: C:\VirtualFileSystem\{User}_shared\textFile.txt -> Shared\textFile.txt
+//     * @param iob_file
+//     * @param iva_directoryId
+//     * @return
+//     */
+//    public static String buildRelativeFilePathForClient(File iob_file, int iva_directoryId) {
+//        String rva_
+//    }
 }

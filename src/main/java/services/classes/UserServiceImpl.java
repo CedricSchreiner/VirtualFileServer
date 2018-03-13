@@ -56,8 +56,8 @@ public class UserServiceImpl implements UserService {
             }
 
             try {
-                Initializer.initUserTree(iob_user);
-                Initializer.initUsersSharedDirectories(iob_user);
+                Initializer.initUserTree(lob_user);
+                Initializer.initUsersSharedDirectories(lob_user);
             } catch (IOException ex) {
                 ex.printStackTrace();
             }

@@ -74,7 +74,8 @@ public class FileServiceImpl implements FileService{
      * @param iva_ipAddr Address of the user who send the request
      */
     public boolean addNewFile(List<InputPart> ico_inputList, String iva_filePath, User iob_user, int iva_directoryId, String iva_ipAddr, long iva_lastModified) {
-        String lva_relativePath = iva_filePath;
+        String lva_relativeFilePathForClient;
+        File lob_newFile;
 
         if (iob_user == null) {
             return false;
@@ -88,8 +89,10 @@ public class FileServiceImpl implements FileService{
                 return false;
             }
 
-            if (writeFile(lar_fileContentBytes, iva_filePath, iob_user, iva_directoryId, iva_lastModified)) {
-                notifyClients(lva_relativePath, iob_user, CommandConstants.GC_ADD, iva_directoryId, iva_ipAddr);
+            lob_newFile = writeFile(lar_fileContentBytes, iva_filePath, iob_user, iva_directoryId, iva_lastModified);
+            if (lob_newFile != null) {
+                lva_relativeFilePathForClient = Utils.buildRelativeFilePathForClient(lob_newFile, iva_directoryId);
+                notifyClients(lva_relativeFilePathForClient, iob_user, CommandConstants.GC_ADD, iva_directoryId, iva_ipAddr);
                 return true;
             }
 
@@ -112,26 +115,32 @@ public class FileServiceImpl implements FileService{
      */
     public boolean deleteFile(String iva_filePath, User iob_user, int iva_directoryId, String iva_ipAddr) {
         Tree lob_tree;
-        String lva_relativeFilePath = iva_filePath;
+        String lva_relativeFilePathForClient;
+        File lob_fileToDelete;
 
         if (iob_user == null) {
             return false;
         }
 
-        lob_tree = getTreeFromDirectoryId(iob_user, iva_directoryId);
-        iva_filePath = convertRelativeToAbsolutePath(iva_filePath, iob_user, iva_directoryId);
+        try {
+            lob_tree = getTreeFromDirectoryId(iob_user, iva_directoryId);
+            iva_filePath = convertRelativeToAbsolutePath(iva_filePath, iob_user, iva_directoryId);
 
-        if (iva_filePath == null) {
-            return false;
-        }
+            if (iva_filePath == null) {
+                return false;
+            }
 
-        if (lob_tree.deleteFile(iva_filePath)) {
-            notifyClients(lva_relativeFilePath, iob_user, CommandConstants.GC_DELETE, iva_directoryId, iva_ipAddr);
-            return true;
+            lob_fileToDelete = new File(iva_filePath);
+            if (lob_tree.deleteFile(lob_fileToDelete)) {
+                lva_relativeFilePathForClient = Utils.buildRelativeFilePathForClient(lob_fileToDelete, iva_directoryId);
+                notifyClients(lva_relativeFilePathForClient, iob_user, CommandConstants.GC_DELETE, iva_directoryId, iva_ipAddr);
+                return true;
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
         }
 
         return false;
-//        return iva_filePath != null && lob_tree.deleteFile(iva_filePath);
 
     }
 
@@ -148,8 +157,7 @@ public class FileServiceImpl implements FileService{
     public int moveFile(String iva_filePath, String iva_newFilePath, User iob_user, int iva_sourceDirectoryId, int iva_destinationDirectoryId, String iva_ipAddr) {
         Tree lob_sourceTree = getTreeFromDirectoryId(iob_user, iva_sourceDirectoryId);
         Tree lob_destinationTree = getTreeFromDirectoryId(iob_user, iva_destinationDirectoryId);
-        String lva_currentRelativeFilePath = iva_filePath;
-        String lva_newRelativeFilePath = iva_newFilePath;
+        String lva_relativeFilePathForClient;
         File lob_file;
         File lob_newFile;
         Collection<File> lco_files;
@@ -158,62 +166,66 @@ public class FileServiceImpl implements FileService{
             return GC_MISSING_OR_WRONG_ARGUMENT;
         }
 
-        iva_filePath = convertRelativeToAbsolutePath(iva_filePath, iob_user, iva_sourceDirectoryId);
-        iva_newFilePath = convertRelativeToAbsolutePath(iva_newFilePath, iob_user, iva_destinationDirectoryId);
-
-        if (iva_filePath == null || iva_newFilePath == null) {
-            return GC_MISSING_OR_WRONG_ARGUMENT;
-        }
-
-        if (lob_sourceTree == lob_destinationTree) {
-            if(lob_sourceTree.moveFile(iva_filePath, iva_newFilePath, false)) {
-                notifyClients(lva_currentRelativeFilePath, iob_user, CommandConstants.GC_MOVE, iva_sourceDirectoryId,iva_ipAddr, lva_newRelativeFilePath);
-                return GC_SUCCESS;
-            }
-            return GC_ERROR;
-        }
-
-        lob_file = lob_sourceTree.getFile(iva_filePath);
-        String lva_oldFileParent = iva_filePath.replaceFirst("\\\\[^\\\\]*$", "");
-
-        if (lob_file == null) {
-            return GC_MISSING_OR_WRONG_ARGUMENT;
-        }
-
-        //collect the files before they are moved
-        lco_files = lob_sourceTree.getDirectory(lob_file);
-
         try {
+            iva_filePath = convertRelativeToAbsolutePath(iva_filePath, iob_user, iva_sourceDirectoryId);
+            iva_newFilePath = convertRelativeToAbsolutePath(iva_newFilePath, iob_user, iva_destinationDirectoryId);
+
+            if (iva_filePath == null || iva_newFilePath == null) {
+                return GC_MISSING_OR_WRONG_ARGUMENT;
+            }
+
+            if (lob_sourceTree == lob_destinationTree) {
+                if(lob_sourceTree.moveFile(iva_filePath, iva_newFilePath, false)) {
+                    lob_file = new File(iva_filePath);
+                    lva_relativeFilePathForClient = Utils.buildRelativeFilePathForClient(lob_file, iva_sourceDirectoryId);
+                    notifyClients(lva_relativeFilePathForClient, iob_user, CommandConstants.GC_MOVE, iva_sourceDirectoryId,iva_ipAddr, lva_relativeFilePathForClient);
+                    return GC_SUCCESS;
+                }
+                return GC_ERROR;
+            }
+
+            lob_file = lob_sourceTree.getFile(iva_filePath);
+            String lva_oldFileParent = iva_filePath.replaceFirst("\\\\[^\\\\]*$", "");
+
+            if (lob_file == null) {
+                return GC_MISSING_OR_WRONG_ARGUMENT;
+            }
+
+            //collect the files before they are moved
+            lco_files = lob_sourceTree.getDirectory(lob_file);
+
+
             if (lob_file.isDirectory()) {
                 FileUtils.moveDirectoryToDirectory(lob_file, new File(iva_newFilePath), false);
             } else {
                 FileUtils.moveFileToDirectory(lob_file, new File(iva_newFilePath), false);
             }
+
+            for (File lob_child : lco_files) {
+                String path = lob_child.getAbsolutePath();
+                path = path.replace(lva_oldFileParent, lob_destinationTree.getRoot().getAbsolutePath());
+                lob_newFile = new File(path);
+                lob_destinationTree.addFile(lob_newFile, lob_child.isDirectory());
+            }
+
+            if (lob_sourceTree.deleteFile(lob_file)) {
+                System.out.println("-------------------------------");
+                lva_relativeFilePathForClient = Utils.buildRelativeFilePathForClient(lob_file, iva_sourceDirectoryId);
+                notifyClients(lva_relativeFilePathForClient, iob_user, CommandConstants.GC_DELETE, iva_sourceDirectoryId, iva_ipAddr);
+                iva_newFilePath += "\\" + lob_file.getName();
+
+                lob_newFile = new File(iva_newFilePath);
+                lco_files = lob_destinationTree.getDirectory(lob_newFile);
+
+                for (File lob_child : lco_files) {
+                    lva_relativeFilePathForClient = Utils.buildRelativeFilePathForClient(lob_child, iva_destinationDirectoryId);
+                    notifyClients(lva_relativeFilePathForClient, iob_user, CommandConstants.GC_ADD, iva_destinationDirectoryId, iva_ipAddr);
+                }
+                return GC_SUCCESS;
+            }
         } catch (IOException ex) {
             System.err.println(ex.getMessage());
             return GC_ERROR;
-        }
-
-
-        for (File lob_child : lco_files) {
-            String path = lob_child.getAbsolutePath();
-            path = path.replace(lva_oldFileParent, lob_destinationTree.getRoot().getAbsolutePath());
-            lob_newFile = new File(path);
-            lob_destinationTree.addFile(lob_newFile, lob_child.isDirectory());
-        }
-
-        if (lob_sourceTree.deleteFile(lob_file)) {
-            notifyClients(lva_currentRelativeFilePath, iob_user, CommandConstants.GC_DELETE, iva_sourceDirectoryId, iva_ipAddr);
-//            lva_newRelativeFilePath += "\\" + lob_file.getName();
-//            lva_newRelativeFilePath = Utils.getRootDirectory() + lva_newRelativeFilePath + "\\" + lob_file.getName();
-            lob_newFile = new File(iva_newFilePath + "\\" + lob_file.getName());
-            lco_files = lob_destinationTree.getDirectory(lob_newFile);
-
-            for (File lob_child : lco_files) {
-                lva_newRelativeFilePath = Utils.convertFileToRelativPath(lob_child, iva_destinationDirectoryId);
-                notifyClients(lva_newRelativeFilePath, iob_user, CommandConstants.GC_ADD, iva_destinationDirectoryId, iva_ipAddr);
-            }
-            return GC_SUCCESS;
         }
 
         return GC_ERROR;
@@ -260,23 +272,28 @@ public class FileServiceImpl implements FileService{
      */
     public boolean createDirectory(String iva_filePath, User iob_user, int iva_directoryId, String iva_ipAddr) {
         Tree lob_tree;
-        String lva_relativePath = iva_filePath;
+        String lva_relativeFilePathForClient;
         if (iob_user == null) {
             return false;
         }
 
-        iva_filePath = convertRelativeToAbsolutePath(iva_filePath, iob_user, iva_directoryId);
+        try {
+            iva_filePath = convertRelativeToAbsolutePath(iva_filePath, iob_user, iva_directoryId);
 
-        if (iva_filePath == null) {
-            return false;
-        }
+            if (iva_filePath == null) {
+                return false;
+            }
 
-        File lob_newDirectory = new File(iva_filePath);
-        lob_tree = getTreeFromDirectoryId(iob_user, iva_directoryId);
+            File lob_newDirectory = new File(iva_filePath);
+            lob_tree = getTreeFromDirectoryId(iob_user, iva_directoryId);
 
-        if (lob_tree.addFile(lob_newDirectory, true)) {
-            notifyClients(lva_relativePath, iob_user, CommandConstants.GC_ADD, iva_directoryId, iva_ipAddr);
-            return true;
+            if (lob_tree.addFile(lob_newDirectory, true)) {
+                lva_relativeFilePathForClient = Utils.buildRelativeFilePathForClient(lob_newDirectory, iva_directoryId);
+                notifyClients(lva_relativeFilePathForClient, iob_user, CommandConstants.GC_ADD, iva_directoryId, iva_ipAddr);
+                return true;
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
         }
         return false;
     }
@@ -372,8 +389,9 @@ public class FileServiceImpl implements FileService{
      * save the file on the server
      * @param iva_content bytes of the file
      * @param iva_filename name of the file
+     * @return return the new file or null
      */
-    private boolean writeFile(byte[] iva_content, String iva_filename, User iob_user, int iva_directoryId, long iva_lastModified) throws IOException {
+    private File writeFile(byte[] iva_content, String iva_filename, User iob_user, int iva_directoryId, long iva_lastModified) throws IOException {
         //----------------------------------------Variables--------------------------------------------
         File lob_file = new File(iva_filename);
         FileOutputStream lob_fileOutputStream;
@@ -384,7 +402,7 @@ public class FileServiceImpl implements FileService{
 
         if (lob_tree.getFile(iva_filename) == null) {
             if (!lob_tree.addFile(lob_file, false)){
-                return false;
+                return null;
             }
         }
 
@@ -394,7 +412,7 @@ public class FileServiceImpl implements FileService{
         lob_fileOutputStream.close();
 
         Files.setLastModifiedTime(lob_file.toPath(), FileTime.fromMillis(iva_lastModified));
-        return true;
+        return lob_file;
     }
 
     private Tree getTreeFromDirectoryId(User iob_User, int iva_directoryId) {

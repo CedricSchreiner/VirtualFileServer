@@ -12,6 +12,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,7 +32,7 @@ public class NotifyService extends Thread {
         for (String lva_ip : gli_ipList) {
             System.out.println("Send " + gob_command.getCommand() + " to: " + lva_ip);
             try (Socket socket = new Socket(lva_ip, 32001)) {
-                BufferedWriter lob_bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+                BufferedWriter lob_bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8));
                 lob_bufferedWriter.append(gob_command.toString());
                 lob_bufferedWriter.flush();
             } catch (Exception ex) {
