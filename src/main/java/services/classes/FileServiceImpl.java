@@ -2,15 +2,13 @@ package services.classes;
 
 import cache.FileMapperCache;
 import com.thoughtworks.xstream.XStream;
-import models.classes.FileDifference;
 import models.classes.MappedFile;
+import models.classes.TreeDifference;
 import models.classes.User;
 import models.constants.CommandConstants;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import services.interfaces.FileService;
-import sun.reflect.generics.tree.Tree;
 import utilities.Utils;
 
 import java.io.File;
@@ -18,16 +16,16 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import static services.classes.NotifyService.notifyClients;
-import static services.constants.FileServiceConstants.*;
 import static utilities.Utils.convertRelativeToAbsolutePath;
 
-public class FileServiceImpl implements FileService{
+public class FileServiceImpl implements FileService {
 
     /**
      * download a file from the server
@@ -62,13 +60,13 @@ public class FileServiceImpl implements FileService{
     /**
      * add a new file to the user directory
      *
-     * @param ico_inputList contains file content and path
+     * @param ico_inputList   contains file content and path
      * @param iva_directoryId id of the directory
-     * @param iva_ipAddr Address of the user who send the request
+     * @param iva_ipAddr      Address of the user who send the request
      * @return 0 everything went fine, the file was updated
-     *         1 user is null
-     *         2 the path could not be converted to a absolute path
-     *         3 other error
+     * 1 user is null
+     * 2 the path could not be converted to a absolute path
+     * 3 other error
      */
     public int addNewFile(List<InputPart> ico_inputList, String iva_filePath, User iob_user, int iva_directoryId, String iva_ipAddr, long iva_lastModified) {
         String lva_relativeFilePathForClient;
@@ -188,8 +186,59 @@ public class FileServiceImpl implements FileService{
      * @return the result of the comparison
      */
     @Override
-    public FileDifference compareFiles(String iva_xmlTreeToCompare, User iob_user, int iva_directoryId) {
-        return null;
+    public TreeDifference compareFiles(String iva_xmlTreeToCompare, User iob_user, int iva_directoryId) {
+        XStream lob_xmlParser = new XStream();
+        XStream.setupDefaultSecurity(lob_xmlParser);
+        Class[] lar_allowedClasses = {MappedFile.class};
+        lob_xmlParser.allowTypes(lar_allowedClasses);
+        FileMapperCache lob_fileMapperCache = FileMapperCache.getFileMapperCache();
+        TreeDifference lob_treeDifference = new TreeDifference();
+        ArrayList<String> lli_updateList = new ArrayList<>();
+        ArrayList<String> lli_deleteList = new ArrayList<>();
+        ArrayList<String> lli_insertList = new ArrayList<>();
+
+        Collection<MappedFile> lob_serverMappedFiles;
+        Collection<MappedFile> lob_clientMappedFiles;
+        lob_serverMappedFiles = lob_fileMapperCache.getAll();
+        lob_clientMappedFiles = (Collection<MappedFile>) lob_xmlParser.fromXML(iva_xmlTreeToCompare);
+
+
+        lob_serverMappedFiles.removeIf(lob_serverMappedFile -> {
+            for (Iterator<MappedFile> lob_mappedFileIterator = lob_clientMappedFiles.iterator();
+                 lob_mappedFileIterator.hasNext(); ) {
+                MappedFile lob_clientMappedFile;
+                lob_clientMappedFile = lob_mappedFileIterator.next();
+
+                if (lob_clientMappedFile.getFilePath().equals(lob_serverMappedFile.getFilePath())) {
+                    if (lob_clientMappedFile.getVersion() == lob_serverMappedFile.getVersion()) {
+                        lob_mappedFileIterator.remove();
+                        return true;
+
+                    } else if (lob_clientMappedFile.getVersion() < lob_serverMappedFile.getVersion()) {
+                        lli_updateList.add(lob_clientMappedFile.getFilePath() + "|"
+                                + lob_clientMappedFile.getVersion());
+
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        });
+
+        for (MappedFile lob_mappedFile : lob_clientMappedFiles) {
+            lli_insertList.add(lob_mappedFile.getFilePath().toString());
+        }
+
+        for (MappedFile lob_mappedFile : lob_serverMappedFiles) {
+            lli_deleteList.add(lob_mappedFile.getFilePath().toString());
+        }
+
+        lob_treeDifference.setFilesToUpdate(lli_updateList);
+        lob_treeDifference.setFilesToInsert(lli_insertList);
+        lob_treeDifference.setFilesToDelete(lli_deleteList);
+
+        return lob_treeDifference;
     }
 
 //    /**
@@ -480,19 +529,20 @@ public class FileServiceImpl implements FileService{
 //    }
 
 
-    private byte[] getFileContent(List<InputPart> ico_inputList) throws IOException{
+    private byte[] getFileContent(List<InputPart> ico_inputList) throws IOException {
         return IOUtils.toByteArray(
-                ico_inputList.get(0).getBody(InputStream.class,null)
+                ico_inputList.get(0).getBody(InputStream.class, null)
         );
     }
 
     /**
      * save the file on the server
-     * @param iva_content bytes of the file
+     *
+     * @param iva_content  bytes of the file
      * @param iva_filename name of the file
      * @return 0 file was written
-     *         1 the file that was send is older
-     *         2 error while writing to the file
+     * 1 the file that was send is older
+     * 2 error while writing to the file
      */
     private int writeFile(byte[] iva_content, String iva_filename, User iob_user, int iva_directoryId, long iva_lastModified) {
         //----------------------------------------Variables--------------------------------------------

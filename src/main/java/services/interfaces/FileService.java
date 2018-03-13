@@ -1,6 +1,7 @@
 package services.interfaces;
 
 import models.classes.FileDifference;
+import models.classes.TreeDifference;
 import models.classes.User;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 
@@ -94,5 +95,5 @@ public interface FileService {
      *                        < 0: private directory
      * @return the result of the comparison
      */
-    FileDifference compareFiles(String iva_xmlTreeToCompare, User iob_user, int iva_directoryId);
+    TreeDifference compareFiles(String iva_xmlTreeToCompare, User iob_user, int iva_directoryId);
 }
