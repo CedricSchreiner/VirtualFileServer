@@ -221,7 +221,7 @@ public class FileServiceImpl implements FileService {
                     } else if (lob_clientMappedFile.getVersion() < lob_serverMappedFile.getVersion()) {
                         lli_updateList.add(lob_clientMappedFile.getFilePath() + "|"
                                 + lob_clientMappedFile.getVersion());
-
+                        lob_mappedFileIterator.remove();
                         return true;
                     }
                 }
