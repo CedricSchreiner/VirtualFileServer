@@ -2,6 +2,7 @@ package services.classes;
 
 import cache.FileMapperCache;
 import com.thoughtworks.xstream.XStream;
+import models.classes.FileDifference;
 import models.classes.MappedFile;
 import models.classes.User;
 import models.constants.CommandConstants;
@@ -174,6 +175,21 @@ public class FileServiceImpl implements FileService{
     @Override
     public boolean renameFile(String iva_filePath, String iva_newFileName, User iob_user, int iva_directoryId, String iva_ipAddr) {
         return false;
+    }
+
+    /**
+     * Compare the user tree with another tree
+     *
+     * @param iva_xmlTreeToCompare tree as xml string
+     * @param iob_user             user who wants the result of the tree comparison
+     * @param iva_directoryId      > 0: shared directory
+     *                             = 0: public directory
+     *                             < 0: private directory
+     * @return the result of the comparison
+     */
+    @Override
+    public FileDifference compareFiles(String iva_xmlTreeToCompare, User iob_user, int iva_directoryId) {
+        return null;
     }
 
 //    /**
