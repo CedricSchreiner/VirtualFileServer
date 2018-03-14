@@ -17,10 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import static services.classes.NotifyService.notifyClients;
 import static utilities.Utils.convertRelativeToAbsolutePath;
@@ -622,5 +619,21 @@ public class FileServiceImpl implements FileService {
         }
 
         return lco_files;
+    }
+
+    private static Collection<File> readAllFilesFromDirectory(File iob_file) {
+        return getAllFiles(new ArrayList<>(), iob_file);
+    }
+
+    private static Collection<File> getAllFiles(Collection<File> ico_files, File iob_pointer) {
+        ico_files.add(iob_pointer);
+
+        if (iob_pointer.isDirectory()) {
+            for (File lob_child : Objects.requireNonNull(iob_pointer.listFiles())) {
+                getAllFiles(ico_files, lob_child);
+            }
+        }
+
+        return ico_files;
     }
 }
