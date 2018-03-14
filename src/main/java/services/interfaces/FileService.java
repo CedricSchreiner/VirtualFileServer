@@ -82,8 +82,8 @@ public interface FileService {
      * @param iva_filePath path of the file
      * @param iob_user the user who wants to rename a file
      * @param iva_newFileName the new name of the file
-     * @param iva_directoryId id of the source directory
      * @param iva_ipAddr Address of the user who send the request
+     * @param iva_directoryId id of the source directory
      * @return true if the file was renamed, otherwise false
      */
     boolean renameFile(String iva_filePath, String iva_newFileName, User iob_user, int iva_directoryId, String iva_ipAddr);

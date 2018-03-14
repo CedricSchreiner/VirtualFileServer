@@ -340,8 +340,8 @@ public class FileServiceImpl implements FileService {
      * @param iva_filePath    path of the file
      * @param iva_newFileName the new name of the file
      * @param iob_user        the user who wants to rename a file
-     * @param iva_directoryId id of the source directory
      * @param iva_ipAddr      Address of the user who send the request
+     * @param iva_directoryId id of the source directory
      * @return true if the file was renamed, otherwise false
      */
     @Override
@@ -352,11 +352,12 @@ public class FileServiceImpl implements FileService {
         String lva_serverPath;
         Collection<File> lco_subDirectories;
         File lob_file;
+        File lob_renamedFile;
         String lva_renamedFile;
         String lva_newFilePath;
         Path lva_oldFilePath;
 
-        lva_serverPath = Utils.getRootDirectory() + "\\" + iva_filePath;
+        lva_serverPath = Utils.getRootDirectory() +  iva_filePath;
         lob_file = new File(lva_serverPath);
         lva_newFilePath = StringUtils.substringBeforeLast(lva_serverPath, "\\") + "\\" + iva_newFileName;
 
@@ -365,22 +366,24 @@ public class FileServiceImpl implements FileService {
         // Update file mapper cache for all sub directories
         for (File lob_tmpFile : lco_subDirectories) {
             lob_cachedFile = lob_fileMapperCache.get(lob_tmpFile.toPath());
-            lva_oldFilePath = lob_cachedFile.getFilePath();
-            lva_renamedFile = lob_cachedFile.getFilePath().toString().replace(lva_serverPath, lva_newFilePath);
-            lob_cachedFile.setFilePath(new File(lva_renamedFile).toPath());
-            lob_fileMapperCache.updateKeyAndValue(lva_oldFilePath, lob_cachedFile.getFilePath(), lob_cachedFile);
+            if (lob_cachedFile != null) {
+                lva_oldFilePath = lob_cachedFile.getFilePath();
+                lva_renamedFile = lob_cachedFile.getFilePath().toString().replace(lva_serverPath, lva_newFilePath);
+                lob_cachedFile.setFilePath(new File(lva_renamedFile).toPath());
+                lob_fileMapperCache.updateKeyAndValue(lva_oldFilePath, lob_cachedFile.getFilePath(), lob_cachedFile);
+            }
         }
 
-        lob_fileToRename = lob_fileMapperCache.get(lob_file.toPath());
-
         // Update file name in explorer
-        if (!lob_file.renameTo(new File (lva_newFilePath))) {
+        lob_renamedFile = new File(lva_newFilePath);
+        if (!lob_file.renameTo(lob_renamedFile)) {
             return false;
         }
 
+        lob_fileToRename = lob_fileMapperCache.get(lob_renamedFile.toPath());
+
         // Update file mapper cache for renamed file and increment version
         lob_fileToRename.setVersion(lob_fileToRename.getVersion() + 1);
-        lob_fileMapperCache.updateKeyAndValue(lob_fileToRename.getFilePath(), lob_file.toPath(), lob_fileToRename);
 
         return true;
     }

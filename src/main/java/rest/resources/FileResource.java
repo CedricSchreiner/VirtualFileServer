@@ -77,7 +77,7 @@ public class FileResource {
     @Consumes(MediaType.TEXT_PLAIN)
     public Response renameFile(@Context ContainerRequestContext iob_requestContext,
                                @QueryParam(GC_PARAMETER_PATH_NAME) String iva_path,
-                               @QueryParam(GC_PARAMETER_DIRECTORY_ID) int iva_directoryId,
+                               @QueryParam("directoryId") int iva_directoryId,
                                String iva_newFileName,
                                @Context HttpServletRequest iob_servletRequest) {
 
