@@ -6,6 +6,7 @@ import com.thoughtworks.xstream.XStream;
 import models.classes.*;
 import models.constants.CommandConstants;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import services.interfaces.FileService;
 import services.interfaces.SharedDirectoryService;
@@ -23,6 +24,22 @@ import static services.classes.NotifyService.notifyClients;
 import static utilities.Utils.convertRelativeToAbsolutePath;
 
 public class FileServiceImpl implements FileService {
+
+    private static Collection<File> readAllFilesFromDirectory(File iob_file) {
+        return getAllFiles(new ArrayList<>(), iob_file);
+    }
+
+    private static Collection<File> getAllFiles(Collection<File> ico_files, File iob_pointer) {
+        ico_files.add(iob_pointer);
+
+        if (iob_pointer.isDirectory()) {
+            for (File lob_child : Objects.requireNonNull(iob_pointer.listFiles())) {
+                getAllFiles(ico_files, lob_child);
+            }
+        }
+
+        return ico_files;
+    }
 
     /**
      * download a file from the server
@@ -66,7 +83,7 @@ public class FileServiceImpl implements FileService {
      * @param ico_inputList   contains file content and path
      * @param iva_directoryId id of the directory
      * @param iva_ipAddr      Address of the user who send the request
-     * @param iva_version version of the file
+     * @param iva_version     version of the file
      * @return 0 everything went fine, the file was updated
      * 1 user is null
      * 2 the path could not be converted to a absolute path
@@ -148,94 +165,6 @@ public class FileServiceImpl implements FileService {
     @Override
     public boolean deleteDirectoryOnly(String iva_filePath, User iob_user, int iva_directoryId, String iva_ipAddr) {
         return false;
-    }
-
-    /**
-     * rename a flle on the server
-     *
-     * @param iva_filePath    path of the file
-     * @param iva_newFileName the new name of the file
-     * @param iob_user        the user who wants to rename a file
-     * @param iva_directoryId id of the source directory
-     * @param iva_ipAddr      Address of the user who send the request
-     * @return true if the file was renamed, otherwise false
-     */
-    @Override
-    public boolean renameFile(String iva_filePath, String iva_newFileName, User iob_user, int iva_directoryId, String iva_ipAddr) {
-        return false;
-    }
-
-    /**
-     * Compare the user tree with another tree
-     *
-     * @param iva_xmlTreeToCompare tree as xml string
-     * @param iob_user             user who wants the result of the tree comparison
-     * @return the result of the comparison
-     */
-    @Override
-    public TreeDifference compareFiles(String iva_xmlTreeToCompare, User iob_user) {
-        XStream lob_xmlParser = new XStream();
-        XStream.setupDefaultSecurity(lob_xmlParser);
-        Class[] lar_allowedClasses = {MappedFile.class};
-        lob_xmlParser.allowTypes(lar_allowedClasses);
-        FileMapperCache lob_fileMapperCache = FileMapperCache.getFileMapperCache();
-        TreeDifference lob_treeDifference = new TreeDifference();
-        ArrayList<String> lli_updateList = new ArrayList<>();
-        ArrayList<String> lli_deleteList = new ArrayList<>();
-        ArrayList<String> lli_insertList = new ArrayList<>();
-        String lva_relativePathForClient;
-
-        Collection<MappedFile> lob_serverMappedFiles;
-        Collection<MappedFile> lob_clientMappedFiles;
-        lob_serverMappedFiles = filterFilesForComparison(lob_fileMapperCache.getAll(), iob_user);
-        //noinspection unchecked
-        lob_clientMappedFiles =  (Collection<MappedFile>) lob_xmlParser.fromXML(iva_xmlTreeToCompare);
-
-        for (MappedFile lob_mappedFile : lob_clientMappedFiles) {
-            lob_mappedFile.setFilePath(new File(Utils.getRootDirectory() +
-                    "\\" + lob_mappedFile.getFilePath()).toPath());
-        }
-
-
-        lob_serverMappedFiles.removeIf(lob_serverMappedFile -> {
-            for (Iterator<MappedFile> lob_mappedFileIterator = lob_clientMappedFiles.iterator();
-                 lob_mappedFileIterator.hasNext(); ) {
-                MappedFile lob_clientMappedFile;
-                lob_clientMappedFile = lob_mappedFileIterator.next();
-
-                if (lob_clientMappedFile.getFilePath().equals(lob_serverMappedFile.getFilePath())) {
-                    if (lob_clientMappedFile.getVersion() == lob_serverMappedFile.getVersion()) {
-                        lob_mappedFileIterator.remove();
-                        return true;
-
-                    } else if (lob_clientMappedFile.getVersion() < lob_serverMappedFile.getVersion()) {
-//                        lli_updateList.add(Utils.convertServerToRelativeClientPath(lob_clientMappedFile.getFilePath().toString()) + "|"
-//                                + lob_serverMappedFile.getVersion());
-                        lli_updateList.add(Utils.convertServerToRelativeClientPath(lob_clientMappedFile.getFilePath().toString()));
-                        lob_mappedFileIterator.remove();
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        });
-
-        for (MappedFile lob_mappedFile : lob_clientMappedFiles) {
-            lva_relativePathForClient = Utils.convertServerToRelativeClientPath(lob_mappedFile.getFilePath().toString());
-            lli_deleteList.add(lva_relativePathForClient);
-        }
-
-        for (MappedFile lob_mappedFile : lob_serverMappedFiles) {
-            lva_relativePathForClient = Utils.convertServerToRelativeClientPath(lob_mappedFile.getFilePath().toString());
-            lli_insertList.add(lva_relativePathForClient);
-        }
-
-        lob_treeDifference.setFilesToUpdate(lli_updateList);
-        lob_treeDifference.setFilesToInsert(lli_insertList);
-        lob_treeDifference.setFilesToDelete(lli_deleteList);
-
-        return lob_treeDifference;
     }
 
 //    /**
@@ -403,54 +332,53 @@ public class FileServiceImpl implements FileService {
 //        return false;
 //    }
 //
+
     /**
-     * create a directory on the server
+     * rename a flle on the server
      *
-     * @param iva_filePath    path of the directory
-     * @param iob_user        the user who wants to create a new directory
+     * @param iva_filePath    path of the file
+     * @param iva_newFileName the new name of the file
+     * @param iob_user        the user who wants to rename a file
      * @param iva_directoryId id of the source directory
      * @param iva_ipAddr      Address of the user who send the request
-     * @return 0 if the directory was created
-     *         1 the directory already exists
-     *         2 the directory could not be created
-     *         3 missing information
+     * @return true if the file was renamed, otherwise false
      */
-    public int createDirectory(String iva_filePath, User iob_user, int iva_directoryId, String iva_ipAddr) {
-        String lva_relativeFilePathForClient;
-        MappedFile lob_mappedFile;
-        long lva_lastModified;
-        if (iob_user == null) {
-            return 3;
+    @Override
+    public boolean renameFile(String iva_filePath, String iva_newFileName, User iob_user, int iva_directoryId, String iva_ipAddr) {
+        FileMapperCache lob_fileMapperCache = FileMapperCache.getFileMapperCache();
+        MappedFile lob_fileToRename;
+        MappedFile lob_cachedFile;
+        String lva_serverPath;
+        Collection<File> lco_subDirectories;
+        File lob_file;
+        String lva_renamedFile;
+        String lva_newFilePath;
+
+        lva_serverPath = Utils.getRootDirectory() + "\\" + iva_filePath;
+        lob_file = new File(lva_serverPath);
+        lva_newFilePath = StringUtils.substringBeforeLast(iva_filePath, "\\") + "\\" + iva_newFileName;
+
+        lco_subDirectories = readAllFilesFromDirectory(lob_file);
+
+        // Update file mapper cache for all sub directories
+        for (File lob_tmpFile : lco_subDirectories) {
+            lob_cachedFile = lob_fileMapperCache.get(lob_tmpFile.toPath());
+            lva_renamedFile = lob_cachedFile.getFilePath().toString().replace(lva_serverPath, lva_newFilePath);
+            lob_cachedFile.setFilePath(new File(lva_renamedFile).toPath());
         }
 
-        try {
-            iva_filePath = convertRelativeToAbsolutePath(iva_filePath, iob_user, iva_directoryId);
+        lob_fileToRename = lob_fileMapperCache.get(lob_file.toPath());
 
-            if (iva_filePath == null) {
-                return 3;
-            }
-
-            File lob_newDirectory = new File(iva_filePath);
-
-            if (lob_newDirectory.exists()) {
-                return 1;
-            } else {
-                if (!lob_newDirectory.mkdir()) {
-                    return 2;
-                }
-
-                lva_lastModified = Files.readAttributes(lob_newDirectory.toPath(), BasicFileAttributes.class).lastModifiedTime().toMillis();
-                lob_mappedFile = new MappedFile(lob_newDirectory.toPath(), 1, lva_lastModified);
-                FileMapperCache.getFileMapperCache().put(lob_mappedFile);
-
-                lva_relativeFilePathForClient = Utils.buildRelativeFilePathForClient(lob_newDirectory, iva_directoryId);
-                notifyClients(lva_relativeFilePathForClient, iob_user, CommandConstants.GC_ADD, iva_directoryId, iva_ipAddr);
-            }
-
-        } catch (IOException ex) {
-            ex.printStackTrace();
+        // Update file name in explorer
+        if (!lob_file.renameTo(new File (lva_newFilePath))) {
+            return false;
         }
-        return 3;
+
+        // Update file mapper cache for renamed file and increment version
+        lob_fileToRename.setVersion(lob_fileToRename.getVersion() + 1);
+        lob_fileMapperCache.updateKeyAndValue(lob_fileToRename.getFilePath(), lob_file.toPath(), lob_fileToRename);
+
+        return true;
     }
 //
 //    /**
@@ -538,6 +466,128 @@ public class FileServiceImpl implements FileService {
 //        }
 //    }
 
+    /**
+     * Compare the user tree with another tree
+     *
+     * @param iva_xmlTreeToCompare tree as xml string
+     * @param iob_user             user who wants the result of the tree comparison
+     * @return the result of the comparison
+     */
+    @Override
+    public TreeDifference compareFiles(String iva_xmlTreeToCompare, User iob_user) {
+        XStream lob_xmlParser = new XStream();
+        XStream.setupDefaultSecurity(lob_xmlParser);
+        Class[] lar_allowedClasses = {MappedFile.class};
+        lob_xmlParser.allowTypes(lar_allowedClasses);
+        FileMapperCache lob_fileMapperCache = FileMapperCache.getFileMapperCache();
+        TreeDifference lob_treeDifference = new TreeDifference();
+        ArrayList<String> lli_updateList = new ArrayList<>();
+        ArrayList<String> lli_deleteList = new ArrayList<>();
+        ArrayList<String> lli_insertList = new ArrayList<>();
+        String lva_relativePathForClient;
+
+        Collection<MappedFile> lob_serverMappedFiles;
+        Collection<MappedFile> lob_clientMappedFiles;
+        lob_serverMappedFiles = filterFilesForComparison(lob_fileMapperCache.getAll(), iob_user);
+        //noinspection unchecked
+        lob_clientMappedFiles = (Collection<MappedFile>) lob_xmlParser.fromXML(iva_xmlTreeToCompare);
+
+        for (MappedFile lob_mappedFile : lob_clientMappedFiles) {
+            lob_mappedFile.setFilePath(new File(Utils.getRootDirectory() +
+                    "\\" + lob_mappedFile.getFilePath()).toPath());
+        }
+
+
+        lob_serverMappedFiles.removeIf(lob_serverMappedFile -> {
+            for (Iterator<MappedFile> lob_mappedFileIterator = lob_clientMappedFiles.iterator();
+                 lob_mappedFileIterator.hasNext(); ) {
+                MappedFile lob_clientMappedFile;
+                lob_clientMappedFile = lob_mappedFileIterator.next();
+
+                if (lob_clientMappedFile.getFilePath().equals(lob_serverMappedFile.getFilePath())) {
+                    if (lob_clientMappedFile.getVersion() == lob_serverMappedFile.getVersion()) {
+                        lob_mappedFileIterator.remove();
+                        return true;
+
+                    } else if (lob_clientMappedFile.getVersion() < lob_serverMappedFile.getVersion()) {
+//                        lli_updateList.add(Utils.convertServerToRelativeClientPath(lob_clientMappedFile.getFilePath().toString()) + "|"
+//                                + lob_serverMappedFile.getVersion());
+                        lli_updateList.add(Utils.convertServerToRelativeClientPath(lob_clientMappedFile.getFilePath().toString()));
+                        lob_mappedFileIterator.remove();
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        });
+
+        for (MappedFile lob_mappedFile : lob_clientMappedFiles) {
+            lva_relativePathForClient = Utils.convertServerToRelativeClientPath(lob_mappedFile.getFilePath().toString());
+            lli_deleteList.add(lva_relativePathForClient);
+        }
+
+        for (MappedFile lob_mappedFile : lob_serverMappedFiles) {
+            lva_relativePathForClient = Utils.convertServerToRelativeClientPath(lob_mappedFile.getFilePath().toString());
+            lli_insertList.add(lva_relativePathForClient);
+        }
+
+        lob_treeDifference.setFilesToUpdate(lli_updateList);
+        lob_treeDifference.setFilesToInsert(lli_insertList);
+        lob_treeDifference.setFilesToDelete(lli_deleteList);
+
+        return lob_treeDifference;
+    }
+
+    /**
+     * create a directory on the server
+     *
+     * @param iva_filePath    path of the directory
+     * @param iob_user        the user who wants to create a new directory
+     * @param iva_directoryId id of the source directory
+     * @param iva_ipAddr      Address of the user who send the request
+     * @return 0 if the directory was created
+     * 1 the directory already exists
+     * 2 the directory could not be created
+     * 3 missing information
+     */
+    public int createDirectory(String iva_filePath, User iob_user, int iva_directoryId, String iva_ipAddr) {
+        String lva_relativeFilePathForClient;
+        MappedFile lob_mappedFile;
+        long lva_lastModified;
+        if (iob_user == null) {
+            return 3;
+        }
+
+        try {
+            iva_filePath = convertRelativeToAbsolutePath(iva_filePath, iob_user, iva_directoryId);
+
+            if (iva_filePath == null) {
+                return 3;
+            }
+
+            File lob_newDirectory = new File(iva_filePath);
+
+            if (lob_newDirectory.exists()) {
+                return 1;
+            } else {
+                if (!lob_newDirectory.mkdir()) {
+                    return 2;
+                }
+
+                lva_lastModified = Files.readAttributes(lob_newDirectory.toPath(), BasicFileAttributes.class).lastModifiedTime().toMillis();
+                lob_mappedFile = new MappedFile(lob_newDirectory.toPath(), 1, lva_lastModified);
+                FileMapperCache.getFileMapperCache().put(lob_mappedFile);
+
+                lva_relativeFilePathForClient = Utils.buildRelativeFilePathForClient(lob_newDirectory, iva_directoryId);
+                notifyClients(lva_relativeFilePathForClient, iob_user, CommandConstants.GC_ADD, iva_directoryId, iva_ipAddr);
+            }
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        return 3;
+    }
 
     private byte[] getFileContent(List<InputPart> ico_inputList) throws IOException {
         return IOUtils.toByteArray(
@@ -619,21 +669,5 @@ public class FileServiceImpl implements FileService {
         }
 
         return lco_files;
-    }
-
-    private static Collection<File> readAllFilesFromDirectory(File iob_file) {
-        return getAllFiles(new ArrayList<>(), iob_file);
-    }
-
-    private static Collection<File> getAllFiles(Collection<File> ico_files, File iob_pointer) {
-        ico_files.add(iob_pointer);
-
-        if (iob_pointer.isDirectory()) {
-            for (File lob_child : Objects.requireNonNull(iob_pointer.listFiles())) {
-                getAllFiles(ico_files, lob_child);
-            }
-        }
-
-        return ico_files;
     }
 }
