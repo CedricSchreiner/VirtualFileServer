@@ -87,14 +87,15 @@ public class FileServiceImpl implements FileService {
      *
      * @param ico_inputList   contains file content and path
      * @param iva_directoryId id of the directory
-     * @param iva_ipAddr      Address of the user who send the request
+     * @param iva_ipAddress      Address of the user who send the request
      * @param iva_version     version of the file
      * @return 0 everything went fine, the file was updated
      * 1 user is null
      * 2 the path could not be converted to a absolute path
      * 3 other error
      */
-    public int addNewFile(List<InputPart> ico_inputList, String iva_filePath, User iob_user, int iva_directoryId, String iva_ipAddr, int iva_version) {
+    public int addNewFile(List<InputPart> ico_inputList, String iva_filePath, User iob_user, int iva_directoryId,
+                          String iva_ipAddress, int iva_version) {
         String lva_relativeFilePathForClient;
         File lob_newFile;
         int lva_result;
@@ -116,7 +117,7 @@ public class FileServiceImpl implements FileService {
             if (lva_result == 0) {
                 lob_newFile = new File(iva_filePath);
                 lva_relativeFilePathForClient = Utils.buildRelativeFilePathForClient(lob_newFile, iva_directoryId);
-                notifyClients(lva_relativeFilePathForClient, iob_user, CommandConstants.GC_ADD, iva_directoryId, iva_ipAddr);
+                notifyClients(lva_relativeFilePathForClient, iob_user, CommandConstants.GC_ADD, iva_directoryId, iva_ipAddress);
             }
 
             return lva_result;
@@ -190,11 +191,52 @@ public class FileServiceImpl implements FileService {
      * @param iob_user                   the user who wants to move or rename the file
      * @param iva_directoryId            id of the source directory
      * @param iva_destinationDirectoryId id of the destination directory
-     * @param iva_ipAddr                 Address of the user who send the request
+     * @param iva_ipAddress                 Address of the user who send the request
      * @return true of the file was successfully moved or renamed, otherwise false
      */
     @Override
-    public int moveFile(String iva_filePath, String iva_newFilePath, User iob_user, int iva_directoryId, int iva_destinationDirectoryId, String iva_ipAddr) {
+    public int moveFile(String iva_filePath, String iva_newFilePath, User iob_user, int iva_directoryId,
+                        int iva_destinationDirectoryId, String iva_ipAddress) {
+
+        FileMapperCache lob_fileMapperCache = FileMapperCache.getFileMapperCache();
+        String lva_serverPath;
+        String lva_newServerPath;
+        Collection<File> lco_fileList;
+        MappedFile lob_mappedFile;
+        String lob_newFilePath;
+        Path lob_oldMappedFilePath;
+        Path lob_newMappedFilePath;
+        File lob_oldFile;
+        File lob_newFile;
+
+        lva_serverPath = Utils.getRootDirectory() + iva_filePath;
+        lva_newServerPath = Utils.getRootDirectory() + iva_newFilePath;
+        lco_fileList = readAllFilesFromDirectory(new File(lva_serverPath));
+
+        for (File lob_tmpFile : lco_fileList) {
+            lob_mappedFile = lob_fileMapperCache.get(lob_tmpFile.toPath());
+            lob_oldMappedFilePath = lob_mappedFile.getFilePath();
+            lob_newFilePath = lob_oldMappedFilePath.toString().replace(lva_serverPath, lva_newServerPath);
+            lob_newMappedFilePath = new File(lob_newFilePath).toPath();
+            lob_mappedFile.setFilePath(lob_newMappedFilePath);
+            lob_fileMapperCache.updateKeyAndValue(lob_oldMappedFilePath, lob_newMappedFilePath, lob_mappedFile);
+        }
+
+        lob_oldFile = new File(lva_serverPath);
+        lob_newFile = new File(lva_newServerPath);
+        // TODO Version hochzählen?
+        try {
+            if (lob_newFile.isDirectory()) {
+                FileUtils.moveDirectory(lob_oldFile, lob_newFile);
+            } else {
+                FileUtils.moveFile(lob_oldFile, lob_newFile);
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return 0;
+        }
+
+
         return 0;
     }
 
@@ -204,11 +246,11 @@ public class FileServiceImpl implements FileService {
      * @param iva_filePath    the current path of the directory
      * @param iob_user        the user who wants to delete the directory
      * @param iva_directoryId id of the source directory
-     * @param iva_ipAddr      Address of the user who send the request
+     * @param iva_ipAddress      Address of the user who send the request
      * @return true if the directory was deleted, otherwise false
      */
     @Override
-    public boolean deleteDirectoryOnly(String iva_filePath, User iob_user, int iva_directoryId, String iva_ipAddr) {
+    public boolean deleteDirectoryOnly(String iva_filePath, User iob_user, int iva_directoryId, String iva_ipAddress) {
         return false;
     }
 
@@ -428,6 +470,7 @@ public class FileServiceImpl implements FileService {
 
         // Update file mapper cache for renamed file and increment version
         lob_fileToRename.setVersion(lob_fileToRename.getVersion() + 1);
+        // TODO Cache wird nicht aktualisiert
 
         try {
             notifyClients(Utils.buildRelativeFilePathForClient(lob_renamedFile, iva_directoryId),
