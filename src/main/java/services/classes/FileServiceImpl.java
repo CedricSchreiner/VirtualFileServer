@@ -15,6 +15,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -148,20 +150,6 @@ public class FileServiceImpl implements FileService {
      */
     @Override
     public boolean deleteDirectoryOnly(String iva_filePath, User iob_user, int iva_directoryId, String iva_ipAddr) {
-        return false;
-    }
-
-    /**
-     * create a directory on the server
-     *
-     * @param iva_filePath    path of the directory
-     * @param iob_user        the user who wants to create a new directory
-     * @param iva_directoryId id of the source directory
-     * @param iva_ipAddr      Address of the user who send the request
-     * @return true if the directory was created, otherwise false
-     */
-    @Override
-    public boolean createDirectory(String iva_filePath, User iob_user, int iva_directoryId, String iva_ipAddr) {
         return false;
     }
 
@@ -418,42 +406,55 @@ public class FileServiceImpl implements FileService {
 //        return false;
 //    }
 //
-//    /**
-//     * create a directory on the server
-//     *
-//     * @param iva_filePath path of the directory
-//     * @param iob_user     the user who wants to create a new directory
-//     * @param iva_directoryId id of the source directory
-//     * @param iva_ipAddr Address of the user who send the request
-//     * @return true if the directory was created, otherwise false
-//     */
-//    public boolean createDirectory(String iva_filePath, User iob_user, int iva_directoryId, String iva_ipAddr) {
-//        Tree lob_tree;
-//        String lva_relativeFilePathForClient;
-//        if (iob_user == null) {
-//            return false;
-//        }
-//
-//        try {
-//            iva_filePath = convertRelativeToAbsolutePath(iva_filePath, iob_user, iva_directoryId);
-//
-//            if (iva_filePath == null) {
-//                return false;
-//            }
-//
-//            File lob_newDirectory = new File(iva_filePath);
-//            lob_tree = getTreeFromDirectoryId(iob_user, iva_directoryId);
-//
-//            if (lob_tree.addFile(lob_newDirectory, true)) {
-//                lva_relativeFilePathForClient = Utils.buildRelativeFilePathForClient(lob_newDirectory, iva_directoryId);
-//                notifyClients(lva_relativeFilePathForClient, iob_user, CommandConstants.GC_ADD, iva_directoryId, iva_ipAddr);
-//                return true;
-//            }
-//        } catch (IOException ex) {
-//            ex.printStackTrace();
-//        }
-//        return false;
-//    }
+    /**
+     * create a directory on the server
+     *
+     * @param iva_filePath    path of the directory
+     * @param iob_user        the user who wants to create a new directory
+     * @param iva_directoryId id of the source directory
+     * @param iva_ipAddr      Address of the user who send the request
+     * @return 0 if the directory was created
+     *         1 the directory already exists
+     *         2 the directory could not be created
+     *         3 missing information
+     */
+    public int createDirectory(String iva_filePath, User iob_user, int iva_directoryId, String iva_ipAddr) {
+        String lva_relativeFilePathForClient;
+        MappedFile lob_mappedFile;
+        long lva_lastModified;
+        if (iob_user == null) {
+            return 3;
+        }
+
+        try {
+            iva_filePath = convertRelativeToAbsolutePath(iva_filePath, iob_user, iva_directoryId);
+
+            if (iva_filePath == null) {
+                return 3;
+            }
+
+            File lob_newDirectory = new File(iva_filePath);
+
+            if (lob_newDirectory.exists()) {
+                return 1;
+            } else {
+                if (!lob_newDirectory.mkdir()) {
+                    return 2;
+                }
+
+                lva_lastModified = Files.readAttributes(lob_newDirectory.toPath(), BasicFileAttributes.class).lastModifiedTime().toMillis();
+                lob_mappedFile = new MappedFile(lob_newDirectory.toPath(), 1, lva_lastModified);
+                FileMapperCache.getFileMapperCache().put(lob_mappedFile);
+
+                lva_relativeFilePathForClient = Utils.buildRelativeFilePathForClient(lob_newDirectory, iva_directoryId);
+                notifyClients(lva_relativeFilePathForClient, iob_user, CommandConstants.GC_ADD, iva_directoryId, iva_ipAddr);
+            }
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        return 3;
+    }
 //
 //    /**
 //     * rename a flle on the server

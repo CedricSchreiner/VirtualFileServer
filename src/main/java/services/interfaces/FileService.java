@@ -70,9 +70,12 @@ public interface FileService {
      * @param iob_user     the user who wants to create a new directory
      * @param iva_directoryId id of the source directory
      * @param iva_ipAddr Address of the user who send the request
-     * @return true if the directory was created, otherwise false
+     * @return 0 if the directory was created
+     *         1 the directory already exists
+     *         2 the directory could not be created
+     *         3 missing information
      */
-    boolean createDirectory(String iva_filePath, User iob_user, int iva_directoryId, String iva_ipAddr);
+    int createDirectory(String iva_filePath, User iob_user, int iva_directoryId, String iva_ipAddr);
 
     /**
      * rename a flle on the server

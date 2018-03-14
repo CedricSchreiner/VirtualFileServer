@@ -32,13 +32,13 @@ public class FileResource {
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public Response downloadFile(@QueryParam(GC_PARAMETER_PATH_NAME) String iva_filePath,
                                  @QueryParam(GC_PARAMETER_DIRECTORY_ID) int iva_directoryId,
-                                 @Context ContainerRequestContext iob_requestContext) {
-        User lob_user = getUserFromContext(iob_requestContext);
-        DownloadContent lob_content = gob_fileService.downloadFile(iva_filePath, lob_user, iva_directoryId);
+                @Context ContainerRequestContext iob_requestContext) {
+            User lob_user = getUserFromContext(iob_requestContext);
+            DownloadContent lob_content = gob_fileService.downloadFile(iva_filePath, lob_user, iva_directoryId);
 
-        if (lob_content == null) {
-            return Response.status(404).build();
-        }
+            if (lob_content == null) {
+                return Response.status(404).build();
+            }
 
         if (lob_content.getFile().isDirectory()) {
             return Response.status(204).header(GC_CONTENT_DISPOSITION, Integer.toString(lob_content.getVersion())).build();
@@ -71,23 +71,23 @@ public class FileResource {
 
         return Response.ok().entity(FILE_UPLOADED).build();
     }
-//
-//    @POST
-//    @Path(GC_FILE_RENAME_PATH)
-//    @Consumes(MediaType.TEXT_PLAIN)
-//    public Response renameFile(@Context ContainerRequestContext iob_requestContext,
-//                               @QueryParam(GC_PARAMETER_PATH_NAME) String iva_path,
-//                               @QueryParam(GC_PARAMETER_DIRECTORY_ID) int iva_directoryId,
-//                               String iva_newFileName,
-//                               @Context HttpServletRequest iob_servletRequest) {
-//
-//        User lob_user = getUserFromContext(iob_requestContext);
-//
-//        if (!gob_fileService.renameFile(iva_path, iva_newFileName, lob_user, iva_directoryId, iob_servletRequest.getRemoteAddr())) {
-//            return Response.status(Response.Status.BAD_REQUEST).build();
-//        }
-//        return Response.ok().entity(FILE_RENAMED).build();
-//    }
+
+    @POST
+    @Path(GC_FILE_RENAME_PATH)
+    @Consumes(MediaType.TEXT_PLAIN)
+    public Response renameFile(@Context ContainerRequestContext iob_requestContext,
+                               @QueryParam(GC_PARAMETER_PATH_NAME) String iva_path,
+                               @QueryParam(GC_PARAMETER_DIRECTORY_ID) int iva_directoryId,
+                               String iva_newFileName,
+                               @Context HttpServletRequest iob_servletRequest) {
+
+        User lob_user = getUserFromContext(iob_requestContext);
+
+        if (!gob_fileService.renameFile(iva_path, iva_newFileName, lob_user, iva_directoryId, iob_servletRequest.getRemoteAddr())) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+        return Response.ok().entity(FILE_RENAMED).build();
+    }
 //
 //    @POST
 //    @Path(GC_FILE_DELETE_PATH)
@@ -142,20 +142,21 @@ public class FileResource {
 //        }
 //        return Response.ok().entity(DIRECTORY_DELETED).build();
 //    }
-//
-//    @POST
-//    @Path(GC_CREATE_DIRECTORY_PATH)
-//    public Response createDirectory(@Context ContainerRequestContext iob_requestContext, String iva_filePath,
-//                                    @QueryParam(GC_PARAMETER_DIRECTORY_ID) int iva_directoryId,
-//                                    @Context HttpServletRequest iob_servletRequest) {
-//        User lob_user = getUserFromContext(iob_requestContext);
-//
+
+    @POST
+    @Path(GC_CREATE_DIRECTORY_PATH)
+    public Response createDirectory(@Context ContainerRequestContext iob_requestContext, String iva_filePath,
+                                    @QueryParam(GC_PARAMETER_DIRECTORY_ID) int iva_directoryId,
+                                    @Context HttpServletRequest iob_servletRequest) {
+        User lob_user = getUserFromContext(iob_requestContext);
+        int lva_result = gob_fileService.createDirectory(iva_filePath, lob_user, iva_directoryId, iob_servletRequest.getRemoteAddr());
+
 //        if (!gob_fileService.createDirectory(iva_filePath, lob_user, iva_directoryId, iob_servletRequest.getRemoteAddr())) {
 //            return Response.status(Response.Status.BAD_REQUEST).build();
 //        }
-//        return Response.ok().entity(DIRECTORY_DELETED).build();
-//    }
-//
+        return Response.ok().entity(DIRECTORY_DELETED).build();
+    }
+
     @POST
     @Path("compare")
     @Consumes(MediaType.APPLICATION_XML)
