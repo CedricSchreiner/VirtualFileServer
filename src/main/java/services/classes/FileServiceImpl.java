@@ -251,7 +251,64 @@ public class FileServiceImpl implements FileService {
      */
     @Override
     public boolean deleteDirectoryOnly(String iva_filePath, User iob_user, int iva_directoryId, String iva_ipAddress) {
-        return false;
+        final String lva_newDirectoryName = "_-_DirectoryToDelete";
+
+        FileMapperCache lob_fileMapperCache = FileMapperCache.getFileMapperCache();
+        String lva_serverPath;
+        File lob_directoryToDelete;
+        String lva_basePath;
+        String lva_directoryName;
+        int lva_counter = 1;
+        Collection<File> lco_fileList;
+        MappedFile lob_mappedFile;
+        Path lob_oldMappedFilePath;
+        File lob_renamedFile;
+        File[] lar_fileList;
+
+        lva_serverPath = Utils.getRootDirectory() + iva_filePath;
+        lob_directoryToDelete = new File(lva_serverPath);
+        lva_basePath = lob_directoryToDelete.getParentFile().getPath();
+        lva_directoryName = StringUtils.substringAfterLast(lva_serverPath, "\\");
+
+        if (!lob_directoryToDelete.renameTo(lob_renamedFile = new File(lva_basePath + "\\" + lva_newDirectoryName))) {
+            while (!lob_directoryToDelete.renameTo(lob_renamedFile = new File(lva_basePath + "\\" + lva_newDirectoryName
+                    + lva_counter))) {
+
+                lva_counter++;
+            }
+        }
+
+        lco_fileList = readAllFilesFromDirectory(new File(lva_serverPath));
+
+        for (File lob_tmpFile : lco_fileList) {
+            lob_mappedFile = lob_fileMapperCache.get(lob_tmpFile.toPath());
+            lob_oldMappedFilePath = lob_mappedFile.getFilePath();
+            if (lob_oldMappedFilePath.toString().equals(lva_serverPath)) {
+                lob_fileMapperCache.remove(lob_mappedFile.getFilePath());
+            } else {
+                lob_mappedFile.setFilePath(new File(StringUtils.substringBeforeLast(lob_mappedFile.getFilePath().toString(),
+                        "\\")).toPath());
+                lob_mappedFile.setVersion(1);
+                lob_fileMapperCache.updateKeyAndValue(lob_oldMappedFilePath, lob_mappedFile.getFilePath(), lob_mappedFile);
+            }
+
+        }
+
+        lar_fileList = lob_renamedFile.listFiles();
+
+        for (File lob_file : Objects.requireNonNull(lar_fileList)) {
+            try {
+                if (lob_file.isDirectory()) {
+                    FileUtils.moveDirectory(lob_file, new File(lva_basePath));
+                } else {
+                    FileUtils.moveFile(lob_file, new File(lva_basePath));
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        return !lob_directoryToDelete.delete();
     }
 
 //    /**
