@@ -17,6 +17,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 
@@ -353,6 +354,7 @@ public class FileServiceImpl implements FileService {
         File lob_file;
         String lva_renamedFile;
         String lva_newFilePath;
+        Path lva_oldFilePath;
 
         lva_serverPath = Utils.getRootDirectory() + "\\" + iva_filePath;
         lob_file = new File(lva_serverPath);
@@ -363,8 +365,10 @@ public class FileServiceImpl implements FileService {
         // Update file mapper cache for all sub directories
         for (File lob_tmpFile : lco_subDirectories) {
             lob_cachedFile = lob_fileMapperCache.get(lob_tmpFile.toPath());
+            lva_oldFilePath = lob_cachedFile.getFilePath();
             lva_renamedFile = lob_cachedFile.getFilePath().toString().replace(lva_serverPath, lva_newFilePath);
             lob_cachedFile.setFilePath(new File(lva_renamedFile).toPath());
+            lob_fileMapperCache.updateKeyAndValue(lva_oldFilePath, lob_cachedFile.getFilePath(), lob_cachedFile);
         }
 
         lob_fileToRename = lob_fileMapperCache.get(lob_file.toPath());
