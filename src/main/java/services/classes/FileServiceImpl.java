@@ -21,6 +21,7 @@ import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 
+import static models.constants.CommandConstants.GC_RENAME;
 import static services.classes.NotifyService.notifyClients;
 import static utilities.Utils.convertRelativeToAbsolutePath;
 
@@ -340,12 +341,12 @@ public class FileServiceImpl implements FileService {
      * @param iva_filePath    path of the file
      * @param iva_newFileName the new name of the file
      * @param iob_user        the user who wants to rename a file
-     * @param iva_ipAddr      Address of the user who send the request
+     * @param iva_ipAddress      Address of the user who send the request
      * @param iva_directoryId id of the source directory
      * @return true if the file was renamed, otherwise false
      */
     @Override
-    public boolean renameFile(String iva_filePath, String iva_newFileName, User iob_user, int iva_directoryId, String iva_ipAddr) {
+    public boolean renameFile(String iva_filePath, String iva_newFileName, User iob_user, int iva_directoryId, String iva_ipAddress) {
         FileMapperCache lob_fileMapperCache = FileMapperCache.getFileMapperCache();
         MappedFile lob_fileToRename;
         MappedFile lob_cachedFile;
@@ -384,6 +385,13 @@ public class FileServiceImpl implements FileService {
 
         // Update file mapper cache for renamed file and increment version
         lob_fileToRename.setVersion(lob_fileToRename.getVersion() + 1);
+
+        try {
+            notifyClients(Utils.buildRelativeFilePathForClient(lob_renamedFile, iva_directoryId),
+                    iob_user, GC_RENAME, iva_directoryId, iva_ipAddress, iva_newFileName);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
 
         return true;
     }
