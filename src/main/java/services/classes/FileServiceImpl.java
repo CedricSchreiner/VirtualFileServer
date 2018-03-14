@@ -5,6 +5,7 @@ import cache.FileMapperCache;
 import com.thoughtworks.xstream.XStream;
 import models.classes.*;
 import models.constants.CommandConstants;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
@@ -21,6 +22,8 @@ import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 
+import static models.constants.CommandConstants.GC_DELETE;
+import static models.constants.CommandConstants.GC_DELETE_DIR;
 import static models.constants.CommandConstants.GC_RENAME;
 import static services.classes.NotifyService.notifyClients;
 import static utilities.Utils.convertRelativeToAbsolutePath;
@@ -131,12 +134,52 @@ public class FileServiceImpl implements FileService {
      * @param iva_filePath    the path of the file
      * @param iob_user        the user who wants to delete the file
      * @param iva_directoryId id of the directory
-     * @param iva_ipAddr      Address of the user who send the request
+     * @param iva_ipAddress      Address of the user who send the request
      * @return true if the deletion was successful, otherwise false
      */
     @Override
-    public boolean deleteFile(String iva_filePath, User iob_user, int iva_directoryId, String iva_ipAddr) {
-        return false;
+    public boolean deleteFile(String iva_filePath, User iob_user, int iva_directoryId, String iva_ipAddress) {
+        FileMapperCache lob_fileMapperCache = FileMapperCache.getFileMapperCache();
+        String lva_serverPath;
+        File lob_fileToDelete;
+        Collection<File> lco_fileList;
+
+        lva_serverPath = Utils.getRootDirectory() + iva_filePath;
+        lob_fileToDelete = new File(lva_serverPath);
+
+        lco_fileList = readAllFilesFromDirectory(lob_fileToDelete);
+
+        try {
+            if (lob_fileToDelete.isDirectory()) {
+                FileUtils.deleteDirectory(lob_fileToDelete);
+            } else {
+                if (!lob_fileToDelete.delete()) {
+                    return false;
+                }
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return false;
+        }
+
+        for (File lob_tmpFile : lco_fileList) {
+            lob_fileMapperCache.remove(lob_tmpFile.toPath());
+        }
+
+
+        try {
+            if (lob_fileToDelete.isDirectory()) {
+                notifyClients(Utils.buildRelativeFilePathForClient(lob_fileToDelete, iva_directoryId), iob_user,
+                        GC_DELETE_DIR, iva_directoryId, iva_ipAddress);
+            } else {
+                notifyClients(Utils.buildRelativeFilePathForClient(lob_fileToDelete, iva_directoryId), iob_user,
+                        GC_DELETE, iva_directoryId, iva_ipAddress);
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+        return true;
     }
 
     /**
