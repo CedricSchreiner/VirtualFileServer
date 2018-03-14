@@ -305,10 +305,24 @@ public class FileServiceImpl implements FileService {
                 }
             } catch (IOException ex) {
                 ex.printStackTrace();
+                return false;
             }
         }
 
-        return !lob_directoryToDelete.delete();
+        try {
+            notifyClients(Utils.buildRelativeFilePathForClient(lob_directoryToDelete, iva_directoryId), iob_user,
+                    GC_DELETE_DIR, iva_directoryId, iva_ipAddress);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        if (lob_directoryToDelete.delete()) {
+            return false;
+        }
+
+
+        return true;
     }
 
 //    /**
