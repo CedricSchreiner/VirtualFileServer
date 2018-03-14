@@ -2,7 +2,7 @@ package rest.resources;
 
 import builder.ServiceObjectBuilder;
 import com.thoughtworks.xstream.XStream;
-import models.classes.FileDifference;
+import models.classes.DownloadContent;
 import models.classes.TreeDifference;
 import models.classes.User;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
@@ -17,12 +17,10 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.File;
 import java.util.List;
 import java.util.Map;
 
 import static rest.constants.FileResourceConstants.*;
-import static services.constants.FileServiceConstants.*;
 
 @Path(GC_FILE_RESOURCE_PATH)
 public class FileResource {
@@ -36,17 +34,18 @@ public class FileResource {
                                  @QueryParam(GC_PARAMETER_DIRECTORY_ID) int iva_directoryId,
                                  @Context ContainerRequestContext iob_requestContext) {
         User lob_user = getUserFromContext(iob_requestContext);
-        File lob_file = gob_fileService.downloadFile(iva_filePath, lob_user, iva_directoryId);
+        DownloadContent lob_content = gob_fileService.downloadFile(iva_filePath, lob_user, iva_directoryId);
 
-        if (lob_file == null) {
+        if (lob_content == null) {
             return Response.status(404).build();
         }
 
-        if (lob_file.isDirectory()) {
-            return Response.status(204).build();
+        if (lob_content.getFile().isDirectory()) {
+            return Response.status(204).header(GC_CONTENT_DISPOSITION, Integer.toString(lob_content.getVersion())).build();
         }
-        Response.ResponseBuilder response = Response.ok(lob_file);
-        response.header(GC_CONTENT_DISPOSITION, "attachment;filename=" + lob_file.getName());
+
+        Response.ResponseBuilder response = Response.ok(lob_content.getFile());
+        response.header(GC_CONTENT_DISPOSITION, Integer.toString(lob_content.getVersion()));
         return response.build();
     }
 
@@ -56,7 +55,7 @@ public class FileResource {
     public Response uploadFile(MultipartFormDataInput iob_input,
                                @QueryParam(GC_PARAMETER_PATH_NAME) String iva_filePath,
                                @QueryParam(GC_PARAMETER_DIRECTORY_ID) int iva_directoryId,
-                               @QueryParam("lastModified") long iva_lastModified,
+                               @QueryParam("version") int iva_version,
                                @Context ContainerRequestContext iob_requestContext,
                                @Context HttpServletRequest iob_servletRequest) {
         Map<String, List<InputPart>> lco_uploadForm = iob_input.getFormDataMap();
@@ -64,15 +63,11 @@ public class FileResource {
         int lva_result;
         User lob_user = getUserFromContext(iob_requestContext);
 
-        lva_result = gob_fileService.addNewFile(lob_inputParts, iva_filePath, lob_user, iva_directoryId, iob_servletRequest.getRemoteAddr(), iva_lastModified);
+        lva_result = gob_fileService.addNewFile(lob_inputParts, iva_filePath, lob_user, iva_directoryId, iob_servletRequest.getRemoteAddr(), iva_version);
 
         if (lva_result == 1 || lva_result == 2) {
             return Response.status(422).build();
         }
-
-//        if (!gob_fileService.addNewFile(lob_inputParts, iva_filePath, lob_user, iva_directoryId, iob_servletRequest.getRemoteAddr(), iva_lastModified)) {
-//            return Response.status(Response.Status.EXPECTATION_FAILED).build();
-//        }
 
         return Response.ok().entity(FILE_UPLOADED).build();
     }
@@ -168,7 +163,7 @@ public class FileResource {
     public Response compareTrees(@Context ContainerRequestContext iob_requestContext, String lva_clientFilesAsXml) {
         User lob_user = getUserFromContext(iob_requestContext);
 
-        FileDifference lob_difference = gob_fileService.compareFiles(lva_clientFilesAsXml, lob_user, 0);
+        TreeDifference lob_difference = gob_fileService.compareFiles(lva_clientFilesAsXml, lob_user);
 
         XStream lob_xStream = new XStream();
         String rva_xmlString = lob_xStream.toXML(lob_difference);

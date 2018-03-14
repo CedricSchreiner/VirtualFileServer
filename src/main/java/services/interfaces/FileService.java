@@ -1,11 +1,10 @@
 package services.interfaces;
 
-import models.classes.FileDifference;
+import models.classes.DownloadContent;
 import models.classes.TreeDifference;
 import models.classes.User;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 
-import java.io.File;
 import java.util.List;
 
 public interface FileService {
@@ -17,7 +16,7 @@ public interface FileService {
      * @param iva_directoryId id of the directory where the file is
      * @return the file if it is saved at the given path, otherwise null
      */
-    File downloadFile(String iva_filePath, User iob_user, int iva_directoryId);
+    DownloadContent downloadFile(String iva_filePath, User iob_user, int iva_directoryId);
 
     /**
      * add a new file to the user directory
@@ -25,9 +24,9 @@ public interface FileService {
      * @param ico_inputList contains file content and path
      * @param iva_directoryId id of the directory
      * @param iva_ipAddr Address of the user who send the request
-     * @param iva_lastModified last time the file was modified
+     * @param iva_version last time the file was modified
      */
-    int addNewFile(List<InputPart> ico_inputList, String iva_filePath, User iob_user, int iva_directoryId, String iva_ipAddr, long iva_lastModified);
+    int addNewFile(List<InputPart> ico_inputList, String iva_filePath, User iob_user, int iva_directoryId, String iva_ipAddr, int iva_version);
 
     /**
      * delete a file
@@ -90,10 +89,7 @@ public interface FileService {
      * Compare the user tree with another tree
      * @param iva_xmlTreeToCompare tree as xml string
      * @param iob_user user who wants the result of the tree comparison
-     * @param iva_directoryId > 0: shared directory
-     *                        = 0: public directory
-     *                        < 0: private directory
      * @return the result of the comparison
      */
-    TreeDifference compareFiles(String iva_xmlTreeToCompare, User iob_user, int iva_directoryId);
+    TreeDifference compareFiles(String iva_xmlTreeToCompare, User iob_user);
 }

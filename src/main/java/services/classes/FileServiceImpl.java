@@ -3,24 +3,18 @@ package services.classes;
 import builder.ServiceObjectBuilder;
 import cache.FileMapperCache;
 import com.thoughtworks.xstream.XStream;
-import models.classes.MappedFile;
-import models.classes.SharedDirectory;
-import models.classes.TreeDifference;
-import models.classes.User;
+import models.classes.*;
 import models.constants.CommandConstants;
 import org.apache.commons.io.IOUtils;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import services.interfaces.FileService;
 import services.interfaces.SharedDirectoryService;
-import sun.reflect.generics.tree.Tree;
 import utilities.Utils;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -40,8 +34,11 @@ public class FileServiceImpl implements FileService {
      * @return the file if it is saved at the given path, otherwise null
      */
     @Override
-    public File downloadFile(String iva_filePath, User iob_user, int iva_directoryId) {
-        File rob_file;
+    public DownloadContent downloadFile(String iva_filePath, User iob_user, int iva_directoryId) {
+        File lob_file;
+        DownloadContent rob_downloadContent;
+        int lva_version;
+
         if (iob_user == null) {
             return null;
         }
@@ -52,10 +49,13 @@ public class FileServiceImpl implements FileService {
             return null;
         }
 
-        rob_file = new File(iva_filePath);
+        lob_file = new File(iva_filePath);
 
-        if (rob_file.exists()) {
-            return rob_file;
+
+        if (lob_file.exists()) {
+            lva_version = FileMapperCache.getFileMapperCache().get(lob_file.toPath()).getVersion();
+            rob_downloadContent = new DownloadContent(lob_file, lva_version);
+            return rob_downloadContent;
         }
 
         return null;
@@ -67,12 +67,13 @@ public class FileServiceImpl implements FileService {
      * @param ico_inputList   contains file content and path
      * @param iva_directoryId id of the directory
      * @param iva_ipAddr      Address of the user who send the request
+     * @param iva_version version of the file
      * @return 0 everything went fine, the file was updated
      * 1 user is null
      * 2 the path could not be converted to a absolute path
      * 3 other error
      */
-    public int addNewFile(List<InputPart> ico_inputList, String iva_filePath, User iob_user, int iva_directoryId, String iva_ipAddr, long iva_lastModified) {
+    public int addNewFile(List<InputPart> ico_inputList, String iva_filePath, User iob_user, int iva_directoryId, String iva_ipAddr, int iva_version) {
         String lva_relativeFilePathForClient;
         File lob_newFile;
         int lva_result;
@@ -89,7 +90,7 @@ public class FileServiceImpl implements FileService {
                 return 2;
             }
 
-            lva_result = writeFile(lar_fileContentBytes, iva_filePath, iob_user, iva_directoryId, iva_lastModified);
+            lva_result = writeFile(lar_fileContentBytes, iva_filePath, iva_version);
 
             if (lva_result == 0) {
                 lob_newFile = new File(iva_filePath);
@@ -184,13 +185,10 @@ public class FileServiceImpl implements FileService {
      *
      * @param iva_xmlTreeToCompare tree as xml string
      * @param iob_user             user who wants the result of the tree comparison
-     * @param iva_directoryId      > 0: shared directory
-     *                             = 0: public directory
-     *                             < 0: private directory
      * @return the result of the comparison
      */
     @Override
-    public TreeDifference compareFiles(String iva_xmlTreeToCompare, User iob_user, int iva_directoryId) {
+    public TreeDifference compareFiles(String iva_xmlTreeToCompare, User iob_user) {
         XStream lob_xmlParser = new XStream();
         XStream.setupDefaultSecurity(lob_xmlParser);
         Class[] lar_allowedClasses = {MappedFile.class};
@@ -200,12 +198,13 @@ public class FileServiceImpl implements FileService {
         ArrayList<String> lli_updateList = new ArrayList<>();
         ArrayList<String> lli_deleteList = new ArrayList<>();
         ArrayList<String> lli_insertList = new ArrayList<>();
+        String lva_relativePathForClient;
 
         Collection<MappedFile> lob_serverMappedFiles;
         Collection<MappedFile> lob_clientMappedFiles;
-//        lob_serverMappedFiles = lob_fileMapperCache.getAll();
         lob_serverMappedFiles = filterFilesForComparison(lob_fileMapperCache.getAll(), iob_user);
-        lob_clientMappedFiles = (Collection<MappedFile>) lob_xmlParser.fromXML(iva_xmlTreeToCompare);
+        //noinspection unchecked
+        lob_clientMappedFiles =  (Collection<MappedFile>) lob_xmlParser.fromXML(iva_xmlTreeToCompare);
 
         for (MappedFile lob_mappedFile : lob_clientMappedFiles) {
             lob_mappedFile.setFilePath(new File(Utils.getRootDirectory() +
@@ -225,8 +224,9 @@ public class FileServiceImpl implements FileService {
                         return true;
 
                     } else if (lob_clientMappedFile.getVersion() < lob_serverMappedFile.getVersion()) {
-                        lli_updateList.add(lob_clientMappedFile.getFilePath() + "|"
-                                + lob_clientMappedFile.getVersion());
+//                        lli_updateList.add(Utils.convertServerToRelativeClientPath(lob_clientMappedFile.getFilePath().toString()) + "|"
+//                                + lob_serverMappedFile.getVersion());
+                        lli_updateList.add(Utils.convertServerToRelativeClientPath(lob_clientMappedFile.getFilePath().toString()));
                         lob_mappedFileIterator.remove();
                         return true;
                     }
@@ -237,11 +237,13 @@ public class FileServiceImpl implements FileService {
         });
 
         for (MappedFile lob_mappedFile : lob_clientMappedFiles) {
-            lli_insertList.add(lob_mappedFile.getFilePath().toString());
+            lva_relativePathForClient = Utils.convertServerToRelativeClientPath(lob_mappedFile.getFilePath().toString());
+            lli_deleteList.add(lva_relativePathForClient);
         }
 
         for (MappedFile lob_mappedFile : lob_serverMappedFiles) {
-            lli_deleteList.add(lob_mappedFile.getFilePath().toString());
+            lva_relativePathForClient = Utils.convertServerToRelativeClientPath(lob_mappedFile.getFilePath().toString());
+            lli_insertList.add(lva_relativePathForClient);
         }
 
         lob_treeDifference.setFilesToUpdate(lli_updateList);
@@ -554,17 +556,18 @@ public class FileServiceImpl implements FileService {
      * 1 the file that was send is older
      * 2 error while writing to the file
      */
-    private int writeFile(byte[] iva_content, String iva_filename, User iob_user, int iva_directoryId, long iva_lastModified) {
+    private int writeFile(byte[] iva_content, String iva_filename, int iva_version) {
         //----------------------------------------Variables--------------------------------------------
         File lob_file = new File(iva_filename);
         FileOutputStream lob_fileOutputStream;
         MappedFile lob_mappedFile;
+        FileMapperCache lob_cache = FileMapperCache.getFileMapperCache();
         //---------------------------------------------------------------------------------------------
 
         if (lob_file.exists()) {
             lob_mappedFile = FileMapperCache.getFileMapperCache().get(lob_file.toPath());
-            if (lob_mappedFile.getLastModified() < iva_lastModified) {
-                lob_mappedFile.setLastModified(iva_lastModified);
+            if (lob_mappedFile.getVersion() < iva_version) {
+                lob_mappedFile.setVersion(iva_version);
                 lob_mappedFile.setVersion(lob_mappedFile.getVersion() + 1);
             } else {
                 return 1;
@@ -577,7 +580,8 @@ public class FileServiceImpl implements FileService {
             lob_fileOutputStream.flush();
             lob_fileOutputStream.close();
 
-            Files.setLastModifiedTime(lob_file.toPath(), FileTime.fromMillis(iva_lastModified));
+            lob_mappedFile = new MappedFile(lob_file.toPath(), iva_version, 0);
+            lob_cache.put(lob_mappedFile);
         } catch (IOException ex) {
             ex.printStackTrace();
             return 2;
@@ -587,10 +591,10 @@ public class FileServiceImpl implements FileService {
 
     private Collection<MappedFile> filterFilesForComparison(Collection<MappedFile> ico_files, User iob_user) {
         Collection<MappedFile> lco_files = new ArrayList<>();
-        File lob_privateDirectory = new File(Utils.getRootDirectory() + iob_user.getName() + iob_user.getUserId());
-        File lob_publicDirectory = new File(Utils.getRootDirectory() + "Public");
+        File lob_privateDirectory = new File(Utils.getRootDirectory() + iob_user.getName() + iob_user.getUserId() + "\\");
+        File lob_publicDirectory = new File(Utils.getRootDirectory() + "Public\\");
         File lob_sharedDirectory;
-        String lva_sharedDirectoryPath = Utils.getRootDirectory() + "Shared\\";
+        String lva_sharedDirectoryPath = Utils.getRootDirectory();
         Collection<File> lco_sharedDirectories = new ArrayList<>();
         Collection<File> lco_filter = new ArrayList<>();
 
@@ -601,7 +605,7 @@ public class FileServiceImpl implements FileService {
         List<SharedDirectory> lli_directories = lob_sharedDirectoryService.getSharedDirectoriesOfUser(iob_user);
 
         for (SharedDirectory lob_directory : lli_directories) {
-            lob_sharedDirectory = new File(lva_sharedDirectoryPath + lob_directory.getId());
+            lob_sharedDirectory = new File(lva_sharedDirectoryPath + lob_directory.getOwner().getName() + lob_directory.getOwner().getUserId() + "_shared\\" + lob_directory.getId() + "\\");
             lco_sharedDirectories.add(lob_sharedDirectory);
         }
 
@@ -609,7 +613,8 @@ public class FileServiceImpl implements FileService {
 
         for (MappedFile lob_mappedFile : ico_files) {
             for (File lob_file : lco_filter) {
-                if (lob_mappedFile.getFilePath().startsWith(lob_file.toPath())) {
+                if (lob_mappedFile.getFilePath().startsWith(lob_file.toPath()) &&
+                        lob_mappedFile.getFilePath().getNameCount() > lob_file.toPath().getNameCount()) {
                     lco_files.add(lob_mappedFile);
                 }
             }

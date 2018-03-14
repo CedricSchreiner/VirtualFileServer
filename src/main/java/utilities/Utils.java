@@ -105,6 +105,30 @@ public class Utils {
         return rva_relativeFilePath;
     }
 
+    public static String convertServerToRelativeClientPath(String iva_path) {
+        String lva_relativeClientPath;
+        iva_path = iva_path.replace(getRootDirectory(), "");
+        lva_relativeClientPath = iva_path.replaceFirst("^[^_\\\\]*\\\\", "\\\\");
+
+        if (iva_path.startsWith("Public")) {
+            return iva_path;
+        }
+
+        //the path has changed -> private directory
+        if (!lva_relativeClientPath.equals(iva_path)) {
+            lva_relativeClientPath = lva_relativeClientPath.replaceFirst("^[^\\\\]*", "Private");
+            return lva_relativeClientPath;
+        }
+
+        lva_relativeClientPath = iva_path.replaceFirst("^.*_shared", "Shared");
+
+        if (!lva_relativeClientPath.equals(iva_path)) {
+            lva_relativeClientPath = lva_relativeClientPath.replaceFirst("^[^\\\\]*", "Shared");
+        }
+
+        return lva_relativeClientPath;
+    }
+
     public static String convertRelativeToAbsolutePath (String iva_relativeFilePath, User iob_user, int iva_directoryId) {
         String lva_rootDirectory = Utils.getRootDirectory();
         String rva_absolutePath = "";
