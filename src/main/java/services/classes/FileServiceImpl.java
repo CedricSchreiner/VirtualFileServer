@@ -358,7 +358,7 @@ public class FileServiceImpl implements FileService {
 
         lva_serverPath = Utils.getRootDirectory() + "\\" + iva_filePath;
         lob_file = new File(lva_serverPath);
-        lva_newFilePath = StringUtils.substringBeforeLast(iva_filePath, "\\") + "\\" + iva_newFileName;
+        lva_newFilePath = StringUtils.substringBeforeLast(lva_serverPath, "\\") + "\\" + iva_newFileName;
 
         lco_subDirectories = readAllFilesFromDirectory(lob_file);
 
