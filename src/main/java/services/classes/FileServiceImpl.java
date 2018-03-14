@@ -22,15 +22,13 @@ import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 
-import static models.constants.CommandConstants.GC_DELETE;
-import static models.constants.CommandConstants.GC_DELETE_DIR;
-import static models.constants.CommandConstants.GC_RENAME;
+import static models.constants.CommandConstants.*;
 import static services.classes.NotifyService.notifyClients;
 import static utilities.Utils.convertRelativeToAbsolutePath;
 
 public class FileServiceImpl implements FileService {
 
-    private static Collection<File> readAllFilesFromDirectory(File iob_file) {
+    public static Collection<File> readAllFilesFromDirectory(File iob_file) {
         return getAllFiles(new ArrayList<>(), iob_file);
     }
 
@@ -167,15 +165,9 @@ public class FileServiceImpl implements FileService {
             lob_fileMapperCache.remove(lob_tmpFile.toPath());
         }
 
-
         try {
-            if (lob_fileToDelete.isDirectory()) {
-                notifyClients(Utils.buildRelativeFilePathForClient(lob_fileToDelete, iva_directoryId), iob_user,
-                        GC_DELETE_DIR, iva_directoryId, iva_ipAddress);
-            } else {
-                notifyClients(Utils.buildRelativeFilePathForClient(lob_fileToDelete, iva_directoryId), iob_user,
-                        GC_DELETE, iva_directoryId, iva_ipAddress);
-            }
+            notifyClients(Utils.buildRelativeFilePathForClient(lob_fileToDelete, iva_directoryId), iob_user,
+                    GC_DELETE, iva_directoryId, iva_ipAddress);
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -219,6 +211,7 @@ public class FileServiceImpl implements FileService {
             lob_newFilePath = lob_oldMappedFilePath.toString().replace(lva_serverPath, lva_newServerPath);
             lob_newMappedFilePath = new File(lob_newFilePath).toPath();
             lob_mappedFile.setFilePath(lob_newMappedFilePath);
+            lob_mappedFile.setVersion(1);
             lob_fileMapperCache.updateKeyAndValue(lob_oldMappedFilePath, lob_newMappedFilePath, lob_mappedFile);
         }
 
@@ -235,7 +228,6 @@ public class FileServiceImpl implements FileService {
             ex.printStackTrace();
             return 0;
         }
-
 
         return 0;
     }
@@ -441,6 +433,7 @@ public class FileServiceImpl implements FileService {
         File lob_renamedFile;
         String lva_renamedFile;
         String lva_newFilePath;
+        String lva_relativeClientPath;
         Path lva_oldFilePath;
 
         lva_serverPath = Utils.getRootDirectory() +  iva_filePath;
@@ -469,15 +462,15 @@ public class FileServiceImpl implements FileService {
         lob_fileToRename = lob_fileMapperCache.get(lob_renamedFile.toPath());
 
         // Update file mapper cache for renamed file and increment version
+        //the version should be reset because it is a completely new file
         lob_fileToRename.setVersion(lob_fileToRename.getVersion() + 1);
-        // TODO Cache wird nicht aktualisiert
-
-        try {
-            notifyClients(Utils.buildRelativeFilePathForClient(lob_renamedFile, iva_directoryId),
-                    iob_user, GC_RENAME, iva_directoryId, iva_ipAddress, iva_newFileName);
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
+//        try {
+        lva_relativeClientPath = Utils.convertServerToRelativeClientPath(lob_file.toString());
+        notifyClients(lva_relativeClientPath,
+                iob_user, GC_RENAME, iva_directoryId, iva_ipAddress, iva_newFileName);
+//        } catch (IOException ex) {
+//            ex.printStackTrace();
+//        }
 
         return true;
     }
@@ -611,8 +604,6 @@ public class FileServiceImpl implements FileService {
                         return true;
 
                     } else if (lob_clientMappedFile.getVersion() < lob_serverMappedFile.getVersion()) {
-//                        lli_updateList.add(Utils.convertServerToRelativeClientPath(lob_clientMappedFile.getFilePath().toString()) + "|"
-//                                + lob_serverMappedFile.getVersion());
                         lli_updateList.add(Utils.convertServerToRelativeClientPath(lob_clientMappedFile.getFilePath().toString()));
                         lob_mappedFileIterator.remove();
                         return true;

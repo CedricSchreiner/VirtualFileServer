@@ -5,8 +5,10 @@ import models.classes.SharedDirectory;
 import models.classes.User;
 import models.constants.CommandConstants;
 import models.exceptions.SharedDirectoryException;
+import services.classes.FileServiceImpl;
 import services.classes.NotifyService;
 import services.interfaces.SharedDirectoryService;
+import utilities.Utils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
@@ -15,6 +17,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static builder.ServiceObjectBuilder.getSharedDirectoryServiceObject;
@@ -97,7 +102,12 @@ public class SharedDirectoryResource {
                     }
                 }
 
-                NotifyService.notifyClients("Shared\\" + lva_sharedDirectoryId, lob_user, CommandConstants.GC_ADD_SHARED_DIR, lva_sharedDirectoryId, iob_servletRequest.getRemoteAddr());
+
+
+
+                NotifyService.notifyClients("Shared\\" + lva_sharedDirectoryId, lob_user,
+                        CommandConstants.GC_ADD_SHARED_DIR, lva_sharedDirectoryId, iob_servletRequest.getRemoteAddr()
+                );
 
                 return Response
                         .ok()
@@ -141,6 +151,9 @@ public class SharedDirectoryResource {
 
         User lob_user;
         SharedDirectory lob_sharedDirectory;
+        Collection<File> lco_files;
+        Collection<String> lco_relativePaths = new ArrayList<>();
+        String lva_sharedDirectoryPath;
 
         // Get the shared directory for the passed id
         lob_sharedDirectory = gob_sharedDirectoryService.getSharedDirectoryById(sharedDirectoryId);
@@ -161,7 +174,22 @@ public class SharedDirectoryResource {
             // If successfully return a positive response
             if (gob_sharedDirectoryService.addNewMemberToSharedDirectory(lob_sharedDirectory, iob_user)) {
 
-                NotifyService.notifyClients("Shared\\" + lob_sharedDirectory.getId(), lob_user, CommandConstants.GC_ADD_SHARED_DIR, sharedDirectoryId, iob_servletRequest.getRemoteAddr());
+                lva_sharedDirectoryPath = Utils.getRootDirectory() + lob_sharedDirectory.getOwner().getName() +
+                        lob_sharedDirectory.getOwner().getUserId() + "_shared\\" + lob_sharedDirectory.getId();
+
+
+                lco_files = FileServiceImpl.readAllFilesFromDirectory(new File(lva_sharedDirectoryPath));
+                lco_files.remove(new File(lva_sharedDirectoryPath));
+
+                for (File lob_file : lco_files) {
+                    lco_relativePaths.add(Utils.convertServerToRelativeClientPath(lob_file.toString()));
+                }
+
+                NotifyService.notifyClients("Shared\\" + lob_sharedDirectory.getId(),
+                        lob_user, CommandConstants.GC_ADD_SHARED_DIR, sharedDirectoryId,
+                        iob_servletRequest.getRemoteAddr(), lco_relativePaths.toArray(new String[0])
+                );
+
                 return Response
                         .ok()
                         .entity(GC_S_DIR_MEMBER_SUCCESSFULLY_ADDED)

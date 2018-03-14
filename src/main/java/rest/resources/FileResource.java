@@ -88,21 +88,21 @@ public class FileResource {
         }
         return Response.ok().entity(FILE_RENAMED).build();
     }
-//
-//    @POST
-//    @Path(GC_FILE_DELETE_PATH)
-//    public Response deleteFile(@Context ContainerRequestContext iob_requestContext, String iva_path,
-//                               @QueryParam(GC_PARAMETER_DIRECTORY_ID) int iva_directoryId,
-//                               @Context HttpServletRequest iob_servletRequest) {
-//
-//        User lob_user = getUserFromContext(iob_requestContext);
-//
-//        if (!gob_fileService.deleteFile(iva_path, lob_user, iva_directoryId, iob_servletRequest.getRemoteAddr())) {
-//            return Response.status(Response.Status.BAD_REQUEST).build();
-//        }
-//        return Response.ok().entity(FILE_DELETED).build();
-//    }
-//
+
+    @POST
+    @Path(GC_FILE_DELETE_PATH)
+    public Response deleteFile(@Context ContainerRequestContext iob_requestContext, String iva_path,
+                               @QueryParam(GC_PARAMETER_DIRECTORY_ID) int iva_directoryId,
+                               @Context HttpServletRequest iob_servletRequest) {
+
+        User lob_user = getUserFromContext(iob_requestContext);
+
+        if (!gob_fileService.deleteFile(iva_path, lob_user, iva_directoryId, iob_servletRequest.getRemoteAddr())) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+        return Response.ok().entity(FILE_DELETED).build();
+    }
+
 //    @POST
 //    @Path(GC_FILE_MOVE_PATH)
 //    public Response moveFile(@Context ContainerRequestContext iob_requestContext,
@@ -129,7 +129,7 @@ public class FileResource {
 //                return Response.status(Response.Status.BAD_REQUEST).build();
 //        }
 //    }
-//
+
 //    @POST
 //    @Path(GC_FILE_REMOVE_DIR_ONLY_PATH)
 //    public Response deleteDirectoryOnly(@Context ContainerRequestContext iob_requestContext, String iva_filePath,
@@ -151,9 +151,10 @@ public class FileResource {
         User lob_user = getUserFromContext(iob_requestContext);
         int lva_result = gob_fileService.createDirectory(iva_filePath, lob_user, iva_directoryId, iob_servletRequest.getRemoteAddr());
 
-//        if (!gob_fileService.createDirectory(iva_filePath, lob_user, iva_directoryId, iob_servletRequest.getRemoteAddr())) {
-//            return Response.status(Response.Status.BAD_REQUEST).build();
-//        }
+        if (lva_result == 2 || lva_result == 3) {
+            return Response.status(422).build();
+        }
+
         return Response.ok().entity(DIRECTORY_DELETED).build();
     }
 
