@@ -257,7 +257,6 @@ public class FileServiceImpl implements FileService {
         String lva_serverPath;
         File lob_directoryToDelete;
         String lva_basePath;
-        String lva_directoryName;
         int lva_counter = 1;
         Collection<File> lco_fileList;
         MappedFile lob_mappedFile;
@@ -268,7 +267,6 @@ public class FileServiceImpl implements FileService {
         lva_serverPath = Utils.getRootDirectory() + iva_filePath;
         lob_directoryToDelete = new File(lva_serverPath);
         lva_basePath = lob_directoryToDelete.getParentFile().getPath();
-        lva_directoryName = StringUtils.substringAfterLast(lva_serverPath, "\\");
 
         if (!lob_directoryToDelete.renameTo(lob_renamedFile = new File(lva_basePath + "\\" + lva_newDirectoryName))) {
             while (!lob_directoryToDelete.renameTo(lob_renamedFile = new File(lva_basePath + "\\" + lva_newDirectoryName
