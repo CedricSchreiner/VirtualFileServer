@@ -317,12 +317,7 @@ public class FileServiceImpl implements FileService {
             return false;
         }
 
-        if (lob_directoryToDelete.delete()) {
-            return false;
-        }
-
-
-        return true;
+        return !lob_directoryToDelete.delete();
     }
 
 //    /**
