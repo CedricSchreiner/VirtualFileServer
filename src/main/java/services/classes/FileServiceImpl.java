@@ -738,6 +738,7 @@ public class FileServiceImpl implements FileService {
                 lva_relativeFilePathForClient = Utils.buildRelativeFilePathForClient(lob_newDirectory, iva_directoryId);
                 notifyClients(lva_relativeFilePathForClient, iob_user, CommandConstants.GC_ADD, iva_directoryId, iva_ipAddr);
             }
+            return 0;
 
         } catch (IOException ex) {
             ex.printStackTrace();
