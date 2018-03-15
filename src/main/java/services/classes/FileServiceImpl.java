@@ -231,6 +231,7 @@ public class FileServiceImpl implements FileService {
             lob_mappedFile.setFilePath(lob_newMappedFilePath);
             lob_mappedFile.setVersion(1);
             lob_fileMapperCache.updateKeyAndValue(lob_oldMappedFilePath, lob_newMappedFilePath, lob_mappedFile);
+            System.out.println("Move: " + lob_oldMappedFilePath + " --> " + lob_newMappedFilePath);
         }
         return 0;
     }
