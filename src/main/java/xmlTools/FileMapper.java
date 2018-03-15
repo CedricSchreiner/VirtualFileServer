@@ -10,7 +10,7 @@ import org.jdom2.output.XMLOutputter;
 import utilities.Utils;
 
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
@@ -58,7 +58,7 @@ public abstract class FileMapper {
             lob_xmlOutput.setFormat(Format.getPrettyFormat());
 
             lva_xmlFilePath = getXmlPath();
-            lob_xmlOutput.output(lob_doc, new FileWriter(lva_xmlFilePath));
+            lob_xmlOutput.output(lob_doc, new FileOutputStream(lva_xmlFilePath));
 
         } catch (IOException | JDOMException ex) {
             ex.printStackTrace();
@@ -94,7 +94,7 @@ public abstract class FileMapper {
 
             XMLOutputter xmlOutput = new XMLOutputter();
             xmlOutput.setFormat(Format.getPrettyFormat());
-            xmlOutput.output(lob_doc, new FileWriter(getXmlPath()));
+            xmlOutput.output(lob_doc, new FileOutputStream(getXmlPath()));
 
         } catch (JDOMException | IOException ex) {
             ex.printStackTrace();
@@ -199,7 +199,7 @@ public abstract class FileMapper {
 
             XMLOutputter xmlOutput = new XMLOutputter();
             xmlOutput.setFormat(Format.getPrettyFormat());
-            xmlOutput.output(lob_doc, new FileWriter(getXmlPath()));
+            xmlOutput.output(lob_doc, new FileOutputStream(getXmlPath()));
 
         } catch (JDOMException | IOException ex) {
             ex.printStackTrace();
@@ -223,7 +223,7 @@ public abstract class FileMapper {
             lob_xmlOutput.setFormat(Format.getPrettyFormat());
 
             lva_xmlFilePath = getXmlPath();
-            lob_xmlOutput.output(lob_doc, new FileWriter(lva_xmlFilePath));
+            lob_xmlOutput.output(lob_doc, new FileOutputStream(lva_xmlFilePath));
 
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -256,7 +256,7 @@ public abstract class FileMapper {
 
             XMLOutputter xmlOutput = new XMLOutputter();
             xmlOutput.setFormat(Format.getPrettyFormat());
-            xmlOutput.output(lob_doc, new FileWriter(getXmlPath()));
+            xmlOutput.output(lob_doc, new FileOutputStream(getXmlPath()));
 
         } catch (JDOMException | IOException ex) {
             ex.printStackTrace();
