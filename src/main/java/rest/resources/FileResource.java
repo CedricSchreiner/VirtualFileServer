@@ -21,6 +21,9 @@ import java.util.List;
 import java.util.Map;
 
 import static rest.constants.FileResourceConstants.*;
+import static services.constants.FileServiceConstants.GC_ERROR;
+import static services.constants.FileServiceConstants.GC_MISSING_OR_WRONG_ARGUMENT;
+import static services.constants.FileServiceConstants.GC_SUCCESS;
 
 @Path(GC_FILE_RESOURCE_PATH)
 public class FileResource {
@@ -103,32 +106,32 @@ public class FileResource {
         return Response.ok().entity(FILE_DELETED).build();
     }
 
-//    @POST
-//    @Path(GC_FILE_MOVE_PATH)
-//    public Response moveFile(@Context ContainerRequestContext iob_requestContext,
-//                             @QueryParam(GC_PARAMETER_PATH_NAME) String iva_path, String iva_newFilePath,
-//                             @QueryParam("sourceDirectoryId") int iva_sourceDirectoryId,
-//                             @QueryParam("destinationDirectoryId") int iva_destinationDirectoryId,
-//                             @Context HttpServletRequest iob_servletRequest) {
-//
-//        int lva_result;
-//        User lob_user = getUserFromContext(iob_requestContext);
-//
-//        lva_result = gob_fileService.moveFile(iva_path, iva_newFilePath, lob_user, iva_sourceDirectoryId, iva_destinationDirectoryId, iob_servletRequest.getRemoteAddr());
-//        switch (lva_result) {
-//            case GC_ERROR:
-//                return Response.status(422).build();
-//
-//            case GC_MISSING_OR_WRONG_ARGUMENT:
-//                return Response.status(Response.Status.BAD_REQUEST).build();
-//
-//            case GC_SUCCESS:
-//                return Response.ok().entity(FILE_MOVED).build();
-//
-//            default:
-//                return Response.status(Response.Status.BAD_REQUEST).build();
-//        }
-//    }
+    @POST
+    @Path(GC_FILE_MOVE_PATH)
+    public Response moveFile(@Context ContainerRequestContext iob_requestContext,
+                             @QueryParam(GC_PARAMETER_PATH_NAME) String iva_path, String iva_newFilePath,
+                             @QueryParam("sourceDirectoryId") int iva_sourceDirectoryId,
+                             @QueryParam("destinationDirectoryId") int iva_destinationDirectoryId,
+                             @Context HttpServletRequest iob_servletRequest) {
+
+        int lva_result;
+        User lob_user = getUserFromContext(iob_requestContext);
+
+        lva_result = gob_fileService.moveFile(iva_path, iva_newFilePath, lob_user, iva_sourceDirectoryId, iva_destinationDirectoryId, iob_servletRequest.getRemoteAddr());
+        switch (lva_result) {
+            case GC_ERROR:
+                return Response.status(422).build();
+
+            case GC_MISSING_OR_WRONG_ARGUMENT:
+                return Response.status(Response.Status.BAD_REQUEST).build();
+
+            case GC_SUCCESS:
+                return Response.ok().entity(FILE_MOVED).build();
+
+            default:
+                return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+    }
 
 //    @POST
 //    @Path(GC_FILE_REMOVE_DIR_ONLY_PATH)

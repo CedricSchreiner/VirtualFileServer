@@ -196,6 +196,7 @@ public class FileServiceImpl implements FileService {
         Collection<File> lco_fileList;
         MappedFile lob_mappedFile;
         String lob_newFilePath;
+        String lva_fileName;
         Path lob_oldMappedFilePath;
         Path lob_newMappedFilePath;
         File lob_oldFile;
@@ -203,12 +204,13 @@ public class FileServiceImpl implements FileService {
 
         lva_serverPath = Utils.getRootDirectory() + iva_filePath;
         lva_newServerPath = Utils.getRootDirectory() + iva_newFilePath;
+        lva_fileName = new File(lva_serverPath).getName();
         lco_fileList = readAllFilesFromDirectory(new File(lva_serverPath));
 
         for (File lob_tmpFile : lco_fileList) {
             lob_mappedFile = lob_fileMapperCache.get(lob_tmpFile.toPath());
             lob_oldMappedFilePath = lob_mappedFile.getFilePath();
-            lob_newFilePath = lob_oldMappedFilePath.toString().replace(lva_serverPath, lva_newServerPath);
+            lob_newFilePath = lob_oldMappedFilePath.toString().replace(lva_serverPath, lva_newServerPath + "\\" + lva_fileName);
             lob_newMappedFilePath = new File(lob_newFilePath).toPath();
             lob_mappedFile.setFilePath(lob_newMappedFilePath);
             lob_mappedFile.setVersion(1);
@@ -217,16 +219,18 @@ public class FileServiceImpl implements FileService {
 
         lob_oldFile = new File(lva_serverPath);
         lob_newFile = new File(lva_newServerPath);
-        // TODO Version hochzählen?
+
         try {
-            if (lob_newFile.isDirectory()) {
-                FileUtils.moveDirectory(lob_oldFile, lob_newFile);
+            if (lob_oldFile.isDirectory()) {
+//                FileUtils.moveDirectory(lob_oldFile, lob_newFile);
+                FileUtils.moveDirectoryToDirectory(lob_oldFile, lob_newFile, false);
             } else {
-                FileUtils.moveFile(lob_oldFile, lob_newFile);
+//                FileUtils.moveFile(lob_oldFile, lob_newFile);
+                FileUtils.moveFileToDirectory(lob_oldFile, lob_newFile, false);
             }
         } catch (IOException ex) {
             ex.printStackTrace();
-            return 0;
+            return 1;
         }
 
         return 0;
