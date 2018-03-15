@@ -183,13 +183,13 @@ public class FileServiceImpl implements FileService {
      * @param iva_filePath               the current path of the file
      * @param iva_newFilePath            the new path of the file
      * @param iob_user                   the user who wants to move or rename the file
-     * @param iva_directoryId            id of the source directory
+     * @param iva_sourceDirectoryId      id of the source directory
      * @param iva_destinationDirectoryId id of the destination directory
      * @param iva_ipAddress                 Address of the user who send the request
      * @return true of the file was successfully moved or renamed, otherwise false
      */
     @Override
-    public int moveFile(String iva_filePath, String iva_newFilePath, User iob_user, int iva_directoryId,
+    public int moveFile(String iva_filePath, String iva_newFilePath, User iob_user, int iva_sourceDirectoryId,
                         int iva_destinationDirectoryId, String iva_ipAddress) {
 
         FileMapperCache lob_fileMapperCache = FileMapperCache.getFileMapperCache();
@@ -232,6 +232,24 @@ public class FileServiceImpl implements FileService {
             lob_mappedFile.setVersion(1);
             lob_fileMapperCache.updateKeyAndValue(lob_oldMappedFilePath, lob_newMappedFilePath, lob_mappedFile);
             System.out.println("Move: " + lob_oldMappedFilePath + " --> " + lob_newMappedFilePath);
+        }
+
+        String lva_oldRelativeFilePathForClient = Utils.convertServerToRelativeClientPath(lob_oldFile.toString());
+        String lva_newRelativeFilePathForClient = Utils.convertServerToRelativeClientPath(lob_newFile.toString());
+        if (iva_sourceDirectoryId == iva_destinationDirectoryId) {
+            notifyClients(lva_oldRelativeFilePathForClient, iob_user, CommandConstants.GC_MOVE, iva_sourceDirectoryId, iva_ipAddress, lva_newRelativeFilePathForClient);
+        } else {
+            notifyClients(lva_oldRelativeFilePathForClient, iob_user, CommandConstants.GC_DELETE, iva_sourceDirectoryId, iva_ipAddress);
+
+
+            String lva_oldSourceDirectory = lob_oldFile.getParent();
+            for (File lob_file : lco_fileList) {
+                lva_newRelativeFilePathForClient = lob_file.toString().replace(lva_oldSourceDirectory, lob_newFile.toString());
+                lva_newRelativeFilePathForClient = Utils.convertServerToRelativeClientPath(lva_newRelativeFilePathForClient);
+                notifyClients(lva_newRelativeFilePathForClient, iob_user, CommandConstants.GC_ADD, iva_destinationDirectoryId, iva_ipAddress);
+            }
+
+
         }
         return 0;
     }
@@ -483,7 +501,7 @@ public class FileServiceImpl implements FileService {
                 lva_lastModified = Files.readAttributes(lob_newDirectory.toPath(), BasicFileAttributes.class).lastModifiedTime().toMillis();
                 lob_mappedFile = new MappedFile(lob_newDirectory.toPath(), 1, lva_lastModified);
                 FileMapperCache.getFileMapperCache().put(lob_mappedFile);
-
+                System.out.println("Added: " + lob_mappedFile);
                 lva_relativeFilePathForClient = Utils.buildRelativeFilePathForClient(lob_newDirectory, iva_directoryId);
                 notifyClients(lva_relativeFilePathForClient, iob_user, CommandConstants.GC_ADD, iva_directoryId, iva_ipAddr);
             }
