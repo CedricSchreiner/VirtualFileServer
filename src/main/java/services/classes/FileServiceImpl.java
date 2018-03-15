@@ -117,7 +117,6 @@ public class FileServiceImpl implements FileService {
                 lva_relativeFilePathForClient = Utils.buildRelativeFilePathForClient(lob_newFile, iva_directoryId);
                 notifyClients(lva_relativeFilePathForClient, iob_user, CommandConstants.GC_ADD, iva_directoryId, iva_ipAddress);
             }
-
             return lva_result;
 
         } catch (IOException ex) {
@@ -163,6 +162,7 @@ public class FileServiceImpl implements FileService {
 
         for (File lob_tmpFile : lco_fileList) {
             lob_fileMapperCache.remove(lob_tmpFile.toPath());
+            System.out.println("Delete:" + lob_tmpFile);
         }
 
         try {
@@ -171,6 +171,8 @@ public class FileServiceImpl implements FileService {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
+
+        print();
 
         return true;
     }
@@ -207,6 +209,20 @@ public class FileServiceImpl implements FileService {
         lva_fileName = new File(lva_serverPath).getName();
         lco_fileList = readAllFilesFromDirectory(new File(lva_serverPath));
 
+        lob_oldFile = new File(lva_serverPath);
+        lob_newFile = new File(lva_newServerPath);
+
+        try {
+            if (lob_oldFile.isDirectory()) {
+                FileUtils.moveDirectoryToDirectory(lob_oldFile, lob_newFile, false);
+            } else {
+                FileUtils.moveFileToDirectory(lob_oldFile, lob_newFile, false);
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return 1;
+        }
+
         for (File lob_tmpFile : lco_fileList) {
             lob_mappedFile = lob_fileMapperCache.get(lob_tmpFile.toPath());
             lob_oldMappedFilePath = lob_mappedFile.getFilePath();
@@ -216,23 +232,6 @@ public class FileServiceImpl implements FileService {
             lob_mappedFile.setVersion(1);
             lob_fileMapperCache.updateKeyAndValue(lob_oldMappedFilePath, lob_newMappedFilePath, lob_mappedFile);
         }
-
-        lob_oldFile = new File(lva_serverPath);
-        lob_newFile = new File(lva_newServerPath);
-
-        try {
-            if (lob_oldFile.isDirectory()) {
-//                FileUtils.moveDirectory(lob_oldFile, lob_newFile);
-                FileUtils.moveDirectoryToDirectory(lob_oldFile, lob_newFile, false);
-            } else {
-//                FileUtils.moveFile(lob_oldFile, lob_newFile);
-                FileUtils.moveFileToDirectory(lob_oldFile, lob_newFile, false);
-            }
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            return 1;
-        }
-
         return 0;
     }
 
@@ -777,7 +776,6 @@ public class FileServiceImpl implements FileService {
             lob_mappedFile = FileMapperCache.getFileMapperCache().get(lob_file.toPath());
             if (lob_mappedFile.getVersion() < iva_version) {
                 lob_mappedFile.setVersion(iva_version);
-                lob_mappedFile.setVersion(lob_mappedFile.getVersion() + 1);
             } else {
                 return 1;
             }
@@ -791,6 +789,7 @@ public class FileServiceImpl implements FileService {
 
             lob_mappedFile = new MappedFile(lob_file.toPath(), iva_version, 0);
             lob_cache.put(lob_mappedFile);
+            System.out.println("Added: " + lob_mappedFile);
         } catch (IOException ex) {
             ex.printStackTrace();
             return 2;
@@ -830,5 +829,12 @@ public class FileServiceImpl implements FileService {
         }
 
         return lco_files;
+    }
+
+    private void print() {
+        System.out.println("\n-----------------------------------------------------------------------------------");
+        for (MappedFile lob_mappedFile : FileMapperCache.getFileMapperCache().getAll()) {
+            System.out.println(lob_mappedFile);
+        }
     }
 }

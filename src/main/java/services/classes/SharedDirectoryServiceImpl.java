@@ -100,12 +100,8 @@ public class SharedDirectoryServiceImpl implements SharedDirectoryService {
                 iob_sharedDirectory.setId(lob_sharedDirectory.getId());
             }
         }
-        try {
-            Initializer.initSharedDirectory(iob_sharedDirectory, lob_user);
-//            FileTreeCollection.getInstance().addSharedDirectoryTree(lob_tree);
-        }catch (IOException ex) {
-            ex.printStackTrace();
-        }
+
+        Initializer.initSharedDirectory(iob_sharedDirectory, lob_user);
 
         // add all members to the new shared directory
         for (User lob_member : iob_sharedDirectory.getMembers()) {

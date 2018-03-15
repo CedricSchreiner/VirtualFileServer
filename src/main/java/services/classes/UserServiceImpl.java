@@ -55,12 +55,8 @@ public class UserServiceImpl implements UserService {
                 throw new UserDirectoryNotCreated(GC_USER_DIRECTORY_NOT_CREATED);
             }
 
-            try {
-                Initializer.initUserTree(lob_user);
-                Initializer.initUsersSharedDirectories(lob_user);
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
+            Initializer.initUserTree(lob_user);
+            Initializer.initUsersSharedDirectories(lob_user);
             return true;
         }
 

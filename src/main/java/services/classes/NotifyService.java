@@ -9,7 +9,6 @@ import services.interfaces.SharedDirectoryService;
 import services.interfaces.UserService;
 
 import java.io.BufferedWriter;
-import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
