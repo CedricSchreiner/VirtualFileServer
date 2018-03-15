@@ -10,7 +10,6 @@ import rest.Initializer;
 import services.interfaces.SharedDirectoryService;
 import services.interfaces.UserService;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
